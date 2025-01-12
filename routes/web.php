@@ -13,4 +13,6 @@ use Inertia\Inertia;
 
 // データ登録API
 Route::post('/data', [DataController::class, 'store']);
+// MACアドレスを取得してplace_idを変換
+Route::get('/getPlaceId', [DataController::class, 'getPlaceId']);
 
