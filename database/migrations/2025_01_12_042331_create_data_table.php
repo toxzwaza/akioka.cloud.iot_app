@@ -15,9 +15,9 @@ return new class extends Migration
     {
         Schema::create('data', function (Blueprint $table) {
             $table->id();
-            $table->float('temperature')->nullable(false);
-            $table->float('humidity')->nullable(false);
-            $table->float('co2')->nullable(false);
+            $table->integer('temperature')->nullable(false);
+            $table->integer('humidity')->nullable(false);
+            $table->integer('co2')->nullable(false);
             $table->integer('place_id')->nullable(false);
             $table->timestamps();
         });
