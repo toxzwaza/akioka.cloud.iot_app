@@ -14,7 +14,7 @@ class DataController extends Controller
     public function store(Request $request)
     {
         $status = false;
-        $message = '';
+        $msg = '';
 
         $temperature = $request->temperature;
         $humidity = $request->humidity;
