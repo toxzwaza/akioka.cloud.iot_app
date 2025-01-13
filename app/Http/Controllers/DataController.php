@@ -34,8 +34,13 @@ class DataController extends Controller
     }
 
     public function getPlaceId(Request $request){
-        $macAddress = $request->macAddress;
-        $placeId = Computer::where('mac_address', $macAddress)->first()->place_id;
-        return response()->json(['placeId' => $placeId]);
+        $mac_address = $request->mac_address ?? '';
+
+        $place = Computer::where('mac_address', $mac_address)->first();
+        if($place){
+            return response()->json(['placeId' => $place->id]);
+        }else{
+            return response()->json(['placeId' => 0]);
+        }
     }
 }
