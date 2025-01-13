@@ -19,7 +19,7 @@ class DataController extends Controller
         $co2 = $request->co2;
         $place_id = $request->place_id;
 
-        if($temperature && $humidity && $co2 && $placeNo){
+        if($temperature && $humidity && $co2 && $place_id){
             $data = new Data();
             $data->temperature = $temperature;
             $data->humidity = $humidity;
