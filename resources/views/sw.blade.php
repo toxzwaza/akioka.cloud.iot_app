@@ -6,7 +6,7 @@ self.addEventListener('install', event => {
             console.log('Service Worker: Caching files...');
             return cache.addAll([
                 '/', // ホームページ
-                '{{ Vite::asset("resources/css/app.css") }}', // ビルド後のCSSファイル
+                '{{ Vite::asset("resources/js/app.css") }}', // 正しいパスを指定
                 '{{ Vite::asset("resources/js/app.js") }}',  // ビルド後のJSファイル
                 '/offline.html', // オフラインページ（必要に応じて作成）
             ]);
