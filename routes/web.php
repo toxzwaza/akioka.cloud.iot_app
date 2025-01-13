@@ -6,6 +6,20 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+use Illuminate\Support\Facades\Response;
+
+//PWS用ルート
+Route::get('/manifest.json', function () {
+    return Response::file(public_path('manifest.json'), [
+        'Content-Type' => 'application/json',
+    ]);
+});
+
+Route::get('/sw.js', function () {
+    return Response::file(public_path('sw.js'), [
+        'Content-Type' => 'application/javascript',
+    ]);
+});
 
 // 管理画面
 
