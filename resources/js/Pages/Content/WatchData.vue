@@ -58,28 +58,28 @@ main {
     }
 
     p.denkiro {
-      right: 100px;
-      top: 130px;
+      right: 80px;
+      top: 110px;
     }
     p.romae {
-      right: 100px;
-      top: 320px;
+      right: 80px;
+      top: 300px;
     }
     p.namagata {
-      right: 100px;
-      top: 520px;
+      right: 80px;
+      top: 500px;
     }
     p.sunasyori {
-      right: 100px;
-      top: 760px;
+      right: 80px;
+      top: 740px;
     }
     p.syukka {
-      right: 100px;
-      top: 920px;
+      right: 80px;
+      top: 900px;
     }
     p.jimusyo {
-      right: 100px;
-      top: 1080px;
+      right: 80px;
+      top: 1060px;
     }
 
   }
