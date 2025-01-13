@@ -12,7 +12,7 @@ use Inertia\Inertia;
 // サイネージ用コンテンツ
 
 // データ登録API
-Route::post('/data', [DataController::class, 'store']);
+Route::get('/data', [DataController::class, 'store']);
 // MACアドレスを取得してplace_idを変換
 Route::get('/getPlaceId', [DataController::class, 'getPlaceId']);
 
