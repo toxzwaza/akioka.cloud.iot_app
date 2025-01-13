@@ -42,44 +42,44 @@ main {
     }
     p.tosou {
       left: 70px;
-      top: 131px;
+      top: 120px;
     }
     p.nakago {
       left: 70px;
-      top: 308px;
+      top: 290px;
     }
     p.shotto {
       left: 70px;
-      top: 490px;
+      top: 460px;
     }
     p.siage {
       left: 70px;
-      top: 680px;
+      top: 630px;
     }
 
     p.denkiro {
-      right: 80px;
+      right: 75px;
       top: 110px;
     }
     p.romae {
-      right: 80px;
-      top: 300px;
+      right: 75px;
+      top: 290px;
     }
     p.namagata {
-      right: 80px;
-      top: 500px;
+      right: 75px;
+      top: 480px;
     }
     p.sunasyori {
-      right: 80px;
-      top: 740px;
+      right: 75px;
+      top: 700px;
     }
     p.syukka {
-      right: 80px;
-      top: 900px;
+      right: 75px;
+      top: 860px;
     }
     p.jimusyo {
-      right: 80px;
-      top: 1060px;
+      right: 75px;
+      top: 1000px;
     }
 
   }
