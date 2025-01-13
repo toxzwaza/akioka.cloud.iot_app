@@ -17,14 +17,14 @@ class DataController extends Controller
         $temperature = $request->temperature;
         $humidity = $request->humidity;
         $co2 = $request->co2;
-        $placeNo = $request->placeNo;
+        $place_id = $request->place_id;
 
         if($temperature && $humidity && $co2 && $placeNo){
             $data = new Data();
             $data->temperature = $temperature;
             $data->humidity = $humidity;
             $data->co2 = $co2;
-            $data->place_id = $placeNo;
+            $data->place_id = $place_id;
             $data->save();
             $status = true;
         }
