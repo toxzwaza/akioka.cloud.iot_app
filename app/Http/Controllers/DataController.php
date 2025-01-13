@@ -44,9 +44,9 @@ class DataController extends Controller
 
         $place = Computer::where('mac_address', $mac_address)->first();
         if ($place) {
-            return response()->json(['placeId' => $place->id]);
+            return response()->json([$place->id]);
         } else {
-            return response()->json(['placeId' => 0]);
+            return response()->json([0]);
         }
     }
 }
