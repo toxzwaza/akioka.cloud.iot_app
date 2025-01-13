@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DataController;
+use App\Http\Controllers\MainController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -16,12 +17,11 @@ Route::get('/manifest.json', function () {
 });
 
 Route::get('/sw.js', function () {
-    return Response::file(public_path('sw.js'), [
-        'Content-Type' => 'application/javascript',
-    ]);
+    return response()->view('sw')->header('Content-Type', 'application/javascript');
 });
 
 // 管理画面
+Route::get('/', [MainController::class, 'index'])->name('home');
 
 // サイネージ用コンテンツ
 
