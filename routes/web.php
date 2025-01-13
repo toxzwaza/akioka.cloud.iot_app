@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContentController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\ProfileController;
@@ -15,7 +16,6 @@ Route::get('/manifest.json', function () {
         'Content-Type' => 'application/json',
     ]);
 });
-
 Route::get('/sw.js', function () {
     return response()->view('sw')->header('Content-Type', 'application/javascript');
 });
@@ -24,6 +24,7 @@ Route::get('/sw.js', function () {
 Route::get('/', [MainController::class, 'index'])->name('home');
 
 // サイネージ用コンテンツ
+Route::get('/watchData', [ContentController::class, 'watchData'])->name('content.watchData');
 
 // データ登録API
 Route::get('/data', [DataController::class, 'store']);
