@@ -5,6 +5,7 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use App\Models\Computer;
+use App\Models\Facility;
 use App\Models\Place;
 use Illuminate\Database\Seeder;
 
@@ -134,6 +135,13 @@ class DatabaseSeeder extends Seeder
             'mac_address' => 'd8:3a:dd:c1:73:e6',
             'signage' => 1,
             'sensor' => 1,
+        ]);
+
+        Facility::create([
+            'name' => '応接室',
+        ]);
+        Facility::create([
+            'name' => '社長室',
         ]);
     }
 }
