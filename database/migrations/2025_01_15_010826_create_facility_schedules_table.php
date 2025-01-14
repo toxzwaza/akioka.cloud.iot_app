@@ -15,7 +15,6 @@ return new class extends Migration
     {
         Schema::create('facility_schedules', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('facility_id');
             $table->foreignId('facility_id')->constrained('facilities');
             $table->string('title')->nullable(false);
             $table->string('badge')->nullable();
