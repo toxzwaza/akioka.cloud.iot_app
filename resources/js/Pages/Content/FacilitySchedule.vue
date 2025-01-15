@@ -14,9 +14,13 @@ const pickNowSchedule = () => {
   // 施設ごとに現在適用中のスケジュールにフラグを立てる
   const now = new Date();
 
-  facility_schedules_1.value.forEach((schedule) => {
+  facility_schedules_1.value = facility_schedules_1.value.filter((schedule) => {
     const startDate = new Date(schedule.start_date);
     const endDate = new Date(schedule.end_date);
+
+    if (endDate < now) {
+      return false; // 配列から削除
+    }
 
     if (startDate <= now && now <= endDate) {
       schedule.now = 1;
@@ -25,14 +29,16 @@ const pickNowSchedule = () => {
       schedule.now = 0;
     }
 
-    if (endDate < now) {
-      schedule.already = 1;
-    }
+    return true;
   });
 
-  facility_schedules_2.value.forEach((schedule) => {
+  facility_schedules_2.value = facility_schedules_2.value.filter((schedule) => {
     const startDate = new Date(schedule.start_date);
     const endDate = new Date(schedule.end_date);
+
+    if (endDate < now) {
+      return false; // 配列から削除
+    }
 
     if (startDate <= now && now <= endDate) {
       schedule.now = 1;
@@ -41,9 +47,7 @@ const pickNowSchedule = () => {
       schedule.now = 0;
     }
 
-    if (endDate < now) {
-      schedule.already = 1;
-    }
+    return true;
   });
 };
 const getFacilitySchedule = () => {
