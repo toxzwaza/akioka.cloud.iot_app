@@ -119,7 +119,6 @@ onMounted(() => {
           </p>
         </div>
         <div class="bottom_content">
-          
           <section class="text-gray-600 body-font">
             <div class="container mx-auto">
               <div class="w-full mx-auto overflow-auto">
@@ -158,6 +157,7 @@ onMounted(() => {
                           new Date(facility.start_date).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
+                            hour12: false, // 24時間形式に設定
                           })
                         }}
                       </td>
@@ -166,6 +166,7 @@ onMounted(() => {
                           new Date(facility.end_date).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
+                            hour12: false, // 24時間形式に設定
                           })
                         }}
                       </td>
@@ -192,6 +193,7 @@ onMounted(() => {
               new Date(schedule_now_2.start_date).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
+                hour12: false, // 24時間形式に設定
               })
             }}
             -
@@ -199,6 +201,7 @@ onMounted(() => {
               new Date(schedule_now_2.end_date).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
+                hour12: false, // 24時間形式に設定
               })
             }}
           </p>
@@ -214,7 +217,6 @@ onMounted(() => {
           </p>
         </div>
         <div class="bottom_content">
-          
           <section class="text-gray-600 body-font">
             <div class="container mx-auto">
               <div class="w-full mx-auto overflow-auto">
@@ -345,16 +347,16 @@ onMounted(() => {
           white-space: nowrap;
         }
 
-        & .participants{
+        & .participants {
           font-weight: bold;
           display: flex;
           flex-wrap: wrap;
 
-          & span:first-child{
+          & span:first-child {
             margin-top: 6px;
           }
 
-          & .user_name{
+          & .user_name {
             font-size: 40px;
             margin-left: 10px;
             color: rgb(255, 43, 114);
@@ -367,7 +369,6 @@ onMounted(() => {
         top: 58%;
         width: 100%;
 
-
         & .active {
           border: 4px solid rgb(255, 43, 114);
           box-sizing: border-box;
@@ -377,11 +378,11 @@ onMounted(() => {
           background-color: rgb(202, 202, 202);
         }
 
-        & table{
+        & table {
           font-size: 20px;
 
-          & td{
-            &.datetime{
+          & td {
+            &.datetime {
               font-size: 40px;
             }
           }
