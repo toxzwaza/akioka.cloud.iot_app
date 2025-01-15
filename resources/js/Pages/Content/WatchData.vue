@@ -24,6 +24,7 @@
 </template>
 <style scoped lang="scss">
 main {
+  font-family: 'IPAexGothic','Noto Sans CJK JP', 'Arial', sans-serif;
   height: 100vh;
   width: 100vw;
   position: relative;
