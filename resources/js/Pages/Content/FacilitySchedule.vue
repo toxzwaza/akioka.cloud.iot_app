@@ -283,7 +283,7 @@ onMounted(() => {
 </template>
 <style lang="scss" scoped>
 #main_container {
-  // font-family: "IPAexGothic", "Noto Sans CJK JP", "Arial", sans-serif;
+  font-family: 'IPAexGothic','Noto Sans CJK JP', 'Arial', sans-serif;
   width: 100vw;
   height: 100vh;
   background-color: rgba(224, 224, 224, 0.733);
@@ -383,7 +383,7 @@ onMounted(() => {
         }
 
         & table {
-          font-size: 20px;
+          font-size: 32px;
 
           & td {
             &.datetime {
