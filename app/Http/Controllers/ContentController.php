@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FacilitySchedule;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -15,6 +16,21 @@ class ContentController extends Controller
 
             return Inertia::render('Content/WatchData');
         }
+
+    }
+    public function facilitySchedule(){
+
+
+
+        return Inertia::render('Content/FacilitySchedule');
+    }
+
+    public function getFacilitySchedule(){
+        $facility_schedules_1 = FacilitySchedule::select('facility_schedules.*','facilities.name as facility_name')->join('facilities','facilities.id','facility_schedules.facility_id')->whereDate('start_date', now()->toDateString())->where('facility_id', 1)->get();
+
+        $facility_schedules_2 = FacilitySchedule::select('facility_schedules.*','facilities.name as facility_name')->join('facilities','facilities.id','facility_schedules.facility_id')->whereDate('start_date', now()->toDateString())->where('facility_id', 2)->get();
+
+        return response()->json(['facility_schedules_1' => $facility_schedules_1, 'facility_schedules_2' => $facility_schedules_2]);
 
     }
 }

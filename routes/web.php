@@ -10,7 +10,7 @@ use Inertia\Inertia;
 
 use Illuminate\Support\Facades\Response;
 
-//PWS用ルート
+////PWS用ルート
 Route::get('/manifest.json', function () {
     return Response::file(public_path('manifest.json'), [
         'Content-Type' => 'application/json',
@@ -23,11 +23,16 @@ Route::get('/sw.js', function () {
 // 管理画面
 Route::get('/', [MainController::class, 'index'])->name('home');
 
-// サイネージ用コンテンツ
+//// サイネージ用コンテンツ
+// 工場全体の作業場ごと温度・湿度・CO２濃度をマップにプロット
 Route::get('/watchData', [ContentController::class, 'watchData'])->name('content.watchData');
+// 施設使用状況
+Route::get('/facilitySchedule', [ContentController::class, 'facilitySchedule'])->name('content.facilitySchedule');
 
-// データ登録API
+//// データ登録API
 Route::get('/data', [DataController::class, 'store']);
+
+//// データ取得API
 // MACアドレスを取得してplace_idを変換
 Route::get('/getPlaceId', [DataController::class, 'getPlaceId']);
-
+Route::get('/getFacilitySchedule', [ContentController::class, 'getFacilitySchedule'])->name('getFacilitySchedule');
