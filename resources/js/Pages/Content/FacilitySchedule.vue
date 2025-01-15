@@ -97,6 +97,7 @@ onMounted(() => {
               new Date(schedule_now_1.start_date).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
+                hour12: false, // 24時間形式に設定
               })
             }}
             -
@@ -104,6 +105,7 @@ onMounted(() => {
               new Date(schedule_now_1.end_date).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
+                hour12: false, // 24時間形式に設定
               })
             }}
           </p>
@@ -255,6 +257,7 @@ onMounted(() => {
                           new Date(facility.start_date).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
+                            hour12: false, // 24時間形式に設定
                           })
                         }}
                       </td>
@@ -263,6 +266,7 @@ onMounted(() => {
                           new Date(facility.end_date).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
+                            hour12: false, // 24時間形式に設定
                           })
                         }}
                       </td>
