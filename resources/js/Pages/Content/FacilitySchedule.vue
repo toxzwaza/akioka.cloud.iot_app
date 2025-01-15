@@ -1,6 +1,6 @@
 <script setup>
-import { onMounted, ref } from "vue"
-import axios from "axios"
+import { onMounted, ref } from "vue";
+import axios from "axios";
 
 const facility_schedules_1 = ref([]);
 const facility_schedules_2 = ref([]);
@@ -10,7 +10,7 @@ const schedule_now_1 = ref(null);
 const schedule_now_2 = ref(null);
 
 const pickNowSchedule = () => {
-  console.log('pickNowSchedule実行')
+  console.log("pickNowSchedule実行");
   // 施設ごとに現在適用中のスケジュールにフラグを立てる
   const now = new Date();
 
@@ -47,17 +47,18 @@ const pickNowSchedule = () => {
   });
 };
 const getFacilitySchedule = () => {
-  axios.get(route('getFacilitySchedule'))
-  .then( res => {
-    console.log(res.data)
-    facility_schedules_1.value = res.data.facility_schedules_1
-    facility_schedules_2.value = res.data.facility_schedules_2
-    pickNowSchedule()
-  })
-  .catch(error => {
-    console.log(error)
-  })
-}
+  axios
+    .get(route("getFacilitySchedule"))
+    .then((res) => {
+      console.log(res.data);
+      facility_schedules_1.value = res.data.facility_schedules_1;
+      facility_schedules_2.value = res.data.facility_schedules_2;
+      pickNowSchedule();
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
 
 // 一時間に一度スケジュールデータを取得(hh:03)
 // const executeEveryHour = () => {
@@ -73,7 +74,6 @@ const getFacilitySchedule = () => {
 //   }, delay);
 // };
 
-
 onMounted(() => {
   getFacilitySchedule();
   // executeEveryHour();
@@ -88,7 +88,7 @@ onMounted(() => {
         <div class="top_content">
           <h1 class="facility_name">応接室</h1>
           <h2 :class="{ use_status: true, active: schedule_now_1 }">
-            {{ schedule_now_1 ? "使用中" : "空き" }}
+            {{ schedule_now_1 ? "使用中" : "空室" }}
           </h2>
         </div>
         <div v-if="schedule_now_1" class="middle_content">
@@ -108,9 +108,18 @@ onMounted(() => {
             }}
           </p>
           <marquee class="title">{{ schedule_now_1.title }}</marquee>
+          <p class="participants">
+            <span>参加者:</span>
+            <span
+              class="user_name"
+              v-for="participant in schedule_now_1.participants"
+              :key="participant.id"
+              >{{ participant.user_name }}</span
+            >
+          </p>
         </div>
         <div class="bottom_content">
-          <h3 class="bottom_title">今日の予定</h3>
+          
           <section class="text-gray-600 body-font">
             <div class="container mx-auto">
               <div class="w-full mx-auto overflow-auto">
@@ -144,7 +153,7 @@ onMounted(() => {
                       }"
                     >
                       <td class="px-4 py-6 font-bold">{{ facility.title }}</td>
-                      <td class="px-4 py-6 font-bold">
+                      <td class="datetime px-4 py-6 font-bold">
                         {{
                           new Date(facility.start_date).toLocaleTimeString([], {
                             hour: "2-digit",
@@ -152,7 +161,7 @@ onMounted(() => {
                           })
                         }}
                       </td>
-                      <td class="px-4 py-6 font-bold">
+                      <td class="datetime px-4 py-6 font-bold">
                         {{
                           new Date(facility.end_date).toLocaleTimeString([], {
                             hour: "2-digit",
@@ -174,29 +183,38 @@ onMounted(() => {
         <div class="top_content">
           <h1 class="facility_name">社長室</h1>
           <h2 :class="{ use_status: true, active: schedule_now_2 }">
-            {{ schedule_now_2 ? "使用中" : "空き" }}
+            {{ schedule_now_2 ? "使用中" : "空室" }}
           </h2>
         </div>
         <div v-if="schedule_now_2" class="middle_content">
           <p class="datetime">
             {{
-              new Date(schedule_now_1.start_date).toLocaleTimeString([], {
+              new Date(schedule_now_2.start_date).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
               })
             }}
             -
             {{
-              new Date(schedule_now_1.end_date).toLocaleTimeString([], {
+              new Date(schedule_now_2.end_date).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
               })
             }}
           </p>
-          <marquee class="title">{{ schedule_now_1.title }}</marquee>
+          <marquee class="title">{{ schedule_now_2.title }}</marquee>
+          <p class="participants">
+            <span>参加者:</span>
+            <span
+              class="user_name"
+              v-for="participant in schedule_now_2.participants"
+              :key="participant.id"
+              >{{ participant.user_name }}</span
+            >
+          </p>
         </div>
         <div class="bottom_content">
-          <h3 class="bottom_title">今日の予定</h3>
+          
           <section class="text-gray-600 body-font">
             <div class="container mx-auto">
               <div class="w-full mx-auto overflow-auto">
@@ -230,7 +248,7 @@ onMounted(() => {
                       }"
                     >
                       <td class="px-4 py-6 font-bold">{{ facility.title }}</td>
-                      <td class="px-4 py-6 font-bold">
+                      <td class="datetime px-4 py-6 font-bold">
                         {{
                           new Date(facility.start_date).toLocaleTimeString([], {
                             hour: "2-digit",
@@ -238,7 +256,7 @@ onMounted(() => {
                           })
                         }}
                       </td>
-                      <td class="px-4 py-6 font-bold">
+                      <td class="datetime px-4 py-6 font-bold">
                         {{
                           new Date(facility.end_date).toLocaleTimeString([], {
                             hour: "2-digit",
@@ -259,7 +277,7 @@ onMounted(() => {
 </template>
 <style lang="scss" scoped>
 #main_container {
-  font-family: 'IPAexGothic','Noto Sans CJK JP', 'Arial', sans-serif;
+  font-family: "IPAexGothic", "Noto Sans CJK JP", "Arial", sans-serif;
   width: 100vw;
   height: 100vh;
   background-color: rgba(224, 224, 224, 0.733);
@@ -271,11 +289,6 @@ onMounted(() => {
   & > div {
     width: 48%;
     height: 100%;
-
-    border-left: 6px solid rgba(128, 128, 128, 0.452);
-    border-top: 6px solid rgba(128, 128, 128, 0.452);
-    border-bottom: 6px solid rgba(128, 128, 128, 0.452);
-    border-right: 6px solid rgba(128, 128, 128, 0.452);
 
     box-sizing: border-box;
     padding: 0 12px;
@@ -298,7 +311,7 @@ onMounted(() => {
         & .use_status {
           font-size: 68px;
           width: 100%;
-          background-color: rgb(40, 255, 105);
+          background-color: rgb(20, 219, 79);
           text-align: center;
           font-weight: bold;
           color: white;
@@ -319,6 +332,7 @@ onMounted(() => {
         & .datetime {
           font-size: 40px;
           color: rgb(75, 75, 75);
+          font-weight: bold;
         }
         & .title {
           font-size: 60px;
@@ -330,19 +344,29 @@ onMounted(() => {
           overflow: hidden;
           white-space: nowrap;
         }
+
+        & .participants{
+          font-weight: bold;
+          display: flex;
+          flex-wrap: wrap;
+
+          & span:first-child{
+            margin-top: 6px;
+          }
+
+          & .user_name{
+            font-size: 40px;
+            margin-left: 10px;
+            color: rgb(255, 43, 114);
+          }
+        }
       }
 
       & .bottom_content {
         position: absolute;
-        top: 54%;
+        top: 58%;
         width: 100%;
 
-        & .bottom_title {
-          margin-bottom: 8px;
-          font-weight: bold;
-          font-size: 32px;
-          color: rgb(75, 75, 75);
-        }
 
         & .active {
           border: 4px solid rgb(255, 43, 114);
@@ -351,6 +375,16 @@ onMounted(() => {
         & .already {
           opacity: 0.6;
           background-color: rgb(202, 202, 202);
+        }
+
+        & table{
+          font-size: 20px;
+
+          & td{
+            &.datetime{
+              font-size: 40px;
+            }
+          }
         }
       }
     }
