@@ -22,6 +22,12 @@ Route::get('/sw.js', function () {
 
 // 管理画面
 Route::get('/', [MainController::class, 'index'])->name('home');
+Route::get('/dashboard', [MainController::class, 'dashboard'])->name('dashboard');
+
+Route::get('/download', [MainController::class ,'download'])->name('download');
+
+Route::get('/setting', [MainController::class ,'setting'])->name('setting');
+
 
 //// サイネージ用コンテンツ
 // 工場全体の作業場ごと温度・湿度・CO２濃度をマップにプロット

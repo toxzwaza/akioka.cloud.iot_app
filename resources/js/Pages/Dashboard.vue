@@ -1,22 +1,435 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import MainLayout from "@/Layouts/MainLayout.vue";
 </script>
 
 <template>
-    <Head title="Dashboard" />
+  <MainLayout :title="'Dashboard'">
+    <template #content>
+      <h1>ダッシュボード</h1>
+      <div id="top_container">
+        <div class="data_card">
+          <h2 class="place_name">電気炉</h2>
+          <div class="">
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
 
-    <AuthenticatedLayout>
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
-        </template>
-
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">You're logged in!</div>
-                </div>
+              <div class="data">
+                <span class="value">20</span>
+                <span class="util">℃</span>
+              </div>
             </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">60</span>
+                <span class="util">%</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">800</span>
+                <span class="util">PPM</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="log_button">
+            <span>Data Log</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
         </div>
-    </AuthenticatedLayout>
+        <div class="data_card">
+          <h2 class="place_name">電気炉</h2>
+          <div class="">
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">20</span>
+                <span class="util">℃</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">60</span>
+                <span class="util">%</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">800</span>
+                <span class="util">PPM</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="log_button">
+            <span>Data Log</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        <div class="data_card">
+          <h2 class="place_name">電気炉</h2>
+          <div class="">
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">20</span>
+                <span class="util">℃</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">60</span>
+                <span class="util">%</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">800</span>
+                <span class="util">PPM</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="log_button">
+            <span>Data Log</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        <div class="data_card">
+          <h2 class="place_name">電気炉</h2>
+          <div class="">
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">20</span>
+                <span class="util">℃</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">60</span>
+                <span class="util">%</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">800</span>
+                <span class="util">PPM</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="log_button">
+            <span>Data Log</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        <div class="data_card">
+          <h2 class="place_name">電気炉</h2>
+          <div class="">
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">20</span>
+                <span class="util">℃</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">60</span>
+                <span class="util">%</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">800</span>
+                <span class="util">PPM</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="log_button">
+            <span>Data Log</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        <div class="data_card">
+          <h2 class="place_name">電気炉</h2>
+          <div class="">
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">20</span>
+                <span class="util">℃</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">60</span>
+                <span class="util">%</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">800</span>
+                <span class="util">PPM</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="log_button">
+            <span>Data Log</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        <div class="data_card">
+          <h2 class="place_name">電気炉</h2>
+          <div class="">
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">20</span>
+                <span class="util">℃</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">60</span>
+                <span class="util">%</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">800</span>
+                <span class="util">PPM</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="log_button">
+            <span>Data Log</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        <div class="data_card">
+          <h2 class="place_name">電気炉</h2>
+          <div class="">
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">20</span>
+                <span class="util">℃</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">60</span>
+                <span class="util">%</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">800</span>
+                <span class="util">PPM</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="log_button">
+            <span>Data Log</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        <div class="data_card">
+          <h2 class="place_name">電気炉</h2>
+          <div class="">
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">20</span>
+                <span class="util">℃</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">60</span>
+                <span class="util">%</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">800</span>
+                <span class="util">PPM</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="log_button">
+            <span>Data Log</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        <div class="data_card">
+          <h2 class="place_name">電気炉</h2>
+          <div class="">
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">20</span>
+                <span class="util">℃</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">60</span>
+                <span class="util">%</span>
+              </div>
+            </div>
+            <div class="data_content">
+              <img class="icon" src="" alt="" />
+
+              <div class="data">
+                <span class="value">800</span>
+                <span class="util">PPM</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="log_button">
+            <span>Data Log</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+      </div>
+      <div id="bottom_container"></div>
+    </template>
+  </MainLayout>
 </template>
+
+<style lang="scss" scoped>
+#top_container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow-x: scroll;
+  padding: 2% 0;
+
+  & .data_card {
+    color: white;
+    background-color: #2aaabe;
+    min-width: 22vw;
+    max-width: 280px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    border-radius: 3px;
+    padding: 1%;
+    margin-right:2%;
+
+    & .place_name {
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      font-weight: bold;
+    }
+    & .data_content {
+      &:nth-child(1),
+      &:nth-child(2) {
+        border-bottom: 2px dashed white;
+      }
+
+      display: flex;
+      justify-content: space-between;
+      padding: 2% 0;
+      margin: 2% 0;
+
+      & .icon {
+        width: 50px;
+        height: 50px;
+        background-color: rgb(255, 255, 255);
+      }
+      & .data {
+        margin: 1% 0;
+
+        width: 44%;
+        display: flex;
+        justify-content: space-around;
+        align-items: start;
+
+        & .value {
+          font-weight: bold;
+          font-size: 2rem;
+          width: 60%;
+          text-align: right;
+        }
+        & .util {
+          font-size: 0.8rem;
+          margin-top: 0.6rem;
+          width: 30%;
+          text-align: left;
+        }
+      }
+    }
+
+    & .log_button {
+      background-color: #1d93a0;
+      text-align: center;
+      padding: 1% 0;
+      font-weight: bold;
+      display: flex;
+      justify-items: center;
+      align-items: center;
+
+      & span {
+        margin-right: 2px;
+      }
+    }
+  }
+}
+#bottom_container {
+}
+</style>
