@@ -1,14 +1,20 @@
 <script setup>
+const props = defineProps({
+    data: Object,
+});
+
 </script>
 <template>
   <div class="data_card">
-    <h2 class="place_name">電気炉</h2>
+    <h2 class="place_name"><span>{{ props.data.place_name}}</span><span>取得:{{ new Date(props.data.created_at).toLocaleString('ja-JP', {month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'}) }}</span></h2>
+    <h4 class="computer_name">{{ props.data.computer_name}}</h4>
+
     <div class="">
       <div class="data_content">
         <img class="icon" src="" alt="" />
 
         <div class="data">
-          <span class="value">20</span>
+          <span class="value">{{ props.data.temperature }}</span>
           <span class="util">℃</span>
         </div>
       </div>
@@ -16,7 +22,7 @@
         <img class="icon" src="" alt="" />
 
         <div class="data">
-          <span class="value">60</span>
+          <span class="value">{{ props.data.humidity }}</span>
           <span class="util">%</span>
         </div>
       </div>
@@ -24,7 +30,7 @@
         <img class="icon" src="" alt="" />
 
         <div class="data">
-          <span class="value">800</span>
+          <span class="value">{{ props.data.co2 }}</span>
           <span class="util">PPM</span>
         </div>
       </div>
@@ -49,9 +55,21 @@
 
   & .place_name {
     font-size: 0.9rem;
-    margin-bottom: 1rem;
     font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    & span:nth-child(2) {
+      font-size: 0.6rem;
+      font-weight: normal;
+    }
   }
+  & .computer_name {
+    font-size: 0.6rem;
+    margin-bottom: 1rem;
+  }
+
   & .data_content {
     &:nth-child(1),
     &:nth-child(2) {

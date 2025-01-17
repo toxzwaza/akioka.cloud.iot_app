@@ -42,3 +42,5 @@ Route::get('/data', [DataController::class, 'store']);
 // MACアドレスを取得してplace_idを変換
 Route::get('/getPlaceId', [DataController::class, 'getPlaceId']);
 Route::get('/getFacilitySchedule', [ContentController::class, 'getFacilitySchedule'])->name('getFacilitySchedule');
+Route::get('/getLatestData', [DataController::class, 'getLatestData'])->name('getLatestData');
+Route::get('/getTempHumiCo2', [DataController::class, 'getTempHumiCo2'])->name('getTempHumiCo2');

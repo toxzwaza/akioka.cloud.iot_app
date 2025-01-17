@@ -35,7 +35,7 @@ class DataController extends Controller
             $msg = $e->getMessage();
         }
 
-        return response()->json(['status' => $status, 'msg' => $msg ]);
+        return response()->json(['status' => $status, 'msg' => $msg]);
     }
 
     public function getPlaceId(Request $request)
@@ -48,5 +48,82 @@ class DataController extends Controller
         } else {
             return response()->json([0]);
         }
+    }
+
+
+    // 最新のデータを取得
+    public function getLatestData()
+    {
+        $computers = Computer::select('computers.name as computer_name', 'computers.place_id', 'places.name as place_name')->join('places', 'computers.place_id', 'places.id')->get();
+
+        $data = [];
+
+        foreach ($computers as $computer) {
+            $latest_data = Data::where('place_id', $computer->place_id)->orderBy('id', 'desc')->first();
+            if ($latest_data) {
+                $latest_data->computer_name = $computer->computer_name;
+                $latest_data->place_id = $computer->place_id;
+                $latest_data->place_name = $computer->place_name;
+                $data[] = $latest_data;
+            }
+        }
+
+        return response()->json($data);
+    }
+
+    public function getTempHumiCo2()
+    {
+        try {
+            $computers = Computer::select('computers.name as computer_name', 'computers.place_id', 'places.name as place_name')
+                ->join('places', 'computers.place_id', 'places.id')
+                ->get();
+
+            $result = [
+                'temperature' => [],
+                'humidity' => [],
+                'co2' => []
+            ];
+
+            foreach ($computers as $computer) {
+                $hourlyData = Data::selectRaw('
+                    place_id,
+                    DATE_FORMAT(created_at, "%Y-%m-%d %H:00:00") as hour,
+                    AVG(temperature) as avg_temperature,
+                    AVG(humidity) as avg_humidity, 
+                    AVG(co2) as avg_co2
+                ')
+                    ->where('place_id', $computer->place_id)
+                    ->groupBy('place_id', 'hour')
+                    ->orderBy('hour', 'asc')
+                    ->get();
+
+                if ($hourlyData->count() > 0) {
+                    $result['temperature'][] = [
+                        'computer_name' => $computer->computer_name,
+                        'place_id' => $computer->place_id,
+                        'place_name' => $computer->place_name,
+                        'data' => $hourlyData->pluck('avg_temperature')
+                    ];
+                    
+                    $result['humidity'][] = [
+                        'computer_name' => $computer->computer_name,
+                        'place_id' => $computer->place_id,
+                        'place_name' => $computer->place_name,
+                        'data' => $hourlyData->pluck('avg_humidity')
+                    ];
+                    
+                    $result['co2'][] = [
+                        'computer_name' => $computer->computer_name,
+                        'place_id' => $computer->place_id,
+                        'place_name' => $computer->place_name,
+                        'data' => $hourlyData->pluck('avg_co2')
+                    ];
+                }
+            }
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()]);
+        }
+
+        return response()->json($result);
     }
 }
