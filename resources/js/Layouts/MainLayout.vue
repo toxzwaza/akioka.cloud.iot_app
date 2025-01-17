@@ -84,11 +84,7 @@ const props = defineProps({
   </main>
 </template>
 <style lang="scss" scoped>
-html {
-    height: 100vh;
-    width: 100vw;
-    background-color: #F5F7FA;
-}
+
 #main_container {
   padding: 4%;
 }
