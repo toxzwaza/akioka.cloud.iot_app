@@ -11,7 +11,7 @@ const props = defineProps({
 
     <div class="">
       <div class="data_content">
-        <img class="icon" src="" alt="" />
+        <img class="icon" src="images/dashboard/icon/temp_icon.png" alt="" />
 
         <div class="data">
           <span class="value">{{ props.data.temperature }}</span>
@@ -19,7 +19,7 @@ const props = defineProps({
         </div>
       </div>
       <div class="data_content">
-        <img class="icon" src="" alt="" />
+        <img class="icon" src="images/dashboard/icon/humi_icon.png" alt="" />
 
         <div class="data">
           <span class="value">{{ props.data.humidity }}</span>
@@ -27,7 +27,7 @@ const props = defineProps({
         </div>
       </div>
       <div class="data_content">
-        <img class="icon" src="" alt="" />
+        <img class="icon" src="images/dashboard/icon/co2_icon.png" alt="" />
 
         <div class="data">
           <span class="value">{{ props.data.co2 }}</span>
@@ -85,7 +85,7 @@ const props = defineProps({
     & .icon {
       width: 50px;
       height: 50px;
-      background-color: rgb(255, 255, 255);
+    //   background-color: rgb(255, 255, 255);
     }
     & .data {
       margin: 1% 0;
