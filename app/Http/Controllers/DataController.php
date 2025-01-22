@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Computer;
 use App\Models\Data;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -93,6 +94,7 @@ class DataController extends Controller
                     AVG(co2) as avg_co2
                 ')
                     ->where('place_id', $computer->place_id)
+                    ->whereDate('created_at', Carbon::today())
                     ->groupBy('place_id', 'hour')
                     ->orderBy('hour', 'asc')
                     ->get();

@@ -54,6 +54,7 @@ const props = defineProps({
   margin-right: 2%;
 
   & .place_name {
+    font-family: serif;
     font-size: 0.9rem;
     font-weight: bold;
     display: flex;
