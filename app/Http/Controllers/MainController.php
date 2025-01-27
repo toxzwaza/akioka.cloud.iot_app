@@ -9,15 +9,7 @@ class MainController extends Controller
 {
     //
     public function index(){
-        return to_route('dashboard');
+        return Inertia::render('Stock/Index');
     }
-    public function dashboard(){
-        return Inertia::render('Dashboard');
-    }
-    public function download(){
-        return Inertia::render('Download');
-    }
-    public function Setting(){
-        return Inertia::render('Setting');
-    }
+
 }

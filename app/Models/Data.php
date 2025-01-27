@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Data extends Model
 {
     use HasFactory;
+
+    protected $connection = 'second_mysql';
 }
