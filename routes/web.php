@@ -29,20 +29,19 @@ Route::get('/sw.js', function () {
 //////////在庫管理システム （タブレット） //////////
 // メイン画面
 Route::get('/', [MainController::class, 'index'])->name('stock.home');
-// 検索画面
-Route::get('/search', [SearchController::class, 'index'])->name('stock.search');
 // 出庫画面
 Route::get('/shipment', [ShipmentController::class, 'index'])->name('stock.shipment');
-
+// 検索画面
+Route::get('/search', [SearchController::class, 'index'])->name('stock.search');
 // 在庫登録
-Route::get('/stock', [InventoryController::class, 'create'])->name('stock.inventory.create');
+Route::get('/stock/create', [InventoryController::class, 'create'])->name('stock.inventory.create');
 // 在庫追加
-Route::get('/stock', [InventoryController::class, 'store'])->name('stock.inventory.store');
+Route::post('/stock', [InventoryController::class, 'store'])->name('stock.inventory.store');
 
 // 発注依頼
-Route::get('/stock', [OrderController::class, 'create'])->name('stock.order.create');
+Route::get('/order/create', [OrderController::class, 'create'])->name('stock.order.create');
 // 発注追加
-Route::get('/stock', [OrderController::class, 'store'])->name('stock.order.store');
+Route::post('/order', [OrderController::class, 'store'])->name('stock.order.store');
 
 
 
