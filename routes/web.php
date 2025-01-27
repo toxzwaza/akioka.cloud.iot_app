@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApiController;
 use App\Http\Controllers\ContentController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\HeatStrokeController;
@@ -43,8 +44,10 @@ Route::get('/order/create', [OrderController::class, 'create'])->name('stock.ord
 // 発注追加
 Route::post('/order', [OrderController::class, 'store'])->name('stock.order.store');
 
-
-
+////////// API用 //////////
+Route::get('/getGroups', [ApiController::class, 'getGroups'])->name('getGroups');
+Route::get('/getUsersByGroup', [ApiController::class, 'getUsersByGroup'])->name('getUsersByGroup');
+Route::get('/getStocks', [ApiController::class, 'getStocks'])->name('getStocks');
 
 ////////// 熱中症用 //////////
 Route::get('/dashboard', [HeatStrokeController::class, 'dashboard'])->name('dashboard');
