@@ -1,6 +1,7 @@
 <script setup>
 import StockLayout from "@/Layouts/StockLayout.vue";
 import StockForm from "@/Components/StockForm.vue";
+import { Link } from "@inertiajs/vue3";
 
 import { ref } from "vue";
 
@@ -24,11 +25,11 @@ const clearStocks = () => {
         <div v-if="stocks.length > 0" class="">
           <button
             @click="clearStocks"
-            class="ml-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            class="ml-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
           >
             検索画面へ戻る
           </button>
-          <div class="flex flex-wrap justify-between">
+          <div class="mt-4 flex flex-wrap justify-between">
             <div
               v-for="stock in stocks"
               :key="stock.id"
@@ -54,8 +55,8 @@ const clearStocks = () => {
                   格納数:{{ stock.quantity }}
                 </p>
 
-                <a
-                  href="#"
+                <Link
+                  :href="route('stock.inventory.show', {id: stock.id})"
                   class="mt-4 inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-500 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-500 dark:focus:ring-blue-800"
                 >
                   詳細画面へ進む
@@ -74,7 +75,7 @@ const clearStocks = () => {
                       d="M1 5h12m0 0L9 1m4 4L9 9"
                     />
                   </svg>
-                </a>
+                </Link>
               </div>
             </div>
           </div>

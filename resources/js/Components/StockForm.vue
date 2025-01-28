@@ -2,14 +2,25 @@
 import { Link } from "@inertiajs/vue3";
 import axios from "axios";
 import { onMounted, ref, reactive } from "vue";
+
 const props = defineProps({
   orderList: Array,
   title: String,
+  stock_storage: Object,
 });
 const emit = defineEmits(["updateStocks"]);
 
+const storage_addresses = ref([]);
 const groups = ref([]);
 const users = ref([]);
+const orders = ref([]);
+
+const stock = reactive({
+  stock_name: null,
+  stock_s_name: null,
+  quantity: null,
+  img_path: null,
+});
 
 const form = reactive({
   search: {
@@ -19,6 +30,7 @@ const form = reactive({
   },
   shipment: {
     stock_id: null,
+    address_id: 0,
     quantity: null,
     user_id: null,
   },
@@ -28,7 +40,6 @@ const getGroups = () => {
   axios
     .get(route("getGroups"))
     .then((res) => {
-      console.log(res.data);
       groups.value = res.data;
     })
     .catch((error) => {
@@ -76,12 +87,78 @@ const clickedButton = (button_name) => {
       break;
     case "shipment":
       // 出庫ボタンが押下された場合の処理
-
+      console.log(form.shipment);
+      // データチェック
+      axios
+        .post(route("stock.shipment.store"), form.shipment)
+        .then((res) => {
+          console.log(res.data)
+          
+          if(res.data.status){
+            confirm('出庫登録が完了しました')
+          }else{
+            confirm('出庫登録が失敗しました')
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
       break;
   }
 };
+
+// 在庫IDもしくはJANコードを取得
+const changeStockId = (stock_id, selectStockStorageId = 0) => {
+  axios
+    .get(route("getStockStorages"), {
+      params: {
+        stock_id: stock_id,
+      },
+    })
+    .then((res) => {
+      console.log(res.data);
+      stock.stock_name = res.data.name;
+      stock.stock_s_name = res.data.s_name;
+      stock.img_path = res.data.img_path;
+
+      storage_addresses.value = res.data.stock_storages;
+
+      if (storage_addresses.value.length === 1) {
+        form.shipment.address_id = storage_addresses.value[0].id;
+        stock.quantity = storage_addresses.value[0].quantity;
+      } else if (storage_addresses.value.length > 1) {
+        // alert('保管場所が複数あります。セレクトボックスから選択してください。')
+        if (selectStockStorageId) {
+          storage_addresses.value.forEach((address) => {
+            if (address.id === selectStockStorageId) {
+              form.shipment.address_id = address.id;
+              stock.quantity = address.quantity;
+            }
+          });
+        } else {
+          alert(
+            "保管場所が複数存在します。対象の保管場所を選択してください。"
+          );
+        }
+      } else {
+        // 保管場所が１つも存在しない場合
+        alert(
+          "保管場所が取得できませんでした。保管場所を登録して、再度お試しください。"
+        );
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
 onMounted(() => {
   getGroups();
+
+  console.log("stock_storage", props.stock_storage);
+  if (props.stock_storage) {
+    form.shipment.stock_id = props.stock_storage.stock_id;
+    changeStockId(props.stock_storage.stock_id, props.stock_storage.id);
+  }
 });
 </script>
 <template>
@@ -95,14 +172,12 @@ onMounted(() => {
       class="w-1/2 p-2 flex flex-col justify-center items-center"
     >
       <div class="text-container w-3/4">
-        <p>
-          <span>品名:</span>
-        </p>
-        <p><span>品番:</span></p>
-        <p><span>数量:</span></p>
+        <p><span>品名:</span>{{ stock.stock_name }}</p>
+        <p><span>品番:</span>{{ stock.stock_s_name }}</p>
+        <p><span>数量:</span>{{ stock.quantity }}</p>
       </div>
       <div class="img_container">
-        <img class="" src="images/stocks/not-image-sample2.png" alt="" />
+        <img class="" :src="stock.img_path" alt="" />
       </div>
     </div>
 
@@ -118,9 +193,36 @@ onMounted(() => {
               type="text"
               placeholder="JANコード or 製品ID"
               v-model="form.shipment.stock_id"
+              @change="changeStockId($event.target.value)"
             />
           </div>
         </div>
+        <div class="flex flex-wrap -mx-3 mb-6">
+          <div class="w-full px-3">
+            <select
+              name="address"
+              class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              id="grid-password"
+              v-model="form.shipment.address_id"
+            >
+              <option value="0" disabled selected>
+                出庫元アドレスを選択してください
+              </option>
+              <option
+                v-for="storage_address in storage_addresses"
+                :key="storage_address.id"
+                :value="storage_address.id"
+              >
+                {{
+                  storage_address.location_name +
+                  " : " +
+                  storage_address.address
+                }}
+              </option>
+            </select>
+          </div>
+        </div>
+
         <div class="flex flex-wrap -mx-3 mb-6">
           <div class="w-full px-3">
             <input
@@ -142,6 +244,7 @@ onMounted(() => {
                 id="department"
                 class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
               >
+                <option value="0">未選択</option>
                 <option
                   v-for="group in groups"
                   :key="group.id"
@@ -175,7 +278,7 @@ onMounted(() => {
           出庫
         </button>
       </form>
-      <section class="text-gray-600 body-font">
+      <section v-if="orders.length > 0" class="text-gray-600 body-font">
         <div class="container py-16 mx-auto">
           <h2 class="order_title">発注データ</h2>
           <div class="w-full mx-auto overflow-auto">
@@ -339,6 +442,9 @@ onMounted(() => {
     white-space: nowrap;
     overflow-x: hidden;
     color: #109ff3;
+    border-bottom: 1px dashed rgb(199, 199, 199);
+    margin-bottom: 1rem;
+
     & span {
       font-weight: normal;
       font-size: 1rem;

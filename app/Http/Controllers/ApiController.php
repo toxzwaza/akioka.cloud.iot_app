@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Group;
 use App\Models\Stock;
+use App\Models\StockStorage;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -57,5 +58,16 @@ class ApiController extends Controller
         } catch (Exception $e) {
             return response()->json($e);
         }
+    }
+
+    public function getStockStorages(Request $request){
+        $stock_id = $request->stock_id;
+        $stock = Stock::where('id', $stock_id)->orWhere('jan_code', $stock_id)->first();
+
+        $stock_storages = StockStorage::select('stock_storages.*', 'locations.name as location_name', 'storage_addresses.address')->join('storage_addresses', 'stock_storages.storage_address_id', 'storage_addresses.id')
+        ->join('locations', 'storage_addresses.location_id', 'locations.id')->where('stock_id', $stock->id)->get();
+        $stock->stock_storages = $stock_storages;
+
+        return response()->json($stock);
     }
 }

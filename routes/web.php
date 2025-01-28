@@ -32,8 +32,12 @@ Route::get('/sw.js', function () {
 Route::get('/', [MainController::class, 'index'])->name('stock.home');
 // 出庫画面
 Route::get('/shipment', [ShipmentController::class, 'index'])->name('stock.shipment');
+Route::post('/shipment', [ShipmentController::class, 'store'])->name('stock.shipment.store');
+
 // 検索画面
 Route::get('/search', [SearchController::class, 'index'])->name('stock.search');
+// 在庫詳細画面
+Route::get('/stock/{id}', [InventoryController::class, 'show'])->name('stock.inventory.show');
 // 在庫登録
 Route::get('/stock/create', [InventoryController::class, 'create'])->name('stock.inventory.create');
 // 在庫追加
@@ -48,6 +52,8 @@ Route::post('/order', [OrderController::class, 'store'])->name('stock.order.stor
 Route::get('/getGroups', [ApiController::class, 'getGroups'])->name('getGroups');
 Route::get('/getUsersByGroup', [ApiController::class, 'getUsersByGroup'])->name('getUsersByGroup');
 Route::get('/getStocks', [ApiController::class, 'getStocks'])->name('getStocks');
+// 在庫格納先アドレス取得
+Route::get('/getStockStorages', [ApiController::class, 'getStockStorages'])->name('getStockStorages');
 
 ////////// 熱中症用 //////////
 Route::get('/dashboard', [HeatStrokeController::class, 'dashboard'])->name('dashboard');
