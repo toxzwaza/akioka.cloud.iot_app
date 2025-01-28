@@ -9,5 +9,4 @@ class Place extends Model
 {
     use HasFactory;
 
-    protected $connection = 'second_mysql';
 }

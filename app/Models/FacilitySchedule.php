@@ -9,5 +9,4 @@ class FacilitySchedule extends Model
 {
     use HasFactory;
 
-    protected $connection = 'second_mysql';
 }
