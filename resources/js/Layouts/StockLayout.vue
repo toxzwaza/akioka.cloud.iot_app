@@ -17,7 +17,7 @@ const beforeButton = () => {
 <template>
   <Head :title="props.title" />
   <header id="main_header">
-    <nav class="flex items-center justify-between bg-blue-500 p-2">
+    <nav class="flex items-center justify-between bg-blue-500 py-2 px-4">
       <div class="flex items-center flex-shrink-0 text-white mr-6">
         <Link class="flex items-center " :href="route('stock.home')">
           <i id="home_icon" class="fas fa-home"></i>
@@ -63,13 +63,13 @@ const beforeButton = () => {
 </template>
 <style lang="scss" scoped>
 #main_header{
-  height: 10vh;
+  height: auto;
   & #home_icon{
     font-size: 2rem;
 
   }
   & .arrow-icon{
-    font-size: 1.8rem;
+    font-size: 1.2rem;
   }
 }
 #main_container {
