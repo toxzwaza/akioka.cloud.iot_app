@@ -42,13 +42,13 @@ const beforeButton = () => {
         <div>
           <button
             @click="beforeButton"
-            class="inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
+            class="btn inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
           >
-            <i class="fas fa-arrow-left"></i>
+            <i class="arrow-icon fas fa-arrow-left"></i>
           </button>
           <button
             @click="forwardButton"
-            class="ml-2 inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
+            class="arrow-icon btn ml-2 inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
           >
             <i class="fas fa-arrow-right"></i>
           </button>
@@ -67,6 +67,9 @@ const beforeButton = () => {
   & #home_icon{
     font-size: 2rem;
 
+  }
+  & .arrow-icon{
+    font-size: 1.8rem;
   }
 }
 #main_container {
