@@ -63,7 +63,7 @@ const beforeButton = () => {
 </template>
 <style lang="scss" scoped>
 #main_header{
-  height: 8vh;
+  height: 10vh;
   & #home_icon{
     font-size: 2rem;
 
