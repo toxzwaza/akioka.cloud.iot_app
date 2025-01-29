@@ -40,6 +40,8 @@ Route::get('/search', [SearchController::class, 'index'])->name('stock.search');
 Route::get('/stock/{id}', [InventoryController::class, 'show'])->name('stock.inventory.show');
 // 在庫ファイル更新
 Route::post('/stock/updateFile', [InventoryController::class, 'updateFile'])->name('stock.updateFile');
+// 在庫数量変更
+Route::post('/stock/changeQuantity', [InventoryController::class, 'changeQuantity'])->name('stock.changeQuantity');
 
 // 在庫登録
 Route::get('/stock/create', [InventoryController::class, 'create'])->name('stock.inventory.create');

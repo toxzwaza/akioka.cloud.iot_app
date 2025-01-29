@@ -2,6 +2,7 @@
 import StockLayout from "@/Layouts/StockLayout.vue";
 import { Link } from "@inertiajs/vue3";
 import { onMounted, ref } from "vue";
+import axios from "axios"
 
 const stock_storage = ref(null);
 const initial_orders = ref(null);
@@ -9,6 +10,31 @@ const initial_orders = ref(null);
 const previewImage = ref(null);
 const selectedFile = ref(null);
 
+const change_quantity = ref(null)
+const changeQuantity = () => {
+  if(confirm(`数量を ${change_quantity.value} に変更します。よろしいですか？`)){
+    // 数量更新処理
+    axios.post(route('stock.changeQuantity'), {
+      stock_id: props.stock.id,
+      stock_storage_id: stock_storage.value.id,
+      quantity: change_quantity.value
+    })
+    .then(res => {
+      console.log(res.data)
+      if(res.data.status){
+        if(confirm('更新が完了しました。')){
+          window.location.reload()
+        }
+      }else{
+        alert(res.data.msg)
+      }
+    })
+    .catch(error => {
+      console.log(error)
+    })
+
+  }
+}
 const props = defineProps({
   stock: Object,
 });
@@ -120,10 +146,33 @@ onMounted(() => {
                 <h1 id="quantity" class="">{{ stock_storage.quantity }}個</h1>
               </div>
             </div>
+            <div>
+              <details>
+                <summary class="bg-gray-500 text-white pl-4 mt-4">数量編集(管理者のみ)</summary>
+                <p class="text-sm text-red-500 mt-2 mb-1">
+                  数量を入力して、確定ボタンを押してください。
+                </p>
+                <div class="flex items-center justify-start">
+                  <input
+                    class="appearance-none block w-1/2 bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    type="number"
+                    name="change_quantity"
+                    id=""
+                    v-model="change_quantity"
+                  />
+                  <button
+                    @click="changeQuantity"
+                    v-if="change_quantity"
+                    class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2 whitespace-nowrap"
+                  >
+                    確定
+                  </button>
+                </div>
+              </details>
+            </div>
 
             <div id="button_container" class="mt-12 mb-12">
               <Link
-  
                 :href="
                   route('stock.shipment', {
                     stock_storage_address_id: stock_storage.id,

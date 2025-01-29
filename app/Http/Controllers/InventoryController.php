@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\InitialOrder;
+use App\Models\InventoryOperationRecord;
 use App\Models\Stock;
 use App\Models\StockStorage;
 use Exception;
@@ -58,6 +59,42 @@ class InventoryController extends Controller
         }
 
         return response()->json(['status' => $status, 'msg' => $msg], 200);
+    }
 
+    public function changeQuantity(Request $request)
+    {
+        $status = true;
+        $msg = '';
+
+        $stock_id = $request->stock_id;
+        $stock_storage_id = $request->stock_storage_id;
+        $quantity = $request->quantity;
+        $bef_quantity = 0;
+
+        try {
+
+            // 数量を変更
+            $stock_storage = StockStorage::find($stock_storage_id);
+            $bef_quantity = $stock_storage->quantity;
+            $stock_storage->quantity = $quantity;
+            $stock_storage->save();
+
+            // 編集履歴を保存
+            $inventory_operation_record = new InventoryOperationRecord();
+            $inventory_operation_record->stock_id = $stock_id;
+            $inventory_operation_record->stock_storage_id = $stock_storage_id;
+            $inventory_operation_record->quantity = $quantity;
+            $inventory_operation_record->inventory_operation_id = 9;
+            $inventory_operation_record->bef_quantity = $bef_quantity;
+            $inventory_operation_record->save();
+
+        } catch (Exception $e) {
+            $msg = $e->getMessage();
+            $status = false;
+        }
+
+
+
+        return response()->json(['status' => $status, 'msg' => $msg]);
     }
 }
