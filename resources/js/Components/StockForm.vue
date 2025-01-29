@@ -95,9 +95,10 @@ const clickedButton = (button_name) => {
           console.log(res.data)
           
           if(res.data.status){
-            confirm('出庫登録が完了しました')
+            alert('出庫登録が完了しました')
+            window.location.href = route('stock.home');
           }else{
-            confirm('出庫登録が失敗しました')
+            alert('出庫登録が失敗しました。再度お試し頂くか、管理者に問い合わせてください。')
           }
         })
         .catch((error) => {

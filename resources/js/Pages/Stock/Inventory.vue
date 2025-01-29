@@ -39,12 +39,12 @@ const uploadFile = () => {
     })
     .then((res) => {
       console.log("File uploaded successfully:", res.data);
-      if(res.data.status){
-        if(confirm('ファイルのアップロードが完了しました。')){
+      if (res.data.status) {
+        if (confirm("ファイルのアップロードが完了しました。")) {
           window.location.reload();
         }
-      }else{
-        alert('ファイルのアップロード中にエラーが発生しました。')
+      } else {
+        alert("ファイルのアップロード中にエラーが発生しました。");
       }
     })
     .catch((error) => {
@@ -90,19 +90,19 @@ onMounted(() => {
           <h1 class="stock_name">{{ props.stock.name }}</h1>
           <h2 class="stock_s_name">品番: {{ props.stock.s_name }}</h2>
 
-          <div class="flex flex-col mt-6 mb-2">
+          <div class="file_container flex flex-col mt-6 mb-2">
             <input
               class="w-1/2"
               type="file"
               capture="camera"
               @change="handleFileChange"
             />
+            <img
+              class="stock_img w-2/3 mt-4"
+              :src="'/' + props.stock.img_path"
+              alt=""
+            />
           </div>
-          <img
-            class="stock_img w-2/3"
-            :src="'/' + props.stock.img_path"
-            alt=""
-          />
         </div>
         <div id="right_container" class="w-1/2">
           <!-- 格納先が１つの場合 -->
@@ -241,7 +241,7 @@ onMounted(() => {
 
   & .img_container {
     width: 100%;
-    height: 85%;
+    height: 80%;
     & img {
       width: 100%;
       height: 100%;
@@ -267,8 +267,14 @@ onMounted(() => {
     font-size: 1.6rem;
     color: gray;
   }
-  & .stock_img {
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  & .file_container {
+    width: 80%;
+    & .stock_img {
+      width: 100%;
+      object-fit: contain;
+
+      box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    }
   }
 }
 
