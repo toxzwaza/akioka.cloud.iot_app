@@ -24,11 +24,11 @@ import { Link } from "@inertiajs/vue3";
         </div>
 
         <!-- 発注画面 -->
-        <div class="w-1/2 p-4">
+        <!-- <div class="w-1/2 p-4">
           <Link :href="route('stock.order.create')"
             ><img class="" src="/images/stocks/icons/order.png" alt="発注画面"
           /></Link>
-        </div>
+        </div> -->
         <!-- 在庫追加画面 -->
         <!-- <div class="w-1/2 p-4">
           <Link :href="route('stock.inventory.create')"><img class="" src="/images/stocks/icons/inventory.png" alt="在庫追加画面" /></Link>

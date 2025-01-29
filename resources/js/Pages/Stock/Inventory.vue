@@ -4,6 +4,8 @@ import { Link } from "@inertiajs/vue3";
 import { onMounted, ref } from "vue";
 
 const stock_storage = ref(null);
+const initial_orders = ref(null);
+
 const previewImage = ref(null);
 const selectedFile = ref(null);
 
@@ -57,6 +59,8 @@ onMounted(() => {
   if (props.stock.stock_storage.length == 1) {
     stock_storage.value = props.stock.stock_storage[0];
   }
+  initial_orders.value = props.stock.initial_orders;
+  console.log("initial_orders", initial_orders.value);
 });
 </script>
 <template>
@@ -106,7 +110,7 @@ onMounted(() => {
         </div>
         <div id="right_container" class="w-1/2">
           <!-- 格納先が１つの場合 -->
-          <section id="one_address" v-if="stock_storage">
+          <section id="one_address" class="px-4" v-if="stock_storage">
             <div class="flex flex-col">
               <h1 id="location_name" class="text-center mb-4">
                 {{ stock_storage.location_name }}
@@ -119,6 +123,7 @@ onMounted(() => {
 
             <div id="button_container" class="mt-12 mb-12">
               <Link
+  
                 :href="
                   route('stock.shipment', {
                     stock_storage_address_id: stock_storage.id,
@@ -171,7 +176,7 @@ onMounted(() => {
             </div>
           </section>
 
-          <section class="w-full mt-8 text-gray-600 body-font">
+          <section class="w-full mt-8 text-gray-600 body-font p-4">
             <div class="container mx-auto">
               <h2 class="array_title">発注履歴</h2>
               <div class="w-full mx-auto overflow-auto">
@@ -179,17 +184,17 @@ onMounted(() => {
                   <thead>
                     <tr>
                       <th
-                        class="px-8 py-6 title-font tracking-wider font-medium text-gray-900 text-lg bg-gray-100 rounded-tl rounded-bl"
+                        class="py-4 title-font tracking-wider font-medium text-gray-900 text-lg bg-gray-100 rounded-tl rounded-bl"
                       >
                         発注日
                       </th>
                       <th
-                        class="px-8 py-6 title-font tracking-wider font-medium text-gray-900 text-lg bg-gray-100"
+                        class="py-4 title-font tracking-wider font-medium text-gray-900 text-lg bg-gray-100"
                       >
                         個数
                       </th>
                       <th
-                        class="px-8 py-6 title-font tracking-wider font-medium text-gray-900 text-lg bg-gray-100"
+                        class="py-4 title-font tracking-wider font-medium text-gray-900 text-lg bg-gray-100"
                       >
                         ステータス
                       </th>
@@ -197,14 +202,39 @@ onMounted(() => {
                   </thead>
                   <tbody>
                     <tr
-                      v-for="stock_storage in props.stock.stock_storage"
-                      :key="stock_storage.id"
+                      v-for="order in props.stock.initial_orders"
+                      :key="order.id"
                     >
-                      <td class="px-8 py-6">
-                        {{ stock_storage.location_name }}
+                      <td class="py-4">
+                        {{
+                          new Date(order.order_date).toLocaleDateString(
+                            "ja-JP",
+                            {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                            }
+                          )
+                        }}
                       </td>
-                      <td class="px-8 py-6">{{ stock_storage.address }}</td>
-                      <td class="px-8 py-6">{{ stock_storage.quantity }}</td>
+                      <td class="py-4">{{ order.quantity }}</td>
+                      <td
+                        :class="{
+                          'py-4 font-bold': true,
+                          'text-green-500':
+                            order.receipt_flg || order.receive_flg,
+                          'text-red-500':
+                            !order.receipt_flg && !order.receive_flg,
+                        }"
+                      >
+                        {{
+                          order.receipt_flg
+                            ? "納品済(入庫)"
+                            : order.receive_flg
+                            ? "納品済(引渡)"
+                            : "未納品"
+                        }}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -233,10 +263,6 @@ onMounted(() => {
     font-family: serif;
     color: #109ff3;
     font-weight: bold;
-  }
-  & > div {
-    &.button_container {
-    }
   }
 
   & .img_container {
@@ -285,24 +311,33 @@ onMounted(() => {
       font-size: 2.6rem;
 
       &#location_name {
-        color: #222222;
+        color: #646464;
       }
       &#address {
-        color: rgb(44, 44, 44);
+        color: rgb(83, 83, 83);
       }
       &#quantity {
         font-weight: normal;
-        font-family: serif;
-        color: rgb(44, 44, 44);
+        color: rgb(102, 102, 102);
       }
     }
   }
 
   & #button_container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
     height: 80px;
 
-    & img {
-      height: 100%;
+    & a {
+      display: block;
+      width: 30%;
+      & img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
     }
   }
   & .array_title {

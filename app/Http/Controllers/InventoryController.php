@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\InitialOrder;
 use App\Models\Stock;
 use App\Models\StockStorage;
 use Exception;
@@ -22,6 +23,9 @@ class InventoryController extends Controller
 
         $stock->stock_storage = $stock_storage;
 
+        // 発注データ
+        $initial_orders = InitialOrder::where('name', $stock->name)->where('s_name', $stock->s_name)->orderBy('order_date', 'desc')->get();
+        $stock->initial_orders = $initial_orders;
         return Inertia::render('Stock/Inventory', ['stock' => $stock]);
     }
 
