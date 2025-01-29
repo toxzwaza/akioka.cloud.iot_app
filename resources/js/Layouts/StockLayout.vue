@@ -17,11 +17,11 @@ const beforeButton = () => {
 <template>
   <Head :title="props.title" />
   <header id="main_header">
-    <nav class="flex items-center justify-between bg-blue-500 p-6">
+    <nav class="flex items-center justify-between bg-blue-500 p-2">
       <div class="flex items-center flex-shrink-0 text-white mr-6">
         <Link class="flex items-center " :href="route('stock.home')">
-          <i class="fas fa-home"></i>
-          <span class="ml-2 font-semibold text-xl tracking-tight">備品倉庫</span>
+          <i id="home_icon" class="fas fa-home"></i>
+          <!-- <span class="ml-2 font-semibold text-xl tracking-tight">備品倉庫</span> -->
         </Link>
 
         <!-- <div class="ml-4">
@@ -32,7 +32,7 @@ const beforeButton = () => {
           >
         </div> -->
       </div>
-      <div class="w-full flex justify-between">
+      <div class="w-full flex justify-between items-center">
         <div class="w-1/2 flex items-center justify-center">
           <!-- ナビゲーション -->
           <Link class="nav_image" :class="{'opacity-50': route().current().endsWith('search') }" :href="route('stock.search')"><img src="/images/stocks/icons/search.png" alt="検索画面" /></Link>
@@ -62,8 +62,12 @@ const beforeButton = () => {
   </main>
 </template>
 <style lang="scss" scoped>
-#header_container {
-  height: 10vh;
+#main_header{
+  height: 8vh;
+  & #home_icon{
+    font-size: 2rem;
+
+  }
 }
 #main_container {
   height: 90vh;
