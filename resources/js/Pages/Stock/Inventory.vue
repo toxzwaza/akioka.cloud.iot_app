@@ -4,29 +4,92 @@ import { Link } from "@inertiajs/vue3";
 import { onMounted, ref } from "vue";
 
 const stock_storage = ref(null);
+const previewImage = ref(null);
+const selectedFile = ref(null);
 
 const props = defineProps({
   stock: Object,
 });
+
+const handleFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    console.log("file変更");
+    selectedFile.value = file; // ファイルを保存
+    // プレビュー用のURLを作成
+    previewImage.value = URL.createObjectURL(file);
+  }
+};
+
+const uploadFile = () => {
+  if (!selectedFile.value) {
+    console.error("No file selected");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", selectedFile.value);
+  formData.append("stock_id", props.stock.id);
+
+  axios
+    .post(route("stock.updateFile"), formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => {
+      console.log("File uploaded successfully:", res.data);
+    })
+    .catch((error) => {
+      console.error("Error uploading file:", error);
+    });
+};
 
 onMounted(() => {
   console.log(props.stock);
   if (props.stock.stock_storage.length == 1) {
     stock_storage.value = props.stock.stock_storage[0];
   }
-  console.log(stock_storage.value);
 });
 </script>
 <template>
   <StockLayout :title="'在庫詳細'">
     <template #content>
-      <div class="flex">
+      <div v-if="previewImage" id="previewImage" class="py-4 px-8">
+        <!-- 画像変更時のダイアログボックス -->
+        <div class="flex justify-between items-center my-4">
+          <p class="">コチラの画像で更新します。よろしいですか？</p>
+          <div class="button_container">
+            <button
+              @click="previewImage = null"
+              class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded mr-2"
+            >
+              戻る
+            </button>
+            <button
+              @click="uploadFile"
+              class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"
+            >
+              更新
+            </button>
+          </div>
+        </div>
+        <div class="img_container">
+          <img :src="previewImage" />
+        </div>
+      </div>
+      <div :class="{ flex: true, 'opacity-20': previewImage }">
         <div id="left_container" class="w-1/2">
           <h1 class="stock_name">{{ props.stock.name }}</h1>
           <h2 class="stock_s_name">品番: {{ props.stock.s_name }}</h2>
 
           <div class="flex flex-col mt-6 mb-2">
-            <input class="w-1/2" type="file" capture="camera" />
+            <input
+              class="w-1/2"
+              type="file"
+              capture="camera"
+              @change="handleFileChange"
+            />
           </div>
           <img
             class="stock_img w-2/3"
@@ -36,9 +99,11 @@ onMounted(() => {
         </div>
         <div id="right_container" class="w-1/2">
           <!-- 格納先が１つの場合 -->
-          <section id="one_address"  v-if="stock_storage">
+          <section id="one_address" v-if="stock_storage">
             <div class="flex flex-col">
-              <h1 id="location_name" class="text-center mb-4 ">{{ stock_storage.location_name }}</h1>
+              <h1 id="location_name" class="text-center mb-4">
+                {{ stock_storage.location_name }}
+              </h1>
               <div class="flex justify-around">
                 <h1 id="address" class="">{{ stock_storage.address }}</h1>
                 <h1 id="quantity" class="">{{ stock_storage.quantity }}個</h1>
@@ -145,6 +210,39 @@ onMounted(() => {
   </StockLayout>
 </template>
 <style scoped lang="scss">
+#previewImage {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  height: 60vh;
+  width: 80vw;
+  background-color: rgb(255, 255, 255);
+  border-radius: 5px;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  & p {
+    font-size: 1.1rem;
+    font-family: serif;
+    color: #109ff3;
+    font-weight: bold;
+  }
+  & > div {
+    &.button_container {
+    }
+  }
+
+  & .img_container {
+    width: 100%;
+    height: 85%;
+    & img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+}
+
 #left_container {
   & h1 {
     font-size: 1.2rem;
@@ -173,15 +271,15 @@ onMounted(() => {
       font-weight: bold;
       font-size: 2.6rem;
 
-      &#location_name{
+      &#location_name {
         color: #222222;
       }
-      &#address{
+      &#address {
         color: rgb(44, 44, 44);
       }
-      &#quantity{
+      &#quantity {
         font-weight: normal;
-        font-family: serif ;
+        font-family: serif;
         color: rgb(44, 44, 44);
       }
     }

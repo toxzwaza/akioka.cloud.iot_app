@@ -38,6 +38,9 @@ Route::post('/shipment', [ShipmentController::class, 'store'])->name('stock.ship
 Route::get('/search', [SearchController::class, 'index'])->name('stock.search');
 // 在庫詳細画面
 Route::get('/stock/{id}', [InventoryController::class, 'show'])->name('stock.inventory.show');
+// 在庫ファイル更新
+Route::post('/stock/updateFile', [InventoryController::class, 'updateFile'])->name('stock.updateFile');
+
 // 在庫登録
 Route::get('/stock/create', [InventoryController::class, 'create'])->name('stock.inventory.create');
 // 在庫追加

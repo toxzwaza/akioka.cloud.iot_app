@@ -86,7 +86,7 @@ const clearStocks = () => {
 </template>
 <style scoped lang="scss">
 .stock_card {
-  width: 30%;
+  width: 28%;
   height: 30%;
   & .stock_img {
     width: 100%;
