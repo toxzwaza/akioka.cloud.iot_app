@@ -39,6 +39,13 @@ const uploadFile = () => {
     })
     .then((res) => {
       console.log("File uploaded successfully:", res.data);
+      if(res.data.status){
+        if(confirm('ファイルのアップロードが完了しました。')){
+          window.location.reload();
+        }
+      }else{
+        alert('ファイルのアップロード中にエラーが発生しました。')
+      }
     })
     .catch((error) => {
       console.error("Error uploading file:", error);
@@ -58,7 +65,7 @@ onMounted(() => {
       <div v-if="previewImage" id="previewImage" class="py-4 px-8">
         <!-- 画像変更時のダイアログボックス -->
         <div class="flex justify-between items-center my-4">
-          <p class="">コチラの画像で更新します。よろしいですか？</p>
+          <p class="">こちらの画像で更新します。よろしいですか？</p>
           <div class="button_container">
             <button
               @click="previewImage = null"
@@ -216,7 +223,7 @@ onMounted(() => {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 2;
-  height: 60vh;
+  height: 80vh;
   width: 80vw;
   background-color: rgb(255, 255, 255);
   border-radius: 5px;
