@@ -8,29 +8,39 @@ import { ref } from "vue";
 const stocks = ref([]);
 const handleUpdateStocks = (data) => {
   stocks.value = data;
-  console.log("親コンポーネント", stocks.value);
+  search_box.value = false;
 };
 const clearStocks = () => {
   stocks.value = [];
 };
+
+const search_box = ref(true);
 </script>
 <template>
   <StockLayout :title="'検索'">
     <template #content>
       <!-- 検索フォームコンポーネント -->
-      <StockForm  @updateStocks="handleUpdateStocks" />
+      <StockForm v-if="search_box" @updateStocks="handleUpdateStocks" />
+      <button
+        v-else
+        @click="search_box = true"
+        class="ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+      >
+        検索画面を表示
+      </button>
 
       <!-- 検索結果表示用コンポーネント -->
       <div>
         <div v-if="stocks.length > 0" class="">
-          <!-- <button
-            @click="clearStocks"
+          <button
+            v-if="search_box"
+            @click="search_box = false"
             class="ml-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
           >
-            検索画面へ戻る
-          </button> -->
+            検索画面を非表示
+          </button>
 
-          <hr class="my-8">
+          <hr class="my-8" />
           <div class="mt-4 flex flex-wrap justify-between">
             <div
               v-for="stock in stocks"
@@ -58,7 +68,7 @@ const clearStocks = () => {
                 </p>
 
                 <Link
-                  :href="route('stock.inventory.show', {id: stock.id})"
+                  :href="route('stock.inventory.show', { id: stock.id })"
                   class="mt-4 inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-500 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-500 dark:focus:ring-blue-800"
                 >
                   詳細画面へ進む
@@ -98,7 +108,7 @@ const clearStocks = () => {
     padding: 0 1rem;
     background-color: #ffffff;
 
-    & img{
+    & img {
       width: 100%;
       object-fit: contain;
     }

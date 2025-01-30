@@ -96,7 +96,9 @@ const orderStock = () => {
       return;
     }
   } else {
-    if (!confirm(`${props.stock.name} の発注依頼を行います。よろしいですか？`)) {
+    if (
+      !confirm(`${props.stock.name} の発注依頼を行います。よろしいですか？`)
+    ) {
       return;
     }
   }
@@ -282,152 +284,142 @@ onMounted(() => {
               </div>
             </div>
           </section>
-
-          <section
-            id="order_container"
-            class="w-full mt-8 text-gray-600 body-font p-4"
-          >
-            <div class="container mx-auto mb-8">
-              <h2 class="array_title text-green-500">発注依頼</h2>
-              <div class="w-full mx-auto overflow-auto">
-                <table class="table-auto w-full text-left whitespace-no-wrap">
-                  <thead>
-                    <tr>
-                      <th
-                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
-                      >
-                        発注依頼日
-                      </th>
-                      <th
-                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
-                      >
-                        個数
-                      </th>
-                      <th
-                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
-                      >
-                        ステータス
-                      </th>
-                      <th
-                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
-                      ></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      v-for="order_request in props.stock.order_requests"
-                      :key="order_request.id"
-                    >
-                      <td class="py-4">
-                        {{
-                          new Date(order_request.created_at).toLocaleDateString(
-                            "ja-JP",
-                            {
-                              year: "numeric",
-                              month: "2-digit",
-                              day: "2-digit",
-                            }
-                          )
-                        }}
-                      </td>
-                      <td class="py-4">
-                        {{
-                          order_request.quantity ? order_request.quantity : "-"
-                        }}
-                      </td>
-                      <td
-                        :class="{
-                          'py-4 font-bold': true,
-                          'text-green-500': order_request.status,
-                          'text-red-500': !order_request.status,
-                        }"
-                      >
-                        {{ order_request.status ? "受理" : "未受理" }}
-                      </td>
-                      <td
-                        :class="{
-                          'py-4 font-bold text-center': true,
-                        }"
-                      >
-                        <button
-                          @click="deleteOrderRequest(order_request.id)"
-                          v-if="!order_request.status"
-                          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 text-sm px-4 rounded-full"
-                        >
-                          取消
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="container mx-auto">
-              <h2 class="array_title text-red-500">発注履歴</h2>
-              <div class="w-full mx-auto overflow-auto">
-                <table class="table-auto w-full text-left whitespace-no-wrap">
-                  <thead>
-                    <tr>
-                      <th
-                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
-                      >
-                        発注日
-                      </th>
-                      <th
-                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
-                      >
-                        個数
-                      </th>
-                      <th
-                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
-                      >
-                        ステータス
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      v-for="order in props.stock.initial_orders"
-                      :key="order.id"
-                    >
-                      <td class="py-4">
-                        {{
-                          new Date(order.order_date).toLocaleDateString(
-                            "ja-JP",
-                            {
-                              year: "numeric",
-                              month: "2-digit",
-                              day: "2-digit",
-                            }
-                          )
-                        }}
-                      </td>
-                      <td class="py-4">{{ order.quantity }}</td>
-                      <td
-                        :class="{
-                          'py-4 font-bold': true,
-                          'text-green-500':
-                            order.receipt_flg || order.receive_flg,
-                          'text-red-500':
-                            !order.receipt_flg && !order.receive_flg,
-                        }"
-                      >
-                        {{
-                          order.receipt_flg
-                            ? "納品済(入庫)"
-                            : order.receive_flg
-                            ? "納品済(引渡)"
-                            : "未納品"
-                        }}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </section>
         </div>
       </div>
+
+      <section
+        id="order_container"
+        class="w-full mt-8 text-gray-600 body-font p-4 flex justify-between items-center"
+      >
+        <div class="container mx-auto mr-2">
+          <h2 class="array_title text-green-500">発注依頼</h2>
+          <div class="w-full mx-auto overflow-auto">
+            <table class="table-auto w-full text-left whitespace-no-wrap">
+              <thead>
+                <tr>
+                  <th
+                    class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                  >
+                    発注依頼日
+                  </th>
+                  <th
+                    class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                  >
+                    個数
+                  </th>
+                  <th
+                    class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                  >
+                    ステータス
+                  </th>
+                  <th
+                    class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                  ></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="order_request in props.stock.order_requests"
+                  :key="order_request.id"
+                >
+                  <td class="py-4">
+                    {{
+                      new Date(order_request.created_at).toLocaleDateString(
+                        "ja-JP",
+                        {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        }
+                      )
+                    }}
+                  </td>
+                  <td class="py-4">
+                    {{ order_request.quantity ? order_request.quantity : "-" }}
+                  </td>
+                  <td
+                    :class="{
+                      'py-4 font-bold': true,
+                      'text-green-500': order_request.status,
+                      'text-red-500': !order_request.status,
+                    }"
+                  >
+                    {{ order_request.status ? "受理" : "未受理" }}
+                  </td>
+                  <td
+                    :class="{
+                      'py-4 font-bold text-center': true,
+                    }"
+                  >
+                    <button
+                      @click="deleteOrderRequest(order_request.id)"
+                      v-if="!order_request.status"
+                      class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 text-sm px-4 rounded-full"
+                    >
+                      取消
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="container mx-auto ml-2">
+          <h2 class="array_title text-red-500">発注履歴</h2>
+          <div class="w-full mx-auto overflow-auto">
+            <table class="table-auto w-full text-left whitespace-no-wrap">
+              <thead>
+                <tr>
+                  <th
+                    class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                  >
+                    発注日
+                  </th>
+                  <th
+                    class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                  >
+                    個数
+                  </th>
+                  <th
+                    class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                  >
+                    ステータス
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="order in props.stock.initial_orders" :key="order.id">
+                  <td class="py-4">
+                    {{
+                      new Date(order.order_date).toLocaleDateString("ja-JP", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      })
+                    }}
+                  </td>
+                  <td class="py-4">{{ order.quantity }}</td>
+                  <td
+                    :class="{
+                      'py-4 font-bold': true,
+                      'text-green-500': order.receipt_flg || order.receive_flg,
+                      'text-red-500': !order.receipt_flg && !order.receive_flg,
+                    }"
+                  >
+                    {{
+                      order.receipt_flg
+                        ? "納品済(入庫)"
+                        : order.receive_flg
+                        ? "納品済(引渡)"
+                        : "未納品"
+                    }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </template>
   </StockLayout>
 </template>
@@ -507,19 +499,6 @@ onMounted(() => {
       }
     }
   }
-  & #order_container {
-    height: 45vh;
-
-    & > div {
-      height: 50%;
-      overflow-y: auto;
-
-      background-color: rgb(255, 255, 255);
-      padding: 1rem;
-      border-radius: 5px;
-      box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-    }
-  }
 
   & #button_container {
     display: flex;
@@ -539,9 +518,24 @@ onMounted(() => {
       }
     }
   }
-  & .array_title {
-    font-size: 1.2rem;
-    font-weight: bold;
+}
+
+#order_container {
+  height: 45vh;
+
+  & > div {
+    height: 50%;
+    overflow-y: auto;
+
+    background-color: rgb(255, 255, 255);
+    padding: 1rem;
+    border-radius: 5px;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+
+    & .array_title {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
   }
 }
 </style>

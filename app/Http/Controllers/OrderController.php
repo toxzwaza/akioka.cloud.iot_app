@@ -40,7 +40,7 @@ class OrderController extends Controller
             $stock = Stock::find($stock_id);
             // 発注依頼を通知
             $message = "{$stock->name}{$stock->s_name}の発注依頼を受付ました。以下のURLから発注を完了させてください。";
-            Helper::sendNotify(['to-murakami@akioka-ltd.jp'], $message, 'https://akioka.cloud/');
+            Helper::sendNotify(['to-murakami@akioka-ltd.jp'], $message, 'http://monokanri-manage.local/stock/stocks/order_requests?user_id=91');
         }
 
         return response()->json(['status' => $status, 'msg' => $msg]);
