@@ -289,7 +289,7 @@ onMounted(() => {
 
       <section
         id="order_container"
-        class="w-full mt-8 text-gray-600 body-font p-4 flex justify-between items-center"
+        class="w-full mt-8 text-gray-600 body-font flex justify-between items-center"
       >
         <div class="container mx-auto mr-2">
           <h2 class="array_title text-green-500">発注依頼</h2>
@@ -306,6 +306,11 @@ onMounted(() => {
                     class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
                   >
                     個数
+                  </th>
+                  <th
+                    class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                  >
+                    注文者
                   </th>
                   <th
                     class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
@@ -336,6 +341,9 @@ onMounted(() => {
                   </td>
                   <td class="py-4">
                     {{ order_request.quantity ? order_request.quantity : "-" }}
+                  </td>
+                  <td class="py-4">
+                    {{ order_request.user_name ? order_request.user_name : "-" }}
                   </td>
                   <td
                     :class="{
@@ -524,7 +532,7 @@ onMounted(() => {
   height: 45vh;
 
   & > div {
-    height: 50%;
+    height: 100%;
     overflow-y: auto;
 
     background-color: rgb(255, 255, 255);

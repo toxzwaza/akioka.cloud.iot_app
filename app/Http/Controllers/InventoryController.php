@@ -26,7 +26,7 @@ class InventoryController extends Controller
         $stock->stock_storage = $stock_storage;
 
         // 発注依頼を取得
-        $order_requests = OrderRequest::where('stock_id', $id)->get();
+        $order_requests = OrderRequest::select('order_requests.*', 'users.name as user_name')->leftJoin('users', 'order_requests.user_id', 'users.id')->where('stock_id', $id)->get();
         $stock->order_requests = $order_requests;
 
         // 発注履歴データ
