@@ -29,7 +29,6 @@ class OrderController extends Controller
             $order_request = new OrderRequest();
             $order_request->stock_id = $stock_id;
             $order_request->save();
-
         } catch (Exception $e) {
             $status = false;
             $msg = $e->getMessage();
@@ -46,7 +45,8 @@ class OrderController extends Controller
         return response()->json(['status' => $status, 'msg' => $msg]);
     }
 
-    public function delete($order_request_id){
+    public function delete($order_request_id)
+    {
         $status = true;
         $stock_id = null;
 
@@ -58,12 +58,21 @@ class OrderController extends Controller
             $status = false;
         }
 
-        if($status){
+        if ($status) {
             $stock = Stock::find($stock_id);
             $message = "{$stock->name}{$stock->s_name}の発注依頼を削除しました。";
             Helper::sendNotify(['to-murakami@akioka-ltd.jp'], $message);
         }
 
         return response()->json(['status' => $status]);
+    }
+
+    // 確定発注依頼
+    public function getConfirmOrderRequest()
+    {
+        $order_requests = OrderRequest::select('users.name as user_name', 'stocks.name', 'stocks.s_name', 'stocks.stock_no', 'order_requests.quantity', 'order_requests.updated_at')->leftJoin('users', 'users.id', 'order_requests.user_id')->join('stocks', 'stocks.id', 'order_requests.stock_id')->where('status', 1)
+            ->whereDate('order_requests.updated_at', now()->toDateString())
+            ->get();
+        return response()->json($order_requests);
     }
 }

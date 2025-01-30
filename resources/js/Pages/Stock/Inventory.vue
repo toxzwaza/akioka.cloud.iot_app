@@ -289,7 +289,7 @@ onMounted(() => {
 
       <section
         id="order_container"
-        class="w-full mt-8 text-gray-600 body-font flex justify-between items-center"
+        :class="{'w-full mt-8 text-gray-600 body-font flex justify-between items-center': true, 'opacity-20': previewImage}"
       >
         <div class="container mx-auto mr-2">
           <h2 class="array_title text-green-500">発注依頼</h2>

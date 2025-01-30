@@ -54,6 +54,8 @@ Route::get('/order/create', [OrderController::class, 'create'])->name('stock.ord
 Route::post('/order', [OrderController::class, 'store'])->name('stock.order.store');
 // 発注依頼削除
 Route::delete('/order/{order_request_id}', [OrderController::class, 'delete'])->name('stock.order.delete');
+// 確定発注依頼取得
+Route::get('/order/getConfirmOrderRequest', [OrderController::class, 'getConfirmOrderRequest'])->name('stock.order.getConfirmOrderRequest');
 
 ////////// API用 //////////
 Route::get('/getGroups', [ApiController::class, 'getGroups'])->name('getGroups');

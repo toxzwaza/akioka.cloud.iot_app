@@ -20,11 +20,13 @@ const search_box = ref(true);
   <StockLayout :title="'検索'">
     <template #content>
       <!-- 検索フォームコンポーネント -->
-      <StockForm v-if="search_box" @updateStocks="handleUpdateStocks" />
+      <div :class="{ 'hide' : !search_box }">
+        <StockForm  @updateStocks="handleUpdateStocks" />
+      </div>
       <button
-        v-else
+        v-if="!search_box"
+        :class="{'ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded' : true}"
         @click="search_box = true"
-        class="ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
       >
         検索画面を表示
       </button>
@@ -35,7 +37,7 @@ const search_box = ref(true);
           <button
             v-if="search_box"
             @click="search_box = false"
-            class="ml-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+            :class="{'ml-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded' : true }"
           >
             検索画面を非表示
           </button>
@@ -97,6 +99,12 @@ const search_box = ref(true);
   </StockLayout>
 </template>
 <style scoped lang="scss">
+.hide{
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+}
+
 .stock_card {
   width: 28%;
   height: 30%;
