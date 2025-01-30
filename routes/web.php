@@ -52,6 +52,8 @@ Route::post('/stock', [InventoryController::class, 'store'])->name('stock.invent
 Route::get('/order/create', [OrderController::class, 'create'])->name('stock.order.create');
 // 発注追加
 Route::post('/order', [OrderController::class, 'store'])->name('stock.order.store');
+// 発注依頼削除
+Route::delete('/order/{order_request_id}', [OrderController::class, 'delete'])->name('stock.order.delete');
 
 ////////// API用 //////////
 Route::get('/getGroups', [ApiController::class, 'getGroups'])->name('getGroups');

@@ -88,17 +88,48 @@ const uploadFile = () => {
 };
 
 const orderStock = () => {
-  if (confirm(`${props.stock.name} の発注申請を行います。よろしいですか？`)) {
+  const hasPendingOrderRequest = props.stock.order_requests.some(
+    (order_request) => order_request.status === 0
+  );
+  if (hasPendingOrderRequest) {
+    if (!confirm("未受理の発注依頼がありますが、発注依頼を行いますか？")) {
+      return;
+    }
+  } else {
+    if (!confirm(`${props.stock.name} の発注依頼を行います。よろしいですか？`)) {
+      return;
+    }
+  }
+  axios
+    .post(route("stock.order.store"), { stock_id: props.stock.id })
+    .then((res) => {
+      console.log(res.data);
+      if (res.data.status) {
+        if (confirm("発注依頼が完了しました。")) {
+          window.location.reload();
+        }
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
+
+const deleteOrderRequest = (order_request_id) => {
+  if (confirm("発注依頼を取消します。よろしいですか？")) {
     axios
-      .post(route("stock.order.store"), { stock_id: props.stock.id })
+      .delete(
+        route("stock.order.delete", { order_request_id: order_request_id })
+      )
       .then((res) => {
         console.log(res.data);
         if (res.data.status) {
-          alert("発注依頼が完了しました。");
+          alert("注文依頼を削除しました。");
+          window.location.reload();
         }
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
       });
   }
 };
@@ -252,7 +283,10 @@ onMounted(() => {
             </div>
           </section>
 
-          <section id="order_container" class="w-full mt-8 text-gray-600 body-font p-4">
+          <section
+            id="order_container"
+            class="w-full mt-8 text-gray-600 body-font p-4"
+          >
             <div class="container mx-auto mb-8">
               <h2 class="array_title text-green-500">発注依頼</h2>
               <div class="w-full mx-auto overflow-auto">
@@ -260,20 +294,23 @@ onMounted(() => {
                   <thead>
                     <tr>
                       <th
-                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md "
+                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
                       >
                         発注依頼日
                       </th>
                       <th
-                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md "
+                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
                       >
                         個数
                       </th>
                       <th
-                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md "
+                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
                       >
                         ステータス
                       </th>
+                      <th
+                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                      ></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -294,13 +331,32 @@ onMounted(() => {
                         }}
                       </td>
                       <td class="py-4">
-                        {{ order_request.quantity ? order_request.quantity : '-' }}
+                        {{
+                          order_request.quantity ? order_request.quantity : "-"
+                        }}
                       </td>
                       <td
                         :class="{
                           'py-4 font-bold': true,
+                          'text-green-500': order_request.status,
+                          'text-red-500': !order_request.status,
                         }"
-                      >{{ order_request.status ? '受理' : '未受理' }}</td>
+                      >
+                        {{ order_request.status ? "受理" : "未受理" }}
+                      </td>
+                      <td
+                        :class="{
+                          'py-4 font-bold text-center': true,
+                        }"
+                      >
+                        <button
+                          @click="deleteOrderRequest(order_request.id)"
+                          v-if="!order_request.status"
+                          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 text-sm px-4 rounded-full"
+                        >
+                          取消
+                        </button>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -313,7 +369,7 @@ onMounted(() => {
                   <thead>
                     <tr>
                       <th
-                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md "
+                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
                       >
                         発注日
                       </th>
@@ -451,10 +507,10 @@ onMounted(() => {
       }
     }
   }
-  & #order_container{
+  & #order_container {
     height: 45vh;
 
-    & > div{
+    & > div {
       height: 50%;
       overflow-y: auto;
 
