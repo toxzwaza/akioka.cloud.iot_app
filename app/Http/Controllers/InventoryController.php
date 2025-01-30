@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\InitialOrder;
 use App\Models\InventoryOperationRecord;
+use App\Models\OrderRequest;
 use App\Models\Stock;
 use App\Models\StockStorage;
 use Exception;
@@ -24,7 +25,11 @@ class InventoryController extends Controller
 
         $stock->stock_storage = $stock_storage;
 
-        // 発注データ
+        // 発注依頼を取得
+        $order_requests = OrderRequest::where('stock_id', $id)->get();
+        $stock->order_requests = $order_requests;
+
+        // 発注履歴データ
         $initial_orders = InitialOrder::where('name', $stock->name)->where('s_name', $stock->s_name)->orderBy('order_date', 'desc')->get();
         $stock->initial_orders = $initial_orders;
         return Inertia::render('Stock/Inventory', ['stock' => $stock]);
@@ -79,6 +84,7 @@ class InventoryController extends Controller
             $stock_storage->quantity = $quantity;
             $stock_storage->save();
 
+
             // 編集履歴を保存
             $inventory_operation_record = new InventoryOperationRecord();
             $inventory_operation_record->stock_id = $stock_id;
@@ -87,7 +93,6 @@ class InventoryController extends Controller
             $inventory_operation_record->inventory_operation_id = 9;
             $inventory_operation_record->bef_quantity = $bef_quantity;
             $inventory_operation_record->save();
-
         } catch (Exception $e) {
             $msg = $e->getMessage();
             $status = false;

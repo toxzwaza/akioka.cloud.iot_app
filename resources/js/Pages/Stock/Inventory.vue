@@ -2,7 +2,11 @@
 import StockLayout from "@/Layouts/StockLayout.vue";
 import { Link } from "@inertiajs/vue3";
 import { onMounted, ref } from "vue";
-import axios from "axios"
+import axios from "axios";
+
+const props = defineProps({
+  stock: Object,
+});
 
 const stock_storage = ref(null);
 const initial_orders = ref(null);
@@ -10,35 +14,37 @@ const initial_orders = ref(null);
 const previewImage = ref(null);
 const selectedFile = ref(null);
 
-const change_quantity = ref(null)
+const change_quantity = ref(null);
+
+// 数量変更
 const changeQuantity = () => {
-  if(confirm(`数量を ${change_quantity.value} に変更します。よろしいですか？`)){
+  if (
+    confirm(`数量を ${change_quantity.value} に変更します。よろしいですか？`)
+  ) {
     // 数量更新処理
-    axios.post(route('stock.changeQuantity'), {
-      stock_id: props.stock.id,
-      stock_storage_id: stock_storage.value.id,
-      quantity: change_quantity.value
-    })
-    .then(res => {
-      console.log(res.data)
-      if(res.data.status){
-        if(confirm('更新が完了しました。')){
-          window.location.reload()
+    axios
+      .post(route("stock.changeQuantity"), {
+        stock_id: props.stock.id,
+        stock_storage_id: stock_storage.value.id,
+        quantity: change_quantity.value,
+      })
+      .then((res) => {
+        console.log(res.data);
+        if (res.data.status) {
+          if (confirm("更新が完了しました。")) {
+            window.location.reload();
+          }
+        } else {
+          alert(res.data.msg);
         }
-      }else{
-        alert(res.data.msg)
-      }
-    })
-    .catch(error => {
-      console.log(error)
-    })
-
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
-}
-const props = defineProps({
-  stock: Object,
-});
+};
 
+// 画像プレビュー
 const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
@@ -49,6 +55,7 @@ const handleFileChange = (event) => {
   }
 };
 
+// 画像アップロード
 const uploadFile = () => {
   if (!selectedFile.value) {
     console.error("No file selected");
@@ -80,13 +87,27 @@ const uploadFile = () => {
     });
 };
 
+const orderStock = () => {
+  if (confirm(`${props.stock.name} の発注申請を行います。よろしいですか？`)) {
+    axios
+      .post(route("stock.order.store"), { stock_id: props.stock.id })
+      .then((res) => {
+        console.log(res.data);
+        if (res.data.status) {
+          alert("発注依頼が完了しました。");
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+};
 onMounted(() => {
   console.log(props.stock);
   if (props.stock.stock_storage.length == 1) {
     stock_storage.value = props.stock.stock_storage[0];
   }
   initial_orders.value = props.stock.initial_orders;
-  console.log("initial_orders", initial_orders.value);
 });
 </script>
 <template>
@@ -148,7 +169,9 @@ onMounted(() => {
             </div>
             <div>
               <details>
-                <summary class="bg-gray-500 text-white pl-4 mt-4">数量編集(管理者のみ)</summary>
+                <summary class="bg-gray-500 text-white pl-4 mt-4">
+                  数量編集(管理者のみ)
+                </summary>
                 <p class="text-sm text-red-500 mt-2 mb-1">
                   数量を入力して、確定ボタンを押してください。
                 </p>
@@ -180,6 +203,10 @@ onMounted(() => {
                 "
                 ><img src="/images/stocks/icons/shipment.png" alt="出庫画面"
               /></Link>
+
+              <button @click="orderStock">
+                <img src="/images/stocks/icons/order.png" alt="発注画面" />
+              </button>
             </div>
           </section>
 
@@ -225,25 +252,78 @@ onMounted(() => {
             </div>
           </section>
 
-          <section class="w-full mt-8 text-gray-600 body-font p-4">
-            <div class="container mx-auto">
-              <h2 class="array_title">発注履歴</h2>
+          <section id="order_container" class="w-full mt-8 text-gray-600 body-font p-4">
+            <div class="container mx-auto mb-8">
+              <h2 class="array_title text-green-500">発注依頼</h2>
               <div class="w-full mx-auto overflow-auto">
                 <table class="table-auto w-full text-left whitespace-no-wrap">
                   <thead>
                     <tr>
                       <th
-                        class="py-4 title-font tracking-wider font-medium text-gray-900 text-lg bg-gray-100 rounded-tl rounded-bl"
+                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md "
                       >
-                        発注日
+                        発注依頼日
                       </th>
                       <th
-                        class="py-4 title-font tracking-wider font-medium text-gray-900 text-lg bg-gray-100"
+                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md "
                       >
                         個数
                       </th>
                       <th
-                        class="py-4 title-font tracking-wider font-medium text-gray-900 text-lg bg-gray-100"
+                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md "
+                      >
+                        ステータス
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="order_request in props.stock.order_requests"
+                      :key="order_request.id"
+                    >
+                      <td class="py-4">
+                        {{
+                          new Date(order_request.created_at).toLocaleDateString(
+                            "ja-JP",
+                            {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                            }
+                          )
+                        }}
+                      </td>
+                      <td class="py-4">
+                        {{ order_request.quantity ? order_request.quantity : '-' }}
+                      </td>
+                      <td
+                        :class="{
+                          'py-4 font-bold': true,
+                        }"
+                      >{{ order_request.status ? '受理' : '未受理' }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="container mx-auto">
+              <h2 class="array_title text-red-500">発注履歴</h2>
+              <div class="w-full mx-auto overflow-auto">
+                <table class="table-auto w-full text-left whitespace-no-wrap">
+                  <thead>
+                    <tr>
+                      <th
+                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md "
+                      >
+                        発注日
+                      </th>
+                      <th
+                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                      >
+                        個数
+                      </th>
+                      <th
+                        class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
                       >
                         ステータス
                       </th>
@@ -371,6 +451,19 @@ onMounted(() => {
       }
     }
   }
+  & #order_container{
+    height: 45vh;
+
+    & > div{
+      height: 50%;
+      overflow-y: auto;
+
+      background-color: rgb(255, 255, 255);
+      padding: 1rem;
+      border-radius: 5px;
+      box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    }
+  }
 
   & #button_container {
     display: flex;
@@ -379,7 +472,8 @@ onMounted(() => {
 
     height: 80px;
 
-    & a {
+    & a,
+    button {
       display: block;
       width: 30%;
       & img {
@@ -390,7 +484,7 @@ onMounted(() => {
     }
   }
   & .array_title {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: bold;
   }
 }

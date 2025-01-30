@@ -18,17 +18,19 @@ const clearStocks = () => {
   <StockLayout :title="'検索'">
     <template #content>
       <!-- 検索フォームコンポーネント -->
-      <StockForm v-if="stocks.length < 1" @updateStocks="handleUpdateStocks" />
+      <StockForm  @updateStocks="handleUpdateStocks" />
 
       <!-- 検索結果表示用コンポーネント -->
       <div>
         <div v-if="stocks.length > 0" class="">
-          <button
+          <!-- <button
             @click="clearStocks"
             class="ml-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
           >
             検索画面へ戻る
-          </button>
+          </button> -->
+
+          <hr class="my-8">
           <div class="mt-4 flex flex-wrap justify-between">
             <div
               v-for="stock in stocks"
@@ -94,7 +96,7 @@ const clearStocks = () => {
     display: flex;
     justify-content: center;
     padding: 0 1rem;
-    background-color: #e4e4e4;
+    background-color: #ffffff;
 
     & img{
       width: 100%;
