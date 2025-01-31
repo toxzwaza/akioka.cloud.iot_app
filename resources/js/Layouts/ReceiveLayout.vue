@@ -31,9 +31,12 @@ const props = defineProps({
   </header>
   <!-- <Message /> -->
 
-  <main>
+  <main id="main_container">
     <slot name="content" />
   </main>
 </template>
-<style>
+<style scope lang="scss">
+#main_container{
+    font-size: 14px;
+}
 </style>
