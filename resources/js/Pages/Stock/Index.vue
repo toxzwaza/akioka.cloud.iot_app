@@ -25,7 +25,7 @@ import { Link } from "@inertiajs/vue3";
 
         <!-- 納品画面 -->
         <div class="w-1/2 p-4">
-          <Link :href="route('stock.receive')"
+          <Link :href="route('stock.receive.home')"
             ><img
               class=""
               src="/images/stocks/icons/receive.png"

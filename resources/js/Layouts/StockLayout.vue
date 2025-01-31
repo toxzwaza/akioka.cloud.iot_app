@@ -48,6 +48,12 @@ const beforeButton = () => {
             :href="route('stock.shipment')"
             ><img src="/images/stocks/icons/shipment.png" alt="出庫画面"
           /></Link>
+          <Link
+            class="nav_image"
+            :class="{ 'opacity-50': route().current().includes('receive') }"
+            :href="route('stock.receive')"
+            ><img src="/images/stocks/icons/receive.png" alt="出庫画面"
+          /></Link>
           <!-- <Link class="nav_image" :class="{'opacity-50': route().current().endsWith('order') }" :href="route('stock.order.create')"><img src="/images/stocks/icons/order.png" alt="発注画面" /></Link> -->
         </div>
         <div>

@@ -59,7 +59,20 @@ Route::delete('/order/{order_request_id}', [OrderController::class, 'delete'])->
 Route::get('/order/getConfirmOrderRequest', [OrderController::class, 'getConfirmOrderRequest'])->name('stock.order.getConfirmOrderRequest');
 
 // 納品画面
-Route::get('/receive', [ReceiveController::class, 'index'])->name('stock.receive');
+Route::get('/receive', [ReceiveController::class, 'home'])->name('stock.receive.home');
+Route::get('/receive/index', [ReceiveController::class, 'index'])->name('stock.receive');
+Route::get('/receive/archive', [ReceiveController::class, 'archive'])->name('stock.receive.archive');
+Route::get('/receive/receipt', [ReceiveController::class, 'receipt'])->name('stock.receive.receipt');
+// 納品書が登録されていいない注文リスト
+Route::get('/receive/getInitialOrders', [ReceiveController::class, 'getInitialOrders'])->name('stock.receive.getInitialOrders');
+Route::post('/receive/uploadFile', [ ReceiveController::class, 'uploadFile'])->name('stock.receive.uploadFile');
+Route::get('/receive/deleteInitialOrder/{order_id}', [ReceiveController::class, 'deleteInitialOrder'])->name('stock.receive.delete.initialOrder');
+// 納品書が登録されている注文リスト
+Route::get('/receive/getAlreadyDelifileInitialOrders', [ReceiveController::class, 'getAlreadyDelifileInitialOrders'])->name('stock.receive.getAlreadyDelifileInitialOrders');
+Route::get('/receive/delivery/{id}', [ReceiveController::class, 'delivery'])->name('stock.receive.delivery');
+Route::get('/receive/getReceiptOrders', [ReceiveController::class, 'getReceiptOrders'])->name('stock.receive.getReceiptOrders');
+Route::get('/receive/updateReceipt/{id}', [ReceiveController::class, 'updateReceipt'])->name('stock.receive.updateReceipt');
+
 
 ////////// API用 //////////
 Route::get('/getGroups', [ApiController::class, 'getGroups'])->name('getGroups');
@@ -79,6 +92,7 @@ Route::get('/setting', [HeatStrokeController::class ,'setting'])->name('setting'
 Route::get('/watchData', [ContentController::class, 'watchData'])->name('content.watchData');
 // 施設使用状況
 Route::get('/facilitySchedule', [ContentController::class, 'facilitySchedule'])->name('content.facilitySchedule');
+
 
 ////////// データ登録API //////////
 Route::get('/data', [DataController::class, 'store']);

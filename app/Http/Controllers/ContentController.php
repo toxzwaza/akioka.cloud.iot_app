@@ -41,4 +41,5 @@ class ContentController extends Controller
         return response()->json(['facility_schedules_1' => $facility_schedules_1, 'facility_schedules_2' => $facility_schedules_2]);
 
     }
+
 }

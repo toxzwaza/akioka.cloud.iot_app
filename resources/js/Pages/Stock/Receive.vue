@@ -8,7 +8,7 @@ import { Link } from "@inertiajs/vue3";
     <template #content>
       <div id="iframe_container">
         <iframe
-          src="http://monokanri-manage.local/tablet/stock/receive"
+          :src="route('stock.receive')"
           frameborder="0"
         ></iframe>
       </div>
