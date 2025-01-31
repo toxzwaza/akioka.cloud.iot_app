@@ -70,7 +70,7 @@ class OrderController extends Controller
     // 確定発注依頼
     public function getConfirmOrderRequest()
     {
-        $order_requests = OrderRequest::select('users.name as user_name', 'stocks.name', 'stocks.s_name', 'stocks.stock_no', 'order_requests.quantity', 'order_requests.updated_at')->leftJoin('users', 'users.id', 'order_requests.user_id')->join('stocks', 'stocks.id', 'order_requests.stock_id')->where('status', 1)
+        $order_requests = OrderRequest::select('users.name as user_name', 'stocks.name', 'stocks.s_name', 'stocks.stock_no', 'stocks.price as stock_price','stocks.solo_unit', 'org_unit' , 'stocks.quantity_per_org', 'deli_location' ,'suppliers.supplier_no as com_no', 'suppliers.name as com_name', 'stock_suppliers.lead_time', 'stock_suppliers.memo' ,'order_requests.quantity', 'order_requests.updated_at')->leftJoin('users', 'users.id', 'order_requests.user_id')->leftJoin('stock_suppliers', 'stock_suppliers.stock_id', 'order_requests.stock_id')->join('suppliers', 'suppliers.id', 'stock_suppliers.supplier_id')->join('stocks', 'stocks.id', 'order_requests.stock_id')->where('status', 1)
             ->whereDate('order_requests.updated_at', now()->toDateString())
             ->get();
         return response()->json($order_requests);
