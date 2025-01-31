@@ -8,6 +8,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReceiveController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\StockController;
@@ -56,6 +57,9 @@ Route::post('/order', [OrderController::class, 'store'])->name('stock.order.stor
 Route::delete('/order/{order_request_id}', [OrderController::class, 'delete'])->name('stock.order.delete');
 // 確定発注依頼取得
 Route::get('/order/getConfirmOrderRequest', [OrderController::class, 'getConfirmOrderRequest'])->name('stock.order.getConfirmOrderRequest');
+
+// 納品画面
+Route::get('/receive', [ReceiveController::class, 'index'])->name('stock.receive');
 
 ////////// API用 //////////
 Route::get('/getGroups', [ApiController::class, 'getGroups'])->name('getGroups');

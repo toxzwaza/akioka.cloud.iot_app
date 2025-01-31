@@ -3,6 +3,7 @@ import { Head, Link } from "@inertiajs/vue3";
 
 const props = defineProps({
   title: String,
+  padding: Boolean,
 });
 
 const forwardButton = () => {
@@ -19,7 +20,7 @@ const beforeButton = () => {
   <header id="main_header">
     <nav class="flex items-center justify-between bg-blue-500 py-2 px-4">
       <div class="flex items-center flex-shrink-0 text-white mr-6">
-        <Link class="flex items-center " :href="route('stock.home')">
+        <Link class="flex items-center" :href="route('stock.home')">
           <i id="home_icon" class="fas fa-home"></i>
           <!-- <span class="ml-2 font-semibold text-xl tracking-tight">備品倉庫</span> -->
         </Link>
@@ -35,8 +36,18 @@ const beforeButton = () => {
       <div class="w-full flex justify-between items-center">
         <div class="w-1/2 flex items-center justify-center">
           <!-- ナビゲーション -->
-          <Link class="nav_image" :class="{'opacity-50': route().current().endsWith('search') }" :href="route('stock.search')"><img src="/images/stocks/icons/search.png" alt="検索画面" /></Link>
-          <Link class="nav_image" :class="{'opacity-50': route().current().endsWith('shipment') }" :href="route('stock.shipment')"><img src="/images/stocks/icons/shipment.png" alt="出庫画面" /></Link>
+          <Link
+            class="nav_image"
+            :class="{ 'opacity-50': route().current().endsWith('search') }"
+            :href="route('stock.search')"
+            ><img src="/images/stocks/icons/search.png" alt="検索画面"
+          /></Link>
+          <Link
+            class="nav_image"
+            :class="{ 'opacity-50': route().current().endsWith('shipment') }"
+            :href="route('stock.shipment')"
+            ><img src="/images/stocks/icons/shipment.png" alt="出庫画面"
+          /></Link>
           <!-- <Link class="nav_image" :class="{'opacity-50': route().current().endsWith('order') }" :href="route('stock.order.create')"><img src="/images/stocks/icons/order.png" alt="発注画面" /></Link> -->
         </div>
         <div>
@@ -57,30 +68,31 @@ const beforeButton = () => {
     </nav>
   </header>
 
-  <main id="main_container">
+  <main id="main_container" :class="{ 'padding_container' : props.padding }">
     <slot name="content" />
   </main>
 </template>
 <style lang="scss" scoped>
-#main_header{
+#main_header {
   height: auto;
-  & #home_icon{
+  & #home_icon {
     font-size: 2rem;
-
   }
-  & .arrow-icon{
+  & .arrow-icon {
     font-size: 1.2rem;
   }
 }
 #main_container {
   height: 90vh;
   overflow-y: scroll;
-
-  padding: 4%;
   background-color: #f5f5f5;
+  padding: 4%;
+  &.padding_container {
+    padding: 0;
+  }
 }
 
-.nav_image{
+.nav_image {
   width: 6rem;
   margin-right: 1rem;
 }
