@@ -37,6 +37,6 @@ const props = defineProps({
 </template>
 <style scope lang="scss">
 #main_container{
-    font-size: 14px;
+    font-size: 12px;
 }
 </style>
