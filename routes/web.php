@@ -72,7 +72,11 @@ Route::get('/receive/getAlreadyDelifileInitialOrders', [ReceiveController::class
 Route::get('/receive/delivery/{id}', [ReceiveController::class, 'delivery'])->name('stock.receive.delivery');
 Route::get('/receive/getReceiptOrders', [ReceiveController::class, 'getReceiptOrders'])->name('stock.receive.getReceiptOrders');
 Route::get('/receive/updateReceipt/{id}', [ReceiveController::class, 'updateReceipt'])->name('stock.receive.updateReceipt');
-
+Route::post('/receive/store', [ReceiveController::class, 'store'])->name('stock.receive.store');
+Route::get('/receive/updateDelivery', [ReceiveController::class, 'updateDelivery'])->name('stock.receive.updateDelivery');
+Route::get('/receive/getClassifications', [ReceiveController::class, 'getClassifications'])->name('stock.receive.getClassifications');
+Route::get('/receive/getSuppliers', [ReceiveController::class, 'getSuppliers'])->name('stock.receive.getSuppliers');
+Route::get('/receive/none_storage/{order_id}', [ReceiveController::class, 'none_storage'])->name('stock.receive.none_storage');
 
 ////////// API用 //////////
 Route::get('/getGroups', [ApiController::class, 'getGroups'])->name('getGroups');

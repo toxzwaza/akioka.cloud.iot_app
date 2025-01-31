@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Classification;
 use App\Models\InitialOrder;
+use App\Models\InventoryOperationRecord;
 use App\Models\Location;
 use App\Models\SplitOrderQuantity;
 use App\Models\Stock;
 use App\Models\StockStorage;
+use App\Models\StockSupplier;
 use App\Models\StorageAddress;
 use App\Models\Supplier;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ReceiveController extends Controller
@@ -213,7 +217,7 @@ class ReceiveController extends Controller
             $storage_addresses = StorageAddress::orderBy('address', 'asc')->get();
         }
 
-        return Inertia::render('Stock/Tablet/Delivery', ['order' => $order, 'supplier_id' => $supplier_id, 'locations' => $locations, 'storage_addresses' => $storage_addresses]);
+        return Inertia::render('Stock/Receive/Delivery', ['order' => $order, 'supplier_id' => $supplier_id, 'locations' => $locations, 'storage_addresses' => $storage_addresses]);
     }
 
     ///////////////////////// Receipt.vue /////////////////////////
@@ -251,5 +255,153 @@ class ReceiveController extends Controller
         $order->save();
 
         return redirect()->back();
+    }
+
+    ///////////////////////// Receipt.vue /////////////////////////
+    public function store(Request $request)
+    {
+        $order_id = $request->order_id;
+        $supplier_id = $request->supplier_id;
+        $classification_id = $request->classification_id;
+        $deli_location = $request->deli_location ?? '';
+        $storage_address_id = $request->storage_address_id;
+
+        $is_success = true;
+
+        $order = null;
+
+        try {
+            DB::transaction(function () use ($order_id, $supplier_id, $classification_id, $deli_location, $storage_address_id) {
+                if ($order_id && $supplier_id && $classification_id) {
+                    $order = InitialOrder::find($order_id);
+
+
+
+                    $stock  = new Stock();
+                    $stock->name = $order->name;
+                    $stock->s_name = $order->s_name;
+                    $stock->deli_location = $deli_location;
+                    $stock->classification_id = $classification_id;
+                    $stock->save();
+
+                    $stock_supplier = new StockSupplier();
+                    $stock_supplier->stock_id = $stock->id;
+                    $stock_supplier->supplier_id = $supplier_id;
+                    $stock_supplier->save();
+
+                    $stock_storage = new StockStorage();
+                    $stock_storage->stock_id  = $stock->id;
+                    $stock_storage->storage_address_id = $storage_address_id;
+                    $stock_storage->quantity = 0;
+                    $stock_storage->save();
+
+                    // アドレスが作成されたらフラグを初期化する
+                    $order->not_found_flg = null;
+                    $order->save();
+                }
+            });
+        } catch (Exception $e) {
+            $is_success = false;
+            return response()->json(['status' => $is_success, 'msg' => $e->getMessage(), 'order' => $order]);
+        }
+
+        return response()->json(['status' => $is_success]);
+    }
+
+    // 納品数量登録
+    public function updateDelivery(Request $request)
+    {
+        $id = $request->id;
+        $quantity = $request->quantity;
+        $stock_storage_id = $request->stock_storage_id;
+        $stock_id = $request->stock_id;
+        $storage_address_id = $request->storage_address_id;
+
+        $order = InitialOrder::find($id);
+
+        // 既にアドレス登録されている場合
+        if ($stock_storage_id) {
+            // 在庫数量を加算する処理を追加する
+            $stock_storage = StockStorage::find($stock_storage_id);
+            if ($stock_storage) {
+
+                $quantity_sum = 0;
+
+                // 分納データが存在するかチェック
+                $split_order_quantities = SplitOrderQuantity::where('initial_order_id', $id)->get();
+                // 存在する場合、合計を取得
+                if (!$split_order_quantities->isEmpty()) {
+                    $quantity_sum = $split_order_quantities->sum('quantity');
+                }
+
+
+
+                if ($order->quantity == ($quantity_sum + $quantity)) {
+                    // 注文分をすべて納品した場合、受け取りフラグを立てる
+                    $order->receive_flg = 1;
+                    $order->save();
+
+                    if ($stock_id) {
+                        $inventory_operation_records = new InventoryOperationRecord();
+                        $inventory_operation_records->stock_id = $stock_id;
+                        $inventory_operation_records->stock_storage_id = $stock_storage_id;
+                        $inventory_operation_records->inventory_operation_id = 8;
+                        $inventory_operation_records->quantity = $order->quantity;
+                        $inventory_operation_records->save();
+                    }
+
+                    // 納品した分を格納先に追加
+                    $stock_storage->quantity += $quantity;
+                    $stock_storage->save();
+
+                    // 一覧へリダイレクト
+                    return to_route('stock.receive.archive');
+                } else {
+                    // 分納の場合、split_order_quantitiesテーブルを作成
+                    $split_order_quantity = new SplitOrderQuantity();
+                    $split_order_quantity->initial_order_id = $order->id;
+                    $split_order_quantity->quantity = $quantity;
+                    $split_order_quantity->save();
+
+                    // 分納した分を格納先に追加
+                    $stock_storage->quantity += $quantity;
+                    $stock_storage->save();
+                }
+            }
+        } else {
+            // 新たに作成して、個数を登録
+            $stock_storage = new StockStorage();
+            $stock_storage->stock_id = $stock_id;
+            $stock_storage->storage_address_id = $storage_address_id;
+            $stock_storage->quantity = 0;
+            $stock_storage->save();
+
+            return redirect()->back();
+        }
+
+
+        return redirect()->back();
+    }
+
+    public function getClassifications()
+    {
+        $classifications = Classification::all();
+
+        return response()->json($classifications);
+    }
+    public function getSuppliers()
+    {
+        $suppliers = Supplier::all();
+        return response()->json($suppliers);
+    }
+
+    public function none_storage($order_id)
+    {
+        $order = InitialOrder::find($order_id);
+        $order->receive_flg = 1;
+        $order->none_storage_flg = 1;
+        $order->save();
+
+        return to_route('stock.receive.archive');
     }
 }
