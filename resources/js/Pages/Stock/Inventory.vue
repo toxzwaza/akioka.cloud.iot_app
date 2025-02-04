@@ -1,7 +1,7 @@
 <script setup>
 import StockLayout from "@/Layouts/StockLayout.vue";
 import { Link } from "@inertiajs/vue3";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, reactive } from "vue";
 import axios from "axios";
 
 const props = defineProps({
@@ -11,7 +11,12 @@ const props = defineProps({
 const stock_storage = ref(null);
 const initial_orders = ref(null);
 
-const previewImage = ref(null);
+const previewImage = reactive({
+  img_path: null,
+  msg: null,
+  update_button: null
+});
+
 const selectedFile = ref(null);
 
 const change_quantity = ref(null);
@@ -51,9 +56,18 @@ const handleFileChange = (event) => {
     console.log("file変更");
     selectedFile.value = file; // ファイルを保存
     // プレビュー用のURLを作成
-    previewImage.value = URL.createObjectURL(file);
+    previewImage.img_path = URL.createObjectURL(file);
+    previewImage.msg = "こちらの画像で更新します。よろしいですか？"
+    previewImage.update_button = true
   }
 };
+const checkDeliFile = (deli_file) => {
+  console.log(deli_file)
+  previewImage.img_path = `https://akioka.cloud/storage/${deli_file}`;
+  previewImage.msg = "納品書確認"
+  previewImage.update_button = false
+  
+}
 
 // 画像アップロード
 const uploadFile = () => {
@@ -146,18 +160,25 @@ onMounted(() => {
 <template>
   <StockLayout :title="'在庫詳細'">
     <template #content>
-      <div v-if="previewImage" id="previewImage" class="py-4 px-8">
+      <div v-if="previewImage.img_path" id="previewImage" class="py-4 px-8">
         <!-- 画像変更時のダイアログボックス -->
         <div class="flex justify-between items-center my-4">
-          <p class="">こちらの画像で更新します。よろしいですか？</p>
+          <p class="">
+            {{
+              previewImage.msg
+                ? previewImage.msg
+                : "こちらの画像で更新します。よろしいですか？"
+            }}
+          </p>
           <div class="button_container">
             <button
-              @click="previewImage = null"
+              @click="previewImage.img_path = null"
               class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded mr-2"
             >
               戻る
             </button>
             <button
+              v-if="previewImage.update_button"
               @click="uploadFile"
               class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"
             >
@@ -166,12 +187,20 @@ onMounted(() => {
           </div>
         </div>
         <div class="img_container">
-          <img :src="previewImage" />
+          <img :src="previewImage.img_path" />
         </div>
       </div>
-      <div :class="{ flex: true, 'opacity-20': previewImage }">
+      <div :class="{ flex: true, 'opacity-20': previewImage.img_path }">
         <div id="left_container" class="w-1/2">
-          <h1 class="stock_name">{{ props.stock.name }}</h1>
+          <h1 class="stock_name">
+            {{ props.stock.name }}
+            <a
+              :href="`http://monokanri-manage.local/stock/edit/stocks/${props.stock.id}`"
+              target="blank"
+              ><i class="fas fa-edit ml-2 cursor-pointer"></i
+            ></a>
+          </h1>
+
           <h2 class="stock_s_name">品番: {{ props.stock.s_name }}</h2>
 
           <div class="file_container flex flex-col mt-6 mb-2">
@@ -289,7 +318,10 @@ onMounted(() => {
 
       <section
         id="order_container"
-        :class="{'w-full mt-8 text-gray-600 body-font flex justify-between items-center': true, 'opacity-20': previewImage}"
+        :class="{
+          'w-full mt-8 text-gray-600 body-font flex justify-between items-center': true,
+          'opacity-20': previewImage.img_path,
+        }"
       >
         <div class="container mx-auto mr-2">
           <h2 class="array_title text-green-500">発注依頼</h2>
@@ -343,7 +375,9 @@ onMounted(() => {
                     {{ order_request.quantity ? order_request.quantity : "-" }}
                   </td>
                   <td class="py-4">
-                    {{ order_request.user_name ? order_request.user_name : "-" }}
+                    {{
+                      order_request.user_name ? order_request.user_name : "-"
+                    }}
                   </td>
                   <td
                     :class="{
@@ -414,13 +448,15 @@ onMounted(() => {
                       'text-red-500': !order.receipt_flg && !order.receive_flg,
                     }"
                   >
-                    {{
-                      order.receipt_flg
-                        ? "納品済(入庫)"
-                        : order.receive_flg
-                        ? "納品済(引渡)"
-                        : "未納品"
-                    }}
+                    <button @click="checkDeliFile(order.delifile_path)">
+                      {{
+                        order.receipt_flg
+                          ? "納品済(入庫)"
+                          : order.receive_flg
+                          ? "納品済(引渡)"
+                          : "未納品"
+                      }}
+                    </button>
                   </td>
                 </tr>
               </tbody>

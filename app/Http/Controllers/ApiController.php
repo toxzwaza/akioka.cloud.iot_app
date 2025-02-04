@@ -35,7 +35,7 @@ class ApiController extends Controller
             $query = Stock::select('stocks.*', 'stock_storages.quantity', 'locations.name as location_name', 'storage_addresses.address')
                 ->leftJoin('stock_storages', 'stocks.id',  'stock_storages.stock_id')
                 ->leftJoin('storage_addresses', 'stock_storages.storage_address_id', 'storage_addresses.id')
-                ->leftJoin('locations', 'storage_addresses.location_id', 'locations.id')->where('stocks.del_flg', 0);
+                ->leftJoin('locations', 'storage_addresses.location_id', 'locations.id')->where('stocks.del_flg', 0)->orderBy('updated_at', 'desc');
 
 
 
@@ -47,8 +47,9 @@ class ApiController extends Controller
                 $query->where('storage_address_id', $request->address_id);
             }
 
+            // 在庫IDもしくはJANコードから検索
             if ($stock_id) {
-                $query->where('stocks.id', $request->stock_id);
+                $query->where('stocks.id', $request->stock_id)->orWhere('stocks.jan_code', $stock_id);
             }
 
             $stocks = $query->get();
@@ -69,5 +70,35 @@ class ApiController extends Controller
         $stock->stock_storages = $stock_storages;
 
         return response()->json($stock);
+    }
+
+    // 外部からファイルをアップロード
+    public function uploadFile(Request $request){
+        $status = true;
+        $msg = '';
+
+        try {
+            if ($request->hasFile('file')) {
+                $stock_id = $request->stock_id;
+                $file = $request->file('file');
+
+                // 画像を保存する
+                $timestamp = now()->timestamp;
+                $filename = $timestamp . '.' . $file->getClientOriginalExtension();
+                $file->storeAs('public/stock', $filename);
+
+                // 保存した画像のパスに更新
+                $stock = Stock::find($stock_id);
+                $stock->img_path = 'storage/stock/' . $filename;
+                $stock->save();
+
+                $msg = "ファイルアップロードが完了しました";
+            }
+        } catch (Exception $e) {
+            $status = false;
+            $msg = $e->getMessage();
+        }
+
+        return response()->json(['status' => $status, 'msg' => $msg], 200);
     }
 }

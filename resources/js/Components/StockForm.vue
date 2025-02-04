@@ -92,13 +92,15 @@ const clickedButton = (button_name) => {
       axios
         .post(route("stock.shipment.store"), form.shipment)
         .then((res) => {
-          console.log(res.data)
-          
-          if(res.data.status){
-            alert('出庫登録が完了しました')
-            window.location.href = route('stock.home');
-          }else{
-            alert('出庫登録が失敗しました。再度お試し頂くか、管理者に問い合わせてください。')
+          console.log(res.data);
+
+          if (res.data.status) {
+            alert("出庫登録が完了しました");
+            window.location.href = route("stock.home");
+          } else {
+            alert(
+              "出庫登録が失敗しました。再度お試し頂くか、管理者に問い合わせてください。"
+            );
           }
         })
         .catch((error) => {
@@ -137,9 +139,7 @@ const changeStockId = (stock_id, selectStockStorageId = 0) => {
             }
           });
         } else {
-          alert(
-            "保管場所が複数存在します。対象の保管場所を選択してください。"
-          );
+          alert("保管場所が複数存在します。対象の保管場所を選択してください。");
         }
       } else {
         // 保管場所が１つも存在しない場合
@@ -224,9 +224,10 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="flex flex-wrap -mx-3 mb-6">
+        <div v-if="form.shipment.address_id" class="flex flex-wrap -mx-3 mb-6">
           <div class="w-full px-3">
             <input
+              v-if="form.shipment.address_id"
               name="quantity"
               class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
               id="grid-password"
@@ -235,8 +236,12 @@ onMounted(() => {
               v-model="form.shipment.quantity"
             />
           </div>
+          <span v-if="!form.shipment.quantity" class="msg px-3 text-red-600"
+            >数量を入力して下さい。</span
+          >
         </div>
-        <div class="flex flex-wrap -mx-3 mb-6">
+
+        <div v-if="form.shipment.quantity" class="flex flex-wrap -mx-3 mb-6">
           <div class="w-full px-3 flex items-center">
             <div class="mr-2 w-1/3">
               <label for="department">部署</label>
@@ -270,9 +275,13 @@ onMounted(() => {
               </select>
             </div>
           </div>
+          <span v-if="!form.shipment.user_id" class="msg px-3 text-red-600"
+            >出庫者を選択して下さい。</span
+          >
         </div>
 
         <button
+          v-if="form.shipment.address_id && form.shipment.quantity"
           @click.prevent="clickedButton('shipment')"
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
@@ -470,5 +479,13 @@ onMounted(() => {
   font-weight: bold;
   color: #109ff3;
   font-size: 1.2rem;
+}
+
+.msg{
+  &::before{
+    content : "・";
+    font-weight: bold;
+    font-family: monospace;
+  }
 }
 </style>
