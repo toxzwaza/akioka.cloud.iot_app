@@ -18,6 +18,7 @@ const classifications = ref([]);
 // 仕入れ先リスト
 const suppliers = ref([]);
 
+
 // 格納先アドレスリスト
 const storage_addresses = ref([]);
 
@@ -76,11 +77,11 @@ const createStock = () => {
 const updateDelivery = () => {
   if (confirm("納品登録をおこないますか？")) {
     router.get(route("stock.receive.updateDelivery"), {
-        id: form.id,
-        stock_id: form.stock_id,
-        stock_storage_id: form.stock_storage_id,
-        storage_address_id: form.storage_address_id,
-        quantity: form.quantity
+      id: form.id,
+      stock_id: form.stock_id,
+      stock_storage_id: form.stock_storage_id,
+      storage_address_id: form.storage_address_id,
+      quantity: form.quantity,
     });
   }
 };
@@ -104,32 +105,31 @@ onMounted(() => {
 
   // 新規作成の場合カテゴリーリストを取得
   // 新規作成フォーム初期化
-  if (props.order.not_found_flg) {
-    console.log("新期作成");
-    axios
-      .get(route("stock.receive.getClassifications"))
-      .then((res) => {
-        console.log(res.data);
-        classifications.value = res.data;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  axios
+    .get(route("stock.receive.getClassifications"))
+    .then((res) => {
+      console.log(res.data);
+      classifications.value = res.data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 
-    axios
-      .get(route("stock.receive.getSuppliers"))
-      .then((res) => {
-        console.log(res.data);
-        suppliers.value = res.data;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  axios
+    .get(route("stock.receive.getSuppliers"))
+    .then((res) => {
+      console.log(res.data);
+      suppliers.value = res.data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 
-    stock_create_form.order_id = props.order.id;
-    stock_create_form.supplier_id = props.supplier_id;
-    stock_create_form.deli_location = props.order.deli_location;
-  }
+
+  
+  stock_create_form.order_id = props.order.id;
+  stock_create_form.supplier_id = props.supplier_id;
+  stock_create_form.deli_location = props.order.deli_location;
 });
 </script>
 <template>
@@ -186,8 +186,7 @@ onMounted(() => {
                           props.order.img_path &&
                           props.order.img_path.includes('https://')
                             ? props.order.img_path
-                            : 'https://akioka.cloud/' +
-                              props.order.img_path
+                            : 'https://akioka.cloud/' + props.order.img_path
                         "
                       />
                     </div>
@@ -260,7 +259,7 @@ onMounted(() => {
                 </div>
 
                 <!-- 在庫データ作成フォーム -->
-                <div v-if="props.order.not_found_flg">
+                <div v-else>
                   <div class="flex flex-wrap -m-2 justify-center mb-4">
                     <div class="p-2">
                       <div class="mb-8">
@@ -393,7 +392,7 @@ onMounted(() => {
                         >
                           <option value="">選択してください</option>
                           <option
-                            v-for="location in props.locations"
+                            v-for="location in locations"
                             :key="location.id"
                             :value="location.id"
                           >

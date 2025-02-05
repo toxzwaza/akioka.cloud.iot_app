@@ -76,6 +76,8 @@ Route::post('/receive/store', [ReceiveController::class, 'store'])->name('stock.
 Route::get('/receive/updateDelivery', [ReceiveController::class, 'updateDelivery'])->name('stock.receive.updateDelivery');
 Route::get('/receive/getClassifications', [ReceiveController::class, 'getClassifications'])->name('stock.receive.getClassifications');
 Route::get('/receive/getSuppliers', [ReceiveController::class, 'getSuppliers'])->name('stock.receive.getSuppliers');
+
+
 Route::get('/receive/none_storage/{order_id}', [ReceiveController::class, 'none_storage'])->name('stock.receive.none_storage');
 
 ////////// API用 //////////

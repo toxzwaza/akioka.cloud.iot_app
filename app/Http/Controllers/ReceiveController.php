@@ -208,10 +208,12 @@ class ReceiveController extends Controller
                 $order->stock_storages = $stock_storages;
             }
         } else {
+
             $supplier = Supplier::where('name', $order->com_name)->first();
             if ($supplier) {
                 $supplier_id = $supplier->id;
             }
+            
             // 格納先と格納先アドレス
             $locations = Location::all();
             $storage_addresses = StorageAddress::orderBy('address', 'asc')->get();
@@ -403,5 +405,19 @@ class ReceiveController extends Controller
         $order->save();
 
         return to_route('stock.receive.archive');
+    }
+
+    // 格納先取得
+    public function getLocations(){
+        $locations = Location::all();
+
+        return response()->json($locations);
+    }
+    // アドレス取得
+    public function getAddresses($location_id)
+    {
+        $addresses = StorageAddress::where('location_id', $location_id)->orderBy('address', 'asc')->get();
+
+        return response()->json($addresses);
     }
 }
