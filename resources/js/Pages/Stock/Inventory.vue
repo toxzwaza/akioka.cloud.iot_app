@@ -212,7 +212,7 @@ onMounted(() => {
             />
             <img
               class="stock_img w-2/3 mt-4"
-              :src="'/' + props.stock.img_path"
+              :src="props.stock.img_path"
               alt=""
             />
           </div>
