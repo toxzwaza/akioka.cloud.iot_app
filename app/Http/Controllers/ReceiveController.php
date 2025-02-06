@@ -196,6 +196,7 @@ class ReceiveController extends Controller
                 // 画像を取得
                 $order->img_path = $stock->img_path;
                 $order->stock_id = $stock->id;
+                $order->quantity_per_org = $stock->quantity_per_org;
 
                 // 現在の格納先アドレスリストを取得
                 $stock_storages = StockStorage::select('stock_storages.id as stock_storage_id', 'stock_storages.quantity as storage_quantity', 'storage_addresses.id as address_id', 'storage_addresses.address', 'storage_addresses.location_id', 'stock_storages.quantity', 'locations.name')->join('storage_addresses', 'storage_addresses.id', 'stock_storages.storage_address_id')->join('locations', 'locations.id', 'location_id')->where('stock_id', $stock->id)->get();
@@ -213,13 +214,31 @@ class ReceiveController extends Controller
             if ($supplier) {
                 $supplier_id = $supplier->id;
             }
-            
+
             // 格納先と格納先アドレス
             $locations = Location::all();
             $storage_addresses = StorageAddress::orderBy('address', 'asc')->get();
         }
 
         return Inertia::render('Stock/Receive/Delivery', ['order' => $order, 'supplier_id' => $supplier_id, 'locations' => $locations, 'storage_addresses' => $storage_addresses]);
+    }
+    // 換算値のデフォルトを変更
+    public function updateQuantityPerOrg(Request $request)
+    {
+        $is_success = true;
+
+        $stock_id = $request->stock_id;
+        $quantity_per_org = $request->quantity_per_org;
+        try {
+            $stock = Stock::find($stock_id);
+            if ($stock) {
+                $stock->quantity_per_org = $quantity_per_org;
+                $stock->save();
+            }
+        } catch (Exception $e) {
+            $is_success = false;
+        }
+        return response()->json(['status' => $is_success]);
     }
 
     ///////////////////////// Receipt.vue /////////////////////////
@@ -314,7 +333,13 @@ class ReceiveController extends Controller
     public function updateDelivery(Request $request)
     {
         $id = $request->id;
+        // 発注数量分の納入数
         $quantity = $request->quantity;
+        // 換算フラグ
+        $conversion_flg = $request->conversion_flg;
+        // 換算値を反映した実際の納入数
+        $calc_quantity = $request->calc_quantity;
+
         $stock_storage_id = $request->stock_storage_id;
         $stock_id = $request->stock_id;
         $storage_address_id = $request->storage_address_id;
@@ -344,16 +369,26 @@ class ReceiveController extends Controller
                     $order->save();
 
                     if ($stock_id) {
+                        // 納品記録
                         $inventory_operation_records = new InventoryOperationRecord();
                         $inventory_operation_records->stock_id = $stock_id;
                         $inventory_operation_records->stock_storage_id = $stock_storage_id;
                         $inventory_operation_records->inventory_operation_id = 8;
-                        $inventory_operation_records->quantity = $order->quantity;
+                        if ($conversion_flg) {
+                            $inventory_operation_records->quantity = $calc_quantity;
+                        } else {
+                            $inventory_operation_records->quantity = $order->quantity;
+                        }
                         $inventory_operation_records->save();
                     }
 
                     // 納品した分を格納先に追加
-                    $stock_storage->quantity += $quantity;
+                    if ($conversion_flg) {
+                        $stock_storage->quantity += $calc_quantity;
+                    } else {
+                        $stock_storage->quantity += $quantity;
+                    }
+
                     $stock_storage->save();
 
                     // 一覧へリダイレクト
@@ -408,7 +443,8 @@ class ReceiveController extends Controller
     }
 
     // 格納先取得
-    public function getLocations(){
+    public function getLocations()
+    {
         $locations = Location::all();
 
         return response()->json($locations);

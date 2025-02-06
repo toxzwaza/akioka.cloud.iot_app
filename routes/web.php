@@ -70,6 +70,7 @@ Route::get('/receive/deleteInitialOrder/{order_id}', [ReceiveController::class, 
 // 納品書が登録されている注文リスト
 Route::get('/receive/getAlreadyDelifileInitialOrders', [ReceiveController::class, 'getAlreadyDelifileInitialOrders'])->name('stock.receive.getAlreadyDelifileInitialOrders');
 Route::get('/receive/delivery/{id}', [ReceiveController::class, 'delivery'])->name('stock.receive.delivery');
+Route::post('/receive/updateQuantityPerOrg', [ReceiveController::class, 'updateQuantityPerOrg'])->name('stock.receive.updateQuantityPerOrg');
 Route::get('/receive/getReceiptOrders', [ReceiveController::class, 'getReceiptOrders'])->name('stock.receive.getReceiptOrders');
 Route::get('/receive/updateReceipt/{id}', [ReceiveController::class, 'updateReceipt'])->name('stock.receive.updateReceipt');
 Route::post('/receive/store', [ReceiveController::class, 'store'])->name('stock.receive.store');

@@ -18,9 +18,11 @@ const classifications = ref([]);
 // 仕入れ先リスト
 const suppliers = ref([]);
 
-
 // 格納先アドレスリスト
 const storage_addresses = ref([]);
+
+// 納入換算数
+const quantity_per_org = ref(0);
 
 // 数量登録用フォーム
 const form = reactive({
@@ -28,7 +30,9 @@ const form = reactive({
   stock_id: props.order.stock_id,
   storage_address_id: null,
   stock_storage_id: null,
+  conversion_flg: 0,
   quantity: props.order.quantity - props.order.split_quantity_sum,
+  calc_quantity: props.order.quantity - props.order.split_quantity_sum,
 });
 
 // 在庫データ新規登録用フォーム
@@ -81,7 +85,9 @@ const updateDelivery = () => {
       stock_id: form.stock_id,
       stock_storage_id: form.stock_storage_id,
       storage_address_id: form.storage_address_id,
+      conversion_flg: form.conversion_flg,
       quantity: form.quantity,
+      calc_quantity: form.calc_quantity
     });
   }
 };
@@ -92,6 +98,58 @@ const sortStorageAddresses = (locationId) => {
   );
   console.log(storage_addresses.value);
 };
+
+const changeConversion = (val) => {
+  calcConversionQuantity();
+  form.calc_quantity = form.quantity * quantity_per_org.value;
+
+  if (!val) {
+    form.conversion_flg = 0;
+    form.calc_quantity = form.quantity;
+  }
+};
+
+// 換算値を計算
+const calcConversionQuantity = () => {
+  form.calc_quantity = form.quantity * quantity_per_org.value;
+};
+
+// 換算値変更時の処理
+const handleChangeQuantityPerOrg = () => {
+  calcConversionQuantity();
+
+  if (confirm("換算値が更新されました。次回以降のデフォルトに設定しますか？")) {
+    axios
+      .post(route("stock.receive.updateQuantityPerOrg"), {
+        stock_id: props.order.stock_id,
+        quantity_per_org: quantity_per_org.value,
+      })
+      .then((res) => {
+        console.log(res.data);
+        alert("換算値の設定が完了しました");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+};
+
+// 納入数変更再計算
+const handleChangeQuantity = () => {
+  if(form.quantity > props.order.quantity){
+    alert('発注数より大きい数が入力されています。')
+    form.quantity = props.order.quantity
+  }else{
+    // 小さい場合
+    if(form.conversion_flg){
+      calcConversionQuantity()
+    }else{
+      console.log(storage_quantity.value, form.quantity)
+      form.calc_quantity =  form.quantity
+    }
+  }
+
+}
 onMounted(() => {
   console.log("order", props.order);
   console.log("supplier_id", props.supplier_id);
@@ -105,28 +163,33 @@ onMounted(() => {
 
   // 新規作成の場合カテゴリーリストを取得
   // 新規作成フォーム初期化
-  axios
-    .get(route("stock.receive.getClassifications"))
-    .then((res) => {
-      console.log(res.data);
-      classifications.value = res.data;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  if (props.order.not_found_flg) {
+    axios
+      .get(route("stock.receive.getClassifications"))
+      .then((res) => {
+        console.log(res.data);
+        classifications.value = res.data;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 
-  axios
-    .get(route("stock.receive.getSuppliers"))
-    .then((res) => {
-      console.log(res.data);
-      suppliers.value = res.data;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+    axios
+      .get(route("stock.receive.getSuppliers"))
+      .then((res) => {
+        console.log(res.data);
+        suppliers.value = res.data;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
 
+  // 納入換算値の初期値を設定
+  if (props.order.quantity_per_org) {
+    quantity_per_org.value = props.order.quantity_per_org;
+  }
 
-  
   stock_create_form.order_id = props.order.id;
   stock_create_form.supplier_id = props.supplier_id;
   stock_create_form.deli_location = props.order.deli_location;
@@ -221,6 +284,51 @@ onMounted(() => {
                         </option>
                       </select>
                     </div>
+                    <div class="relative mt-8">
+                      <label
+                        for="name"
+                        class="font-bold mb-1leading-7 text-xl text-gray-600"
+                        >納入数換算</label
+                      >
+                      <div
+                        class="flex items-center justify-around rounded border border-gray-300 py-1 px-3 leading-8"
+                      >
+                        <label>
+                          なし
+                          <input
+                            v-model="form.conversion_flg"
+                            @change="changeConversion(0)"
+                            class="ml-2"
+                            type="radio"
+                            name="conversion"
+                            value="0"
+                          />
+                        </label>
+                        <label>
+                          あり
+                          <input
+                            v-model="form.conversion_flg"
+                            @change="changeConversion(1)"
+                            class="ml-2"
+                            type="radio"
+                            name="conversion"
+                            value="1"
+                          />
+                        </label>
+                      </div>
+
+                      <div v-if="form.conversion_flg" class="mt-2">
+                        <p>換算数：</p>
+                        <input
+                          type="number"
+                          name=""
+                          id=""
+                          v-model="quantity_per_org"
+                          @change="handleChangeQuantityPerOrg"
+                          class="text-center w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                        />
+                      </div>
+                    </div>
 
                     <div class="relative mt-8">
                       <label
@@ -229,6 +337,7 @@ onMounted(() => {
                         >納入数</label
                       >
                       <input
+                        @change="handleChangeQuantity"
                         v-model="form.quantity"
                         type="number"
                         id="quantity"
@@ -237,14 +346,21 @@ onMounted(() => {
                       />
                     </div>
 
-                    <p class="mt-4 w-full flex justify-between">
-                      <span>現在個数: {{ storage_quantity }}</span>
+                    <p class="mt-4 w-full flex justify-between text-lg">
+                      <span
+                        >現在:
+                        {{ storage_quantity + props.order.order_unit }}</span
+                      >
                       <span>
                         <i class="fas fa-arrow-right w-6 h-6 inline-block"></i>
                       </span>
-                      <span class="font-bold"
-                        >納入後個数:
-                        {{ form.quantity + storage_quantity }}</span
+                      <span class="font-bold text-red-500"
+                        >納入後:
+                        {{
+                          form.calc_quantity +
+                          storage_quantity +
+                          props.order.order_unit
+                        }}</span
                       >
                     </p>
                   </div>
