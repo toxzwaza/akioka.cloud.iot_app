@@ -50,7 +50,7 @@ class ShipmentController extends Controller
             $inventory_operation_record->inventory_operation_id = 2;
             $inventory_operation_record->quantity = $quantity;
             $inventory_operation_record->user_id = $user_id;
-            $inventory_operation_record->stock_id = $stock_id;
+            $inventory_operation_record->stock_id = $stock_storage->stock_id;
             $inventory_operation_record->save();
         } catch (Exception $e) {
             $status = false;
