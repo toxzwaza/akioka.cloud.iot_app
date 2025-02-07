@@ -262,11 +262,8 @@ onMounted(() => {
 
           <div class="file_container flex flex-col mt-6 mb-2">
             <div class="open_camera_button">
-              <input
-                type="file"
-                capture="camera"
-                @change="handleFileChange"
-              />
+              <img src="/images/stocks/open_camera_button.png" alt="">
+              <input type="file" capture="camera" @change="handleFileChange" />
             </div>
 
             <img
@@ -635,16 +632,31 @@ onMounted(() => {
   }
   & .file_container {
     width: 80%;
-    & .open_camera_button{
+    & .open_camera_button {
+      height: 5vh;
       width: 50%;
-      background-image : url('https://akioka.cloud/images/stocks/open_camera_button.png');
-      background-size: contain;
-      
-      & input[type="file"]{
+      position: relative;
+
+      & img {
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        height: 100%;
+        width: 100%;
+        object-fit: contain;
+      }
+
+      & input[type="file"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+
         height: 100%;
         width: 100%;
         object-fit: cover;
         opacity: 0;
+        z-index: 2;
       }
     }
     & .stock_img {
