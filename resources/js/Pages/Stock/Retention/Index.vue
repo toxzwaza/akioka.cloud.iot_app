@@ -119,10 +119,10 @@ onMounted(() => {
                   <td class="px-4 py-3 w-38">
                     {{ stock.s_name }}
                   </td>
-                  <td class="px-4 py-3">
+                  <td class="px-4 py-3 whitespace-nowrap">
                     {{ stock.location_name }}
                   </td>
-                  <td class="px-4 py-3">
+                  <td class="px-4 py-3 whitespace-nowrap">
                     {{ stock.address }}
                   </td>
                   <td class="px-4 py-3">
@@ -150,7 +150,7 @@ onMounted(() => {
                   </td>
                   <td
                     :class="{
-                      'px-4 py-3': true,
+                      'px-4 py-3 whitespace-nowrap': true,
                       'text-green-500': stock.retention_code == 0,
                       'text-orange-500 font-bold': stock.retention_code == 1,
                       'text-red-500 font-bold': retention_code == 2,
