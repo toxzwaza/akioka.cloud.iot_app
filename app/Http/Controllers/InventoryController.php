@@ -7,6 +7,7 @@ use App\Models\InventoryOperationRecord;
 use App\Models\OrderRequest;
 use App\Models\Stock;
 use App\Models\StockStorage;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -32,6 +33,49 @@ class InventoryController extends Controller
         // 発注履歴データ
         $initial_orders = InitialOrder::where('name', $stock->name)->where('s_name', $stock->s_name)->orderBy('order_date', 'desc')->get();
         $stock->initial_orders = $initial_orders;
+
+        // 過去12ヶ月間の出庫データ取得
+        $shipments = InventoryOperationRecord::where('stock_id', $id)
+            ->where('inventory_operation_id', 2)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy(function ($date) {
+                return Carbon::parse($date->created_at)->format('Y-m');
+            })
+            ->map(function ($group) {
+                return $group->sum('quantity');
+            });
+
+        $currentMonth = Carbon::now()->startOfMonth();
+        $shipmentData = [];
+
+        for ($i = 11; $i >= 0; $i--) {
+            $month = $currentMonth->copy()->subMonths($i)->format('Y-m');
+            $shipmentData[] = $shipments->get($month, 0);
+        }
+
+        // 過去12ヶ月間の入庫データ取得
+        $receives = InventoryOperationRecord::where('stock_id', $id)
+            ->where('inventory_operation_id', 8)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy(function ($date) {
+                return Carbon::parse($date->created_at)->format('Y-m');
+            })
+            ->map(function ($group) {
+                return $group->sum('quantity');
+            });
+
+        $receiveData = [];
+
+        for ($i = 11; $i >= 0; $i--) {
+            $month = $currentMonth->copy()->subMonths($i)->format('Y-m');
+            $receiveData[] = $receives->get($month, 0); // 修正: $shipmentsから$receivesに変更
+        }
+
+        $stock->shipments = $shipmentData;
+        $stock->receives = $receiveData;
+
         return Inertia::render('Stock/Inventory', ['stock' => $stock]);
     }
 

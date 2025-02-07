@@ -3,6 +3,9 @@ import StockLayout from "@/Layouts/StockLayout.vue";
 import { Link } from "@inertiajs/vue3";
 import { onMounted, ref, reactive } from "vue";
 import axios from "axios";
+import { getImgPath,changeDateFormat } from "@/Helper/method";
+import Chart from "@/Components/Stock/Inventory/BarChart.vue";
+import _ from "lodash";
 
 const props = defineProps({
   stock: Object,
@@ -11,15 +14,28 @@ const props = defineProps({
 const stock_storage = ref(null);
 const initial_orders = ref(null);
 
+// 滞留品フラグ
+const retention = reactive({
+  retention_flg: 0,
+  dif_month: null,
+  start_date: null,
+});
+
 const previewImage = reactive({
   img_path: null,
   msg: null,
-  update_button: null
+  update_button: null,
 });
 
 const selectedFile = ref(null);
 
 const change_quantity = ref(null);
+
+// 入庫月平均
+const receive_average = ref(0);
+
+// 出庫月平均
+const shipment_average = ref(0);
 
 // 数量変更
 const changeQuantity = () => {
@@ -57,17 +73,16 @@ const handleFileChange = (event) => {
     selectedFile.value = file; // ファイルを保存
     // プレビュー用のURLを作成
     previewImage.img_path = URL.createObjectURL(file);
-    previewImage.msg = "こちらの画像で更新します。よろしいですか？"
-    previewImage.update_button = true
+    previewImage.msg = "こちらの画像で更新します。よろしいですか？";
+    previewImage.update_button = true;
   }
 };
 const checkDeliFile = (deli_file) => {
-  console.log(deli_file)
+  console.log(deli_file);
   previewImage.img_path = `https://akioka.cloud/storage/${deli_file}`;
-  previewImage.msg = "納品書確認"
-  previewImage.update_button = false
-  
-}
+  previewImage.msg = "納品書確認";
+  previewImage.update_button = false;
+};
 
 // 画像アップロード
 const uploadFile = () => {
@@ -149,12 +164,54 @@ const deleteOrderRequest = (order_request_id) => {
       });
   }
 };
+
+const isLastSixShipmentsZero = () => {
+  const shipments = props.stock.shipments;
+  const lastSixShipments = shipments.slice(-6);
+  const sumOfLastSixShipments = lastSixShipments.reduce(
+    (acc, val) => acc + val,
+    0
+  );
+  return sumOfLastSixShipments === 0;
+};
+
+const parentDate = (targetDate) => {
+  const currentDate = new Date();
+  const monthDifference =
+    (currentDate.getFullYear() - targetDate.getFullYear()) * 12 +
+    (currentDate.getMonth() - targetDate.getMonth());
+
+  return monthDifference;
+};
 onMounted(() => {
   console.log(props.stock);
   if (props.stock.stock_storage.length == 1) {
     stock_storage.value = props.stock.stock_storage[0];
   }
   initial_orders.value = props.stock.initial_orders;
+
+  // それぞれの平均を取得
+  receive_average.value = Math.round(_.mean(props.stock.receives));
+  shipment_average.value = Math.round(_.mean(props.stock.shipments));
+
+  // 滞留しているか調査
+
+  // 格納先に格納されており、直近半年間の出庫合計が０より大きい
+  if (props.stock.stock_storage.length > 0 && isLastSixShipmentsZero()) {
+    const stockCreatedDate = new Date(props.stock.stock_storage[0].created_at);
+    retention.start_date = stockCreatedDate
+
+    const dif_month = parentDate(stockCreatedDate);
+    retention.dif_month = dif_month;
+    if (dif_month > 12) {
+      // 滞留品
+      console.log("滞留しています");
+      retention.retention_flg = 2;
+    } else if (dif_month > 6) {
+      console.log("半滞留品です");
+      retention.retention_flg = 1;
+    }
+  }
 });
 </script>
 <template>
@@ -212,7 +269,7 @@ onMounted(() => {
             />
             <img
               class="stock_img w-2/3 mt-4"
-              :src="props.stock.img_path.includes('storage') ? `https://akioka.cloud/${props.stock.img_path}` : props.stock.img_path"
+              :src="getImgPath(props.stock.img_path)"
               alt=""
             />
           </div>
@@ -269,6 +326,18 @@ onMounted(() => {
               <button @click="orderStock">
                 <img src="/images/stocks/icons/order.png" alt="発注画面" />
               </button>
+            </div>
+
+            <!-- 滞留情報を表示 -->
+            <div>
+                <span :class="{'rounded py-4 text-white block text-4xl font-bold text-center font-mono' : true, 'bg-red-400' : retention.retention_flg == 2, 'bg-orange-400' : retention.retention_flg == 1 , 'bg-green-400' : !retention.retention_flg}">{{ retention.retention_flg == 2 ? '滞留品' : retention.retention_flg == 1 ? '半滞留品' : '正常' }}</span>
+
+                <p v-if="retention.retention_flg" class="text-gray-700 mt-2">{{ `${changeDateFormat(retention.start_date)} より` }}
+                  <span class="text-red-500 text-lg font-bold">{{ `${retention.dif_month}` }}カ月</span>
+                  滞留しています。
+                <br>
+                </p>
+                <p v-else class="text-gray-700 mt-2">この物品は滞留していません。</p>
             </div>
           </section>
 
@@ -464,6 +533,35 @@ onMounted(() => {
           </div>
         </div>
       </section>
+
+      <!-- 出庫・入庫変動グラフを表示 -->
+      <section
+        id="chart_container"
+        class="w-full mt-8 text-gray-600 body-font flex justify-between items-center"
+      >
+        <div class="container mx-auto mr-2">
+          <h3 class="font-bold text-gray-500">
+            平均入庫数 : {{ receive_average + props.stock.solo_unit }}
+          </h3>
+          <Chart
+            :title="'過去12カ月間入庫データ'"
+            :data="props.stock.receives"
+            :inventory_operation_id="2"
+            :average="receive_average"
+          />
+        </div>
+        <div class="container mx-auto ml-2">
+          <h3 class="font-bold text-gray-500">
+            平均出庫数 : {{ shipment_average + props.stock.solo_unit }}
+          </h3>
+          <Chart
+            :title="'過去12カ月間出庫データ'"
+            :data="props.stock.shipments"
+            :inventory_operation_id="8"
+            :average="shipment_average"
+          />
+        </div>
+      </section>
     </template>
   </StockLayout>
 </template>
@@ -570,6 +668,24 @@ onMounted(() => {
   & > div {
     height: 100%;
     overflow-y: auto;
+
+    background-color: rgb(255, 255, 255);
+    padding: 1rem;
+    border-radius: 5px;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+
+    & .array_title {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+  }
+}
+
+#chart_container {
+  height: 47vh;
+
+  & > div {
+    height: 100%;
 
     background-color: rgb(255, 255, 255);
     padding: 1rem;

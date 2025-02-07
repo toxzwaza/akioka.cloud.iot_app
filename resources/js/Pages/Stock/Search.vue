@@ -2,7 +2,7 @@
 import StockLayout from "@/Layouts/StockLayout.vue";
 import StockForm from "@/Components/StockForm.vue";
 import { Link } from "@inertiajs/vue3";
-
+import { getImgPath } from "@/Helper/method";
 import { ref } from "vue";
 
 const stocks = ref([]);
@@ -50,7 +50,7 @@ const search_box = ref(true);
               class="stock_card bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 m-4"
             >
               <div class="stock_img">
-                <img class="rounded-t-lg" :src="stock.img_path" alt="" />
+                <img class="rounded-t-lg" :src="getImgPath(stock.img_path)" alt="" />
               </div>
               <div class="p-5">
                 <a href="#">
