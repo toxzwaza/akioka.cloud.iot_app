@@ -9,6 +9,7 @@ use App\Http\Controllers\MainController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReceiveController;
+use App\Http\Controllers\RetentionController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\StockController;
@@ -78,8 +79,12 @@ Route::get('/receive/updateDelivery', [ReceiveController::class, 'updateDelivery
 Route::get('/receive/getClassifications', [ReceiveController::class, 'getClassifications'])->name('stock.receive.getClassifications');
 Route::get('/receive/getSuppliers', [ReceiveController::class, 'getSuppliers'])->name('stock.receive.getSuppliers');
 
-
 Route::get('/receive/none_storage/{order_id}', [ReceiveController::class, 'none_storage'])->name('stock.receive.none_storage');
+
+// 滞留画面
+Route::get('/retentions', [RetentionController::class, 'home'])->name('stock.retention.home');
+Route::get('/retentions/stocks', [RetentionController::class, 'index'])->name('stock.retention');
+Route::get('/retentions/stocks/getRetentionStocks', [RetentionController::class, 'getRetentionStocks'])->name('stock.retention.getRetentionStocks');
 
 ////////// API用 //////////
 Route::get('/getGroups', [ApiController::class, 'getGroups'])->name('getGroups');

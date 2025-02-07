@@ -52,7 +52,12 @@ const beforeButton = () => {
             class="nav_image"
             :class="{ 'opacity-50': route().current().includes('receive') }"
             :href="route('stock.receive.home')"
-            ><img src="/images/stocks/icons/receive.png" alt="出庫画面"
+            ><img src="/images/stocks/icons/receive.png" alt="納品画面"
+          /></Link>
+          <Link
+            class="nav_image"
+            :href="route('stock.retention.home')"
+            ><img src="/images/stocks/icons/retention.png" alt="納品画面"
           /></Link>
           <!-- <Link class="nav_image" :class="{'opacity-50': route().current().endsWith('order') }" :href="route('stock.order.create')"><img src="/images/stocks/icons/order.png" alt="発注画面" /></Link> -->
         </div>

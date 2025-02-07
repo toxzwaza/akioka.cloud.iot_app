@@ -33,6 +33,16 @@ import { Link } from "@inertiajs/vue3";
           /></Link>
         </div>
 
+        <!-- 滞留画面 -->
+        <div class="w-1/2 p-4">
+          <a :href="route('stock.retention.home')"
+            ><img
+              class=""
+              src="/images/stocks/icons/retention.png"
+              alt="滞留画面"
+          /></a>
+        </div>
+
         <!-- 発注画面 -->
         <!-- <div class="w-1/2 p-4">
           <Link :href="route('stock.order.create')"
