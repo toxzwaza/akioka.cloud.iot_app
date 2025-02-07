@@ -28,7 +28,7 @@ onMounted(() => {
   <RetentionLayout :title="'納品登録'">
     <template #content>
       <section class="text-gray-600 body-font">
-        <div class="container px-5 py-12 mx-auto">
+        <div class="container py-12 mx-auto w-full">
           <h1 class="text-center text-3xl font-medium title-font mb-2 text-gray-600">
             滞留品一覧
           </h1>
