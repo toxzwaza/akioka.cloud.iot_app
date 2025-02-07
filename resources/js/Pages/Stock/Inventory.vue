@@ -267,7 +267,7 @@ onMounted(() => {
             </div>
 
             <img
-              class="stock_img w-2/3 mt-4"
+              class="stock_img w-2/3 mt-2"
               :src="getImgPath(props.stock.img_path)"
               alt=""
             />
