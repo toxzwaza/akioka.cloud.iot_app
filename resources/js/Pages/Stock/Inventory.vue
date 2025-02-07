@@ -3,7 +3,7 @@ import StockLayout from "@/Layouts/StockLayout.vue";
 import { Link } from "@inertiajs/vue3";
 import { onMounted, ref, reactive } from "vue";
 import axios from "axios";
-import { getImgPath,changeDateFormat } from "@/Helper/method";
+import { getImgPath, changeDateFormat } from "@/Helper/method";
 import Chart from "@/Components/Stock/Inventory/BarChart.vue";
 import _ from "lodash";
 
@@ -199,7 +199,7 @@ onMounted(() => {
   // 格納先に格納されており、直近半年間の出庫合計が０より大きい
   if (props.stock.stock_storage.length > 0 && isLastSixShipmentsZero()) {
     const stockCreatedDate = new Date(props.stock.stock_storage[0].created_at);
-    retention.start_date = stockCreatedDate
+    retention.start_date = stockCreatedDate;
 
     const dif_month = parentDate(stockCreatedDate);
     retention.dif_month = dif_month;
@@ -261,12 +261,14 @@ onMounted(() => {
           <h2 class="stock_s_name">品番: {{ props.stock.s_name }}</h2>
 
           <div class="file_container flex flex-col mt-6 mb-2">
-            <input
-              class="w-1/2"
-              type="file"
-              capture="camera"
-              @change="handleFileChange"
-            />
+            <div class="open_camera_button">
+              <input
+                type="file"
+                capture="camera"
+                @change="handleFileChange"
+              />
+            </div>
+
             <img
               class="stock_img w-2/3 mt-4"
               :src="getImgPath(props.stock.img_path)"
@@ -330,14 +332,33 @@ onMounted(() => {
 
             <!-- 滞留情報を表示 -->
             <div>
-                <span :class="{'rounded py-4 text-white block text-4xl font-bold text-center font-mono' : true, 'bg-red-400' : retention.retention_flg == 2, 'bg-orange-400' : retention.retention_flg == 1 , 'bg-green-400' : !retention.retention_flg}">{{ retention.retention_flg == 2 ? '滞留品' : retention.retention_flg == 1 ? '半滞留品' : '正常' }}</span>
+              <span
+                :class="{
+                  'rounded py-4 text-white block text-4xl font-bold text-center font-mono': true,
+                  'bg-red-400': retention.retention_flg == 2,
+                  'bg-orange-400': retention.retention_flg == 1,
+                  'bg-green-400': !retention.retention_flg,
+                }"
+                >{{
+                  retention.retention_flg == 2
+                    ? "滞留品"
+                    : retention.retention_flg == 1
+                    ? "半滞留品"
+                    : "正常"
+                }}</span
+              >
 
-                <p v-if="retention.retention_flg" class="text-gray-700 mt-2">{{ `${changeDateFormat(retention.start_date)} より` }}
-                  <span class="text-red-500 text-lg font-bold">{{ `${retention.dif_month}` }}カ月</span>
-                  滞留しています。
-                <br>
-                </p>
-                <p v-else class="text-gray-700 mt-2">この物品は滞留していません。</p>
+              <p v-if="retention.retention_flg" class="text-gray-700 mt-2">
+                {{ `${changeDateFormat(retention.start_date)} より` }}
+                <span class="text-red-500 text-lg font-bold"
+                  >{{ `${retention.dif_month}` }}カ月</span
+                >
+                滞留しています。
+                <br />
+              </p>
+              <p v-else class="text-gray-700 mt-2">
+                この物品は滞留していません。
+              </p>
             </div>
           </section>
 
@@ -614,6 +635,16 @@ onMounted(() => {
   }
   & .file_container {
     width: 80%;
+    & .open_camera_button{
+      width: 50%;
+      background-image : url('https://akioka.cloud/images/stocks/open_camera_button.png');
+      & input[type="file"]{
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        opacity: 0;
+      }
+    }
     & .stock_img {
       width: 100%;
       object-fit: contain;
@@ -682,7 +713,6 @@ onMounted(() => {
 }
 
 #chart_container {
-
   & > div {
     background-color: rgb(255, 255, 255);
     padding: 1rem;
@@ -694,7 +724,7 @@ onMounted(() => {
       font-weight: bold;
     }
 
-    & canvas{
+    & canvas {
       height: 100%;
       width: 100%;
       object-fit: cover;
