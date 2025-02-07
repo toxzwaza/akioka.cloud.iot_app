@@ -682,11 +682,8 @@ onMounted(() => {
 }
 
 #chart_container {
-  height: 47vh;
 
   & > div {
-    height: 100%;
-
     background-color: rgb(255, 255, 255);
     padding: 1rem;
     border-radius: 5px;
@@ -695,6 +692,12 @@ onMounted(() => {
     & .array_title {
       font-size: 1.2rem;
       font-weight: bold;
+    }
+
+    & canvas{
+      height: 100%;
+      width: 100%;
+      object-fit: cover;
     }
   }
 }

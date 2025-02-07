@@ -72,10 +72,14 @@ watch(
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .chart-container {
-  height: 100%;
   width: 100%;
   padding: 1%;
+  & canvas{
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
 }
 </style>
