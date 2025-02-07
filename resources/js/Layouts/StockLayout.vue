@@ -56,6 +56,7 @@ const beforeButton = () => {
           /></Link>
           <Link
             class="nav_image"
+            :class="{ 'opacity-50': route().current().includes('retention') }"
             :href="route('stock.retention.home')"
             ><img src="/images/stocks/icons/retention.png" alt="納品画面"
           /></Link>
@@ -79,7 +80,7 @@ const beforeButton = () => {
     </nav>
   </header>
 
-  <main id="main_container" :class="{ 'padding_container' : props.padding }">
+  <main id="main_container" :class="{ padding_container: props.padding }">
     <slot name="content" />
   </main>
 </template>
