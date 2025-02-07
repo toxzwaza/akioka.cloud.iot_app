@@ -23,15 +23,15 @@ const getRetentionStocks = () => {
 onMounted(() => {
   getRetentionStocks();
 });
-
 </script>
 <template>
   <RetentionLayout :title="'納品登録'">
     <template #content>
-      <h1 class="text-center text-xl font-bold text-gray-800">滞留品一覧</h1>
-
       <section class="text-gray-600 body-font">
         <div class="container px-5 py-12 mx-auto">
+          <h1 class="text-center text-3xl font-medium title-font mb-2 text-gray-600">
+            滞留品一覧
+          </h1>
           <div class="flex flex-col text-center w-full mb-20">
             <p class="lg:w-2/3 mx-auto leading-relaxed text-base">
               滞留品及び半滞留品が表示されます。

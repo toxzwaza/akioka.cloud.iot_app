@@ -133,7 +133,7 @@ onMounted(() => {
         <div class="container py-12 mx-auto">
           <div class="flex flex-col text-center w-full mb-8">
             <h1
-              class="sm:text-4xl text-3xl font-medium title-font mb-2 text-green-600"
+              class="text-3xl font-medium title-font mb-2 text-green-600"
             >
               納品登録
             </h1>
