@@ -638,6 +638,8 @@ onMounted(() => {
     & .open_camera_button{
       width: 50%;
       background-image : url('https://akioka.cloud/images/stocks/open_camera_button.png');
+      background-size: contain;
+      
       & input[type="file"]{
         height: 100%;
         width: 100%;
