@@ -633,7 +633,7 @@ onMounted(() => {
   & .file_container {
     width: 80%;
     & .open_camera_button {
-      height: 4vh;
+      height: 5vh;
       width: 50%;
       position: relative;
 

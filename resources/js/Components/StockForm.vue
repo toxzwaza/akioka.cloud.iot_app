@@ -152,13 +152,22 @@ const changeStockId = (stock_id, selectStockStorageId = 0) => {
       console.log(error);
     });
 };
+
+// janコードのinput要素をアクティブ
+const focus_input_stock_id = () => {
+  const input_stock_id = document.querySelector("#input_stock_id");
+  input_stock_id.focus();
+};
 onMounted(() => {
   getGroups();
 
-  console.log("stock_storage", props.stock_storage);
   if (props.stock_storage) {
     form.shipment.stock_id = props.stock_storage.stock_id;
     changeStockId(props.stock_storage.stock_id, props.stock_storage.id);
+  }
+
+  if (route().current() == "stock.shipment") {
+    focus_input_stock_id();
   }
 });
 </script>
@@ -190,7 +199,7 @@ onMounted(() => {
             <input
               name="stock_id"
               class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-              id="grid-password"
+              id="input_stock_id"
               type="text"
               placeholder="JANコード or 製品ID"
               v-model="form.shipment.stock_id"
@@ -481,9 +490,9 @@ onMounted(() => {
   font-size: 1.2rem;
 }
 
-.msg{
-  &::before{
-    content : "・";
+.msg {
+  &::before {
+    content: "・";
     font-weight: bold;
     font-family: monospace;
   }
