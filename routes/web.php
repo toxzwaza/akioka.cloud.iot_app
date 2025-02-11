@@ -38,12 +38,19 @@ Route::post('/shipment', [ShipmentController::class, 'store'])->name('stock.ship
 
 // 検索画面
 Route::get('/search', [SearchController::class, 'index'])->name('stock.search');
+
+// 格納先・アドレス編集
+Route::get('/stock/getLocations', [InventoryController::class, 'getLocations'])->name('stock.getLocations');
+Route::get('/stock/getStorageAddresses/{location_id}', [InventoryController::class, 'getStorageAddresses'])->name('stock.getStorageAddresses');
+Route::post('/stock/createStockStorage', [InventoryController::class, 'createStockStorage'])->name('stock.createStockStorage');
+
 // 在庫詳細画面
-Route::get('/stock/{id}', [InventoryController::class, 'show'])->name('stock.inventory.show');
+Route::get('/stock/{stock_id}/{stock_storage_id}', [InventoryController::class, 'show'])->name('stock.inventory.show');
 // 在庫ファイル更新
 Route::post('/stock/updateFile', [InventoryController::class, 'updateFile'])->name('stock.updateFile');
 // 在庫数量変更
 Route::post('/stock/changeQuantity', [InventoryController::class, 'changeQuantity'])->name('stock.changeQuantity');
+
 
 // 在庫登録
 Route::get('/stock/create', [InventoryController::class, 'create'])->name('stock.inventory.create');

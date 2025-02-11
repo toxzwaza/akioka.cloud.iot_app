@@ -9,6 +9,7 @@ const stocks = ref([]);
 const handleUpdateStocks = (data) => {
   stocks.value = data;
   search_box.value = false;
+  console.log('search',stocks.value)
 };
 const clearStocks = () => {
   stocks.value = [];
@@ -70,10 +71,10 @@ const search_box = ref(true);
                 </p>
 
                 <Link
-                  :href="route('stock.inventory.show', { id: stock.id })"
-                  class="mt-4 inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-500 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+                  :href="route('stock.inventory.show', {stock_id: stock.id,  stock_storage_id: stock.stock_storage_id ?? 0 })"
+                  :class="{ 'mt-4 inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white  rounded-lg  focus:ring-4 focus:outline-none dark:focus:ring-blue-800 focus:ring-blue-300' : true , 'bg-blue-500 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500' : stock.stock_storage_id, 'bg-gray-500 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500' : !stock.stock_storage_id}"
                 >
-                  詳細画面へ進む
+                  {{ stock.stock_storage_id ? '詳細画面へ進む' : '格納先アドレスを登録' }}
                   <svg
                     class="rtl:rotate-180 w-3.5 h-3.5 ms-2"
                     aria-hidden="true"

@@ -5,6 +5,7 @@ import { onMounted, ref, reactive } from "vue";
 import axios from "axios";
 import { getImgPath, changeDateFormat } from "@/Helper/method";
 import Chart from "@/Components/Stock/Inventory/BarChart.vue";
+import PickStorageAddress from "@/Components/Stock/Inventory/PickStorageAddress.vue";
 import _ from "lodash";
 
 const props = defineProps({
@@ -183,11 +184,38 @@ const parentDate = (targetDate) => {
 
   return monthDifference;
 };
+
+const handleUpdateLocation = (payload) => {
+  // storage_address_id , quantity
+  axios
+    .post(route("stock.createStockStorage"), {
+      stock_id: props.stock.id,
+      storage_address_id: payload.storage_address_id,
+      quantity: payload.quantity,
+      // 既存の格納先がある場合
+      stock_storage_id: stock_storage.value.id
+    })
+    .then((res) => {
+      console.log(res.data);
+
+      if (!stock_storage.value) {
+        window.location.href = route("stock.inventory.show", {
+          stock_id: props.stock.id,
+          stock_storage_id: res.data.stock_storage_id,
+        });
+      } else {
+        window.location.reload();
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
 onMounted(() => {
   console.log(props.stock);
-  if (props.stock.stock_storage.length == 1) {
-    stock_storage.value = props.stock.stock_storage[0];
-  }
+  // console.log(props.stock.stock_storage.length)
+
+  stock_storage.value = props.stock.stock_storage;
   initial_orders.value = props.stock.initial_orders;
 
   // それぞれの平均を取得
@@ -197,7 +225,11 @@ onMounted(() => {
   // 滞留しているか調査
 
   // 格納先に格納されており、直近半年間の出庫合計が０より大きい
-  if (props.stock.stock_storage.length > 0 && isLastSixShipmentsZero()) {
+  if (
+    props.stock.stock_storage &&
+    props.stock.stock_storage.length > 0 &&
+    isLastSixShipmentsZero()
+  ) {
     const stockCreatedDate = new Date(props.stock.stock_storage[0].created_at);
     retention.start_date = stockCreatedDate;
 
@@ -262,7 +294,7 @@ onMounted(() => {
 
           <div class="file_container flex flex-col mt-6 mb-2">
             <div class="open_camera_button">
-              <img src="/images/stocks/open_camera_button.png" alt="">
+              <img src="/images/stocks/open_camera_button.png" alt="" />
               <input type="file" capture="camera" @change="handleFileChange" />
             </div>
 
@@ -274,8 +306,8 @@ onMounted(() => {
           </div>
         </div>
         <div id="right_container" class="w-1/2">
-          <!-- 格納先が１つの場合 -->
-          <section id="one_address" class="px-4" v-if="stock_storage">
+          <!-- 格納先が登録されている場合 -->
+          <section v-if="stock_storage" id="one_address" class="px-4">
             <div class="flex flex-col">
               <h1 id="location_name" class="text-center mb-4">
                 {{ stock_storage.location_name }}
@@ -286,28 +318,41 @@ onMounted(() => {
               </div>
             </div>
             <div>
-              <details>
-                <summary class="bg-gray-500 text-white pl-4 mt-4">
-                  数量編集(管理者のみ)
+              <details class="manage_details">
+                <summary class=" text-white pl-4 mt-4">
+                  数量編集
                 </summary>
-                <p class="text-sm text-red-500 mt-2 mb-1">
-                  数量を入力して、確定ボタンを押してください。
-                </p>
-                <div class="flex items-center justify-start">
-                  <input
-                    class="appearance-none block w-1/2 bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    type="number"
-                    name="change_quantity"
-                    id=""
-                    v-model="change_quantity"
+                <div class="px-2 py-2 bg-gray-300">
+                  <p class="text-sm text-red-500 mt-2 mb-1">
+                    数量を入力して、確定ボタンを押してください。
+                  </p>
+                  <div class="flex items-center justify-start">
+                    <input
+                      class="appearance-none block w-1/2 bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                      type="number"
+                      name="change_quantity"
+                      id=""
+                      v-model="change_quantity"
+                    />
+                    <button
+                      @click="changeQuantity"
+                      v-if="change_quantity"
+                      class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2 whitespace-nowrap"
+                    >
+                      確定
+                    </button>
+                  </div>
+                </div>
+              </details>
+              <details class="manage_details">
+                <summary class=" text-white pl-4 mt-4">
+                  格納先・アドレス編集
+                </summary>
+                <div class="px-2 py-2 bg-gray-300">
+                  <PickStorageAddress
+                    @updateLocation="handleUpdateLocation"
+                    :quantity="stock_storage.quantity"
                   />
-                  <button
-                    @click="changeQuantity"
-                    v-if="change_quantity"
-                    class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2 whitespace-nowrap"
-                  >
-                    確定
-                  </button>
                 </div>
               </details>
             </div>
@@ -359,227 +404,205 @@ onMounted(() => {
             </div>
           </section>
 
-          <!-- 格納先が複数ある場合 -->
-          <section v-else class="mb-8 some_addresses text-gray-600 body-font">
-            <div class="container mx-auto">
-              <h2 class="array_title">保管場所</h2>
-              <div class="w-full mx-auto overflow-auto">
-                <table class="table-auto w-full text-left whitespace-no-wrap">
-                  <thead>
-                    <tr>
-                      <th
-                        class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl"
-                      >
-                        保管倉庫
-                      </th>
-                      <th
-                        class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                      >
-                        アドレス
-                      </th>
-                      <th
-                        class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                      >
-                        数量
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      v-for="stock_storage in props.stock.stock_storage"
-                      :key="stock_storage.id"
-                    >
-                      <td class="px-4 py-3">
-                        {{ stock_storage.location_name }}
-                      </td>
-                      <td class="px-4 py-3">{{ stock_storage.address }}</td>
-                      <td class="px-4 py-3">{{ stock_storage.quantity }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+          <!-- 格納先が登録されていない場合 -->
+          <section v-else>
+            <h1 class="text-lg mb-4 text-gray-600 font-bold">
+              以下より格納先を新規登録してください。
+            </h1>
+            <PickStorageAddress
+              :quantity="0"
+              @updateLocation="handleUpdateLocation"
+            />
           </section>
         </div>
       </div>
 
-      <section
-        id="order_container"
-        :class="{
-          'w-full mt-8 text-gray-600 body-font flex justify-between items-center': true,
-          'opacity-20': previewImage.img_path,
-        }"
-      >
-        <div class="container mx-auto mr-2">
-          <h2 class="array_title text-green-500">発注依頼</h2>
-          <div class="w-full mx-auto overflow-auto">
-            <table class="table-auto w-full text-left whitespace-no-wrap">
-              <thead>
-                <tr>
-                  <th
-                    class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+      <div v-if="stock_storage">
+        <section
+          id="order_container"
+          :class="{
+            'w-full mt-8 text-gray-600 body-font flex justify-between items-center': true,
+            'opacity-20': previewImage.img_path,
+          }"
+        >
+          <div class="container mx-auto mr-2">
+            <h2 class="array_title text-green-500">発注依頼</h2>
+            <div class="w-full mx-auto overflow-auto">
+              <table class="table-auto w-full text-left whitespace-no-wrap">
+                <thead>
+                  <tr>
+                    <th
+                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                    >
+                      発注依頼日
+                    </th>
+                    <th
+                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                    >
+                      個数
+                    </th>
+                    <th
+                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                    >
+                      注文者
+                    </th>
+                    <th
+                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                    >
+                      ステータス
+                    </th>
+                    <th
+                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                    ></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="order_request in props.stock.order_requests"
+                    :key="order_request.id"
                   >
-                    発注依頼日
-                  </th>
-                  <th
-                    class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                    <td class="py-4">
+                      {{
+                        new Date(order_request.created_at).toLocaleDateString(
+                          "ja-JP",
+                          {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                          }
+                        )
+                      }}
+                    </td>
+                    <td class="py-4">
+                      {{
+                        order_request.quantity ? order_request.quantity : "-"
+                      }}
+                    </td>
+                    <td class="py-4">
+                      {{
+                        order_request.user_name ? order_request.user_name : "-"
+                      }}
+                    </td>
+                    <td
+                      :class="{
+                        'py-4 font-bold': true,
+                        'text-green-500': order_request.status,
+                        'text-red-500': !order_request.status,
+                      }"
+                    >
+                      {{ order_request.status ? "受理" : "未受理" }}
+                    </td>
+                    <td
+                      :class="{
+                        'py-4 font-bold text-center': true,
+                      }"
+                    >
+                      <button
+                        @click="deleteOrderRequest(order_request.id)"
+                        v-if="!order_request.status"
+                        class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 text-sm px-4 rounded-full"
+                      >
+                        取消
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="container mx-auto ml-2">
+            <h2 class="array_title text-red-500">発注履歴</h2>
+            <div class="w-full mx-auto overflow-auto">
+              <table class="table-auto w-full text-left whitespace-no-wrap">
+                <thead>
+                  <tr>
+                    <th
+                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                    >
+                      発注日
+                    </th>
+                    <th
+                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                    >
+                      個数
+                    </th>
+                    <th
+                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                    >
+                      ステータス
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="order in props.stock.initial_orders"
+                    :key="order.id"
                   >
-                    個数
-                  </th>
-                  <th
-                    class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
-                  >
-                    注文者
-                  </th>
-                  <th
-                    class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
-                  >
-                    ステータス
-                  </th>
-                  <th
-                    class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
-                  ></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="order_request in props.stock.order_requests"
-                  :key="order_request.id"
-                >
-                  <td class="py-4">
-                    {{
-                      new Date(order_request.created_at).toLocaleDateString(
-                        "ja-JP",
-                        {
+                    <td class="py-4">
+                      {{
+                        new Date(order.order_date).toLocaleDateString("ja-JP", {
                           year: "numeric",
                           month: "2-digit",
                           day: "2-digit",
-                        }
-                      )
-                    }}
-                  </td>
-                  <td class="py-4">
-                    {{ order_request.quantity ? order_request.quantity : "-" }}
-                  </td>
-                  <td class="py-4">
-                    {{
-                      order_request.user_name ? order_request.user_name : "-"
-                    }}
-                  </td>
-                  <td
-                    :class="{
-                      'py-4 font-bold': true,
-                      'text-green-500': order_request.status,
-                      'text-red-500': !order_request.status,
-                    }"
-                  >
-                    {{ order_request.status ? "受理" : "未受理" }}
-                  </td>
-                  <td
-                    :class="{
-                      'py-4 font-bold text-center': true,
-                    }"
-                  >
-                    <button
-                      @click="deleteOrderRequest(order_request.id)"
-                      v-if="!order_request.status"
-                      class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 text-sm px-4 rounded-full"
-                    >
-                      取消
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div class="container mx-auto ml-2">
-          <h2 class="array_title text-red-500">発注履歴</h2>
-          <div class="w-full mx-auto overflow-auto">
-            <table class="table-auto w-full text-left whitespace-no-wrap">
-              <thead>
-                <tr>
-                  <th
-                    class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
-                  >
-                    発注日
-                  </th>
-                  <th
-                    class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
-                  >
-                    個数
-                  </th>
-                  <th
-                    class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
-                  >
-                    ステータス
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="order in props.stock.initial_orders" :key="order.id">
-                  <td class="py-4">
-                    {{
-                      new Date(order.order_date).toLocaleDateString("ja-JP", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                      })
-                    }}
-                  </td>
-                  <td class="py-4">{{ order.quantity }}</td>
-                  <td
-                    :class="{
-                      'py-4 font-bold': true,
-                      'text-green-500': order.receipt_flg || order.receive_flg,
-                      'text-red-500': !order.receipt_flg && !order.receive_flg,
-                    }"
-                  >
-                    <button @click="checkDeliFile(order.delifile_path)">
-                      {{
-                        order.receipt_flg
-                          ? "納品済(入庫)"
-                          : order.receive_flg
-                          ? "納品済(引渡)"
-                          : "未納品"
+                        })
                       }}
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                    </td>
+                    <td class="py-4">{{ order.quantity }}</td>
+                    <td
+                      :class="{
+                        'py-4 font-bold': true,
+                        'text-green-500':
+                          order.receipt_flg || order.receive_flg,
+                        'text-red-500':
+                          !order.receipt_flg && !order.receive_flg,
+                      }"
+                    >
+                      <button @click="checkDeliFile(order.delifile_path)">
+                        {{
+                          order.receipt_flg
+                            ? "納品済(入庫)"
+                            : order.receive_flg
+                            ? "納品済(引渡)"
+                            : "未納品"
+                        }}
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- 出庫・入庫変動グラフを表示 -->
-      <section
-        id="chart_container"
-        class="w-full mt-8 text-gray-600 body-font flex justify-between items-center"
-      >
-        <div class="container mx-auto mr-2">
-          <h3 class="font-bold text-gray-500">
-            平均入庫数 : {{ receive_average + props.stock.solo_unit }}
-          </h3>
-          <Chart
-            :title="'過去12カ月間入庫データ'"
-            :data="props.stock.receives"
-            :inventory_operation_id="2"
-            :average="receive_average"
-          />
-        </div>
-        <div class="container mx-auto ml-2">
-          <h3 class="font-bold text-gray-500">
-            平均出庫数 : {{ shipment_average + props.stock.solo_unit }}
-          </h3>
-          <Chart
-            :title="'過去12カ月間出庫データ'"
-            :data="props.stock.shipments"
-            :inventory_operation_id="8"
-            :average="shipment_average"
-          />
-        </div>
-      </section>
+        <!-- 出庫・入庫変動グラフを表示 -->
+        <section
+          id="chart_container"
+          class="w-full mt-8 text-gray-600 body-font flex justify-between items-center"
+        >
+          <div class="container mx-auto mr-2">
+            <h3 class="font-bold text-gray-500">
+              平均入庫数 : {{ receive_average + props.stock.solo_unit }}
+            </h3>
+            <Chart
+              :title="'過去12カ月間入庫データ'"
+              :data="props.stock.receives"
+              :inventory_operation_id="2"
+              :average="receive_average"
+            />
+          </div>
+          <div class="container mx-auto ml-2">
+            <h3 class="font-bold text-gray-500">
+              平均出庫数 : {{ shipment_average + props.stock.solo_unit }}
+            </h3>
+            <Chart
+              :title="'過去12カ月間出庫データ'"
+              :data="props.stock.shipments"
+              :inventory_operation_id="8"
+              :average="shipment_average"
+            />
+          </div>
+        </section>
+      </div>
     </template>
   </StockLayout>
 </template>
@@ -683,6 +706,23 @@ onMounted(() => {
       &#quantity {
         font-weight: normal;
         color: rgb(102, 102, 102);
+      }
+    }
+
+    & .manage_details {
+      & summary {
+        border-radius: 5px;
+        background-color: rgb(59 130 246);
+        font-family: monospace;
+        padding: 1% 2%;
+      }
+      &[open]{
+        & summary{
+          border-radius: 5px 5px 0 0;
+        }
+      }
+      & > div {
+        border-radius: 0 0 5px 5px;
       }
     }
   }

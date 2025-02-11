@@ -32,7 +32,7 @@ class ApiController extends Controller
         $stock_id = $request->stock_id;
 
         try {
-            $query = Stock::select('stocks.*', 'stock_storages.quantity', 'locations.name as location_name', 'storage_addresses.address')
+            $query = Stock::select('stocks.*', 'stock_storages.id as stock_storage_id','stock_storages.quantity', 'locations.name as location_name','storage_addresses.id as storage_address_id','storage_addresses.address')
                 ->leftJoin('stock_storages', 'stocks.id',  'stock_storages.stock_id')
                 ->leftJoin('storage_addresses', 'stock_storages.storage_address_id', 'storage_addresses.id')
                 ->leftJoin('locations', 'storage_addresses.location_id', 'locations.id')->where('stocks.del_flg', 0)->orderBy('updated_at', 'desc');
