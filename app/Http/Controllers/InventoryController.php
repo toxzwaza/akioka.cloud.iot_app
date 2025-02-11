@@ -165,28 +165,28 @@ class InventoryController extends Controller
         $quantity = $request->quantity;
         $stock_id = $request->stock_id;
         $stock_storage_id = $request->stock_storage_id ?? 0;
-        
+
 
         try {
             $stock_storage = StockStorage::where('stock_id', $stock_id)->where('storage_address_id', $storage_address_id)->first();
 
             if (!$stock_storage) {
-                
+
                 $stock_storage = new StockStorage();
                 $stock_storage->stock_id = $stock_id;
                 $stock_storage->storage_address_id = $storage_address_id;
                 $stock_storage->quantity = $quantity;
                 $stock_storage->save();
-
-                // 既存の格納先から数量を減らす
-                if($stock_storage_id){
-                    $already_stock_storage = StockStorage::find($stock_storage_id);
-                    $already_stock_storage->quantity = $already_stock_storage->quantity - $quantity;
-                    $already_stock_storage->save();
-                }
-            }else{
+            } else {
                 $stock_storage->quantity = $stock_storage->quantity + $quantity;
                 $stock_storage->save();
+            }
+            
+            // 既存の格納先から数量を減らす
+            if ($stock_storage_id) {
+                $already_stock_storage = StockStorage::find($stock_storage_id);
+                $already_stock_storage->quantity = $already_stock_storage->quantity - $quantity;
+                $already_stock_storage->save();
             }
         } catch (Exception $e) {
             $status = false;
