@@ -1,4 +1,5 @@
 <script setup>
+import { getImgPath } from "@/Helper/method";
 import { Link } from "@inertiajs/vue3";
 import axios from "axios";
 import { onMounted, ref, reactive } from "vue";
@@ -30,7 +31,7 @@ const form = reactive({
   },
   shipment: {
     stock_id: null,
-    address_id: 0,
+    address_id: null,
     quantity: null,
     user_id: null,
   },
@@ -146,6 +147,7 @@ const changeStockId = (stock_id, selectStockStorageId = 0) => {
         alert(
           "保管場所が取得できませんでした。保管場所を登録して、再度お試しください。"
         );
+        form.shipment.address_id = 0
       }
     })
     .catch((error) => {
@@ -158,6 +160,14 @@ const focus_input_stock_id = () => {
   const input_stock_id = document.querySelector("#input_stock_id");
   input_stock_id.focus();
 };
+
+const clickStockInventoryButton = () => {
+  window.location.href = route("stock.inventory.show", {
+    stock_id: form.shipment.stock_id,
+    stock_storage_id: form.shipment.address_id,
+  });
+};
+
 onMounted(() => {
   getGroups();
 
@@ -181,13 +191,46 @@ onMounted(() => {
       id="stock_container"
       class="w-1/2 p-2 flex flex-col justify-center items-center"
     >
+      <div v-if="route().current() == 'stock.shipment' && form.shipment.address_id !== null" class="button_container w-full mb-4">
+        <!-- 詳細画面へ遷移するボタン -->
+        <button
+
+          @click="clickStockInventoryButton"
+          :class="{
+            'inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white  rounded-lg  focus:ring-4 focus:outline-none dark:focus:ring-green-800 focus:ring-green-300': true,
+            'bg-green-500 hover:bg-green-800 dark:bg-green-600 dark:hover:bg-green-500':
+              form.shipment.address_id,
+            'bg-gray-500 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500':
+              !form.shipment.address_id,
+          }"
+        >
+          {{
+            form.shipment.address_id ? "詳細・発注画面へ進む" : "格納先アドレスを登録"
+          }}
+          <svg
+            class="rtl:rotate-180 w-3.5 h-3.5 ms-2"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 14 10"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M1 5h12m0 0L9 1m4 4L9 9"
+            />
+          </svg>
+        </button>
+      </div>
       <div class="text-container w-3/4">
         <p><span>品名:</span>{{ stock.stock_name }}</p>
         <p><span>品番:</span>{{ stock.stock_s_name }}</p>
         <p><span>数量:</span>{{ stock.quantity }}</p>
       </div>
       <div class="img_container">
-        <img class="" :src="stock.img_path" alt="" />
+        <img class="" :src="getImgPath(stock.img_path)" alt="" />
       </div>
     </div>
 
