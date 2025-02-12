@@ -13,6 +13,8 @@ use App\Http\Controllers\RetentionController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\StockController;
+use App\Models\ProductAlias;
+use App\Models\StockAliase;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -122,3 +124,5 @@ Route::get('/getPlaceId', [DataController::class, 'getPlaceId']);
 Route::get('/getFacilitySchedule', [ContentController::class, 'getFacilitySchedule'])->name('getFacilitySchedule');
 Route::get('/getLatestData', [DataController::class, 'getLatestData'])->name('getLatestData');
 Route::get('/getTempHumiCo2', [DataController::class, 'getTempHumiCo2'])->name('getTempHumiCo2');
+
+

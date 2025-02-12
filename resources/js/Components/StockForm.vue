@@ -26,6 +26,7 @@ const stock = reactive({
 const form = reactive({
   search: {
     stock_name: "",
+    alias: "",
     address_id: null,
     stock_id: null,
   },
@@ -75,6 +76,7 @@ const clickedButton = (button_name) => {
         .get(route("getStocks"), {
           params: {
             stock_name: form.search.stock_name,
+            alias: form.search.alias,
             address_id: form.search.address_id,
             stock_id: form.search.stock_id,
           },
@@ -446,8 +448,20 @@ onMounted(() => {
               class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
               id="grid-password"
               type="text"
-              placeholder="品名・品番・略名"
+              placeholder="品名・品番"
               v-model="form.search.stock_name"
+            />
+          </div>
+        </div>
+        <div class="flex flex-wrap -mx-3 mb-6">
+          <div class="w-full px-3">
+            <input
+              name="alias"
+              class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              id="grid-password"
+              type="text"
+              placeholder="略名"
+              v-model="form.search.alias"
             />
           </div>
         </div>
