@@ -12,6 +12,7 @@ use App\Http\Controllers\ReceiveController;
 use App\Http\Controllers\RetentionController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ShipmentController;
+use App\Http\Controllers\StockAliasController;
 use App\Http\Controllers\StockController;
 use App\Models\ProductAlias;
 use App\Models\StockAliase;
@@ -52,6 +53,12 @@ Route::get('/stock/{stock_id}/{stock_storage_id}', [InventoryController::class, 
 Route::post('/stock/updateFile', [InventoryController::class, 'updateFile'])->name('stock.updateFile');
 // 在庫数量変更
 Route::post('/stock/changeQuantity', [InventoryController::class, 'changeQuantity'])->name('stock.changeQuantity');
+// 略名編集
+Route::put('/stock/editAlias', [StockAliasController::class, 'edit'])->name('stock.editAlias');
+// 略名作成
+Route::post('/stock/createAlias', [StockAliasController::class, 'create'])->name('stock.createAlias');
+// 略名削除
+Route::post('/stock/deleteAlias', [StockAliasController::class, 'delete'])->name('stock.deleteAlias');
 
 
 // 在庫登録

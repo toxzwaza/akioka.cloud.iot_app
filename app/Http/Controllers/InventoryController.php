@@ -7,6 +7,7 @@ use App\Models\InventoryOperationRecord;
 use App\Models\Location;
 use App\Models\OrderRequest;
 use App\Models\Stock;
+use App\Models\StockAlias;
 use App\Models\StockStorage;
 use App\Models\StorageAddress;
 use Carbon\Carbon;
@@ -26,6 +27,7 @@ class InventoryController extends Controller
         $stock_storage = null;
         $stock->shipments = null;
         $stock->receives = null;
+        $stock->aliases = null;
 
         if ($stock_storage_id) {
             $stock_storage = StockStorage::select('stock_storages.*', 'locations.name as location_name', 'storage_addresses.address')->join('storage_addresses', 'stock_storages.storage_address_id', 'storage_addresses.id')
@@ -82,6 +84,10 @@ class InventoryController extends Controller
 
             $stock->shipments = $shipmentData;
             $stock->receives = $receiveData;
+
+            // 略名を取得
+            $aliases = StockAlias::where('stock_id', $stock_id)->get();
+            $stock->aliases = $aliases;
         }
 
         return Inertia::render('Stock/Inventory', ['stock' => $stock]);

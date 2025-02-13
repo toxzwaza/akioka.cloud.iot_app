@@ -6,6 +6,7 @@ import axios from "axios";
 import { getImgPath, changeDateFormat } from "@/Helper/method";
 import Chart from "@/Components/Stock/Inventory/BarChart.vue";
 import PickStorageAddress from "@/Components/Stock/Inventory/PickStorageAddress.vue";
+import EditAlias from "@/Components/Stock/Inventory/EditAlias.vue"
 import _ from "lodash";
 
 const props = defineProps({
@@ -14,6 +15,7 @@ const props = defineProps({
 
 const stock_storage = ref(null);
 const initial_orders = ref(null);
+
 
 // 滞留品フラグ
 const retention = reactive({
@@ -193,7 +195,7 @@ const handleUpdateLocation = (payload) => {
       storage_address_id: payload.storage_address_id,
       quantity: payload.quantity,
       // 既存の格納先がある場合
-      stock_storage_id: stock_storage.value.id
+      stock_storage_id: stock_storage.value.id,
     })
     .then((res) => {
       console.log(res.data);
@@ -292,6 +294,18 @@ onMounted(() => {
 
           <h2 class="stock_s_name">品番: {{ props.stock.s_name }}</h2>
 
+          <!-- 略名 -->
+          <h3 class="stock_aliases">
+            略名:
+            <span
+              v-for="alias in props.stock.aliases"
+              :key="alias.id"
+              class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-gray-700 dark:text-gray-400 border border-gray-500 ml-2"
+              >{{ alias.alias }}</span
+            >
+          </h3>
+
+          <!-- 画像変更ボタン -->
           <div class="file_container flex flex-col mt-6 mb-2">
             <div class="open_camera_button">
               <img src="/images/stocks/open_camera_button.png" alt="" />
@@ -319,14 +333,12 @@ onMounted(() => {
             </div>
             <div>
               <details class="manage_details">
-                <summary class=" text-white pl-4 mt-4">
-                  数量編集
-                </summary>
+                <summary class="text-white pl-4 mt-4">数量編集</summary>
                 <div class="px-2 py-2 bg-gray-300">
                   <p class="text-sm text-red-500 mt-2 mb-1">
                     数量を入力して、確定ボタンを押してください。
                   </p>
-                  <div class="flex items-center justify-start">
+                  <div class="flex items-center justify-start py-2 mb-2">
                     <input
                       class="appearance-none block w-1/2 bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                       type="number"
@@ -334,18 +346,18 @@ onMounted(() => {
                       id=""
                       v-model="change_quantity"
                     />
-                    <button
-                      @click="changeQuantity"
-                      v-if="change_quantity"
-                      class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2 whitespace-nowrap"
-                    >
-                      確定
-                    </button>
                   </div>
+                  <button
+                    @click="changeQuantity"
+                    v-if="change_quantity"
+                    class="text-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    確定
+                  </button>
                 </div>
               </details>
               <details class="manage_details">
-                <summary class=" text-white pl-4 mt-4">
+                <summary class="text-white pl-4 mt-4">
                   格納先・アドレス編集
                 </summary>
                 <div class="px-2 py-2 bg-gray-300">
@@ -354,6 +366,13 @@ onMounted(() => {
                     :quantity="stock_storage.quantity"
                   />
                 </div>
+              </details>
+              <details class="alias_details">
+                <summary class="text-white pl-4 mt-4">
+                  略名登録・編集・削除
+                </summary>
+                <EditAlias :aliases="props.stock.aliases" :stock_id ="props.stock.id"/>
+
               </details>
             </div>
 
@@ -653,6 +672,10 @@ onMounted(() => {
     font-size: 1.6rem;
     color: gray;
   }
+  & .stock_aliases {
+    font-size: 1.2rem;
+    color: gray;
+  }
   & .file_container {
     width: 80%;
     & .open_camera_button {
@@ -709,15 +732,16 @@ onMounted(() => {
       }
     }
 
-    & .manage_details {
+    & .manage_details,
+    .alias_details {
       & summary {
         border-radius: 5px;
         background-color: rgb(59 130 246);
         font-family: monospace;
         padding: 1% 2%;
       }
-      &[open]{
-        & summary{
+      &[open] {
+        & summary {
           border-radius: 5px 5px 0 0;
         }
       }
