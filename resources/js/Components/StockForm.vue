@@ -9,6 +9,10 @@ const props = defineProps({
   title: String,
   stock_storage: Object,
 });
+
+// 出庫時のGIF・出庫音再生用
+const success = ref(false);
+
 const emit = defineEmits(["updateStocks"]);
 
 const storage_addresses = ref([]);
@@ -67,6 +71,13 @@ const changeGroups = (group_id) => {
   getUsersByGroup(group_id);
 };
 
+// 音声再生
+const playAudio = () => {
+  const audio = document.querySelector("#shipment_success_mp3");
+  setTimeout(() => {
+    audio.play();
+  }, 1000);
+};
 const clickedButton = (button_name) => {
   console.log(form);
   switch (button_name) {
@@ -98,7 +109,9 @@ const clickedButton = (button_name) => {
           console.log(res.data);
 
           if (res.data.status) {
-            alert("出庫登録が完了しました。\n発注が必要な場合は「詳細・発注画面へ進む」ボタンから発注依頼を行ってください。");
+            success.value = true;
+            playAudio();
+            // alert("出庫登録が完了しました。\n発注が必要な場合は「詳細・発注画面へ進む」ボタンから発注依頼を行ってください。");
           } else {
             alert(
               "出庫登録が失敗しました。再度お試し頂くか、管理者に問い合わせてください。"
@@ -148,7 +161,7 @@ const changeStockId = (stock_id, selectStockStorageId = 0) => {
         alert(
           "保管場所が取得できませんでした。保管場所を登録して、再度お試しください。"
         );
-        form.shipment.address_id = 0
+        form.shipment.address_id = 0;
       }
     })
     .catch((error) => {
@@ -192,10 +205,15 @@ onMounted(() => {
       id="stock_container"
       class="w-1/2 p-2 flex flex-col justify-center items-center"
     >
-      <div v-if="route().current() == 'stock.shipment' && form.shipment.address_id !== null" class="button_container w-full mb-4">
+      <div
+        v-if="
+          route().current() == 'stock.shipment' &&
+          form.shipment.address_id !== null
+        "
+        class="button_container w-full mb-4"
+      >
         <!-- 詳細画面へ遷移するボタン -->
         <button
-
           @click="clickStockInventoryButton"
           :class="{
             'inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white  rounded-lg  focus:ring-4 focus:outline-none dark:focus:ring-green-800 focus:ring-green-300': true,
@@ -206,7 +224,9 @@ onMounted(() => {
           }"
         >
           {{
-            form.shipment.address_id ? "詳細・発注画面へ進む" : "格納先アドレスを登録"
+            form.shipment.address_id
+              ? "詳細・発注画面へ進む"
+              : "格納先アドレスを登録"
           }}
           <svg
             class="rtl:rotate-180 w-3.5 h-3.5 ms-2"
@@ -498,6 +518,15 @@ onMounted(() => {
       </form>
     </div>
   </div>
+  <img
+    v-if="success"
+    id="shipment_success_gif"
+    src="/images/stocks/shipment-success.gif"
+    alt=""
+  />
+  <audio id="shipment_success_mp3">
+    <source src="/audio/stocks/shipment_success.mp3" />
+  </audio>
 </template>
 <style scoped lang="scss">
 #page_title {
@@ -552,5 +581,16 @@ onMounted(() => {
     font-weight: bold;
     font-family: monospace;
   }
+}
+
+#shipment_success_gif {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+
+  height: auto;
+  width: 70vw;
 }
 </style>
