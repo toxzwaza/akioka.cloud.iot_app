@@ -111,7 +111,7 @@ const clickedButton = (button_name) => {
           if (res.data.status) {
             success.value = true;
             playAudio();
-            // alert("出庫登録が完了しました。\n発注が必要な場合は「詳細・発注画面へ進む」ボタンから発注依頼を行ってください。");
+            alert("出庫登録が完了しました。\n発注が必要な場合は「詳細・発注画面へ進む」ボタンから発注依頼を行ってください。");
           } else {
             alert(
               "出庫登録が失敗しました。再度お試し頂くか、管理者に問い合わせてください。"
