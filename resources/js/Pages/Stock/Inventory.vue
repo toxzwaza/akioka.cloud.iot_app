@@ -195,7 +195,7 @@ const handleUpdateLocation = (payload) => {
       storage_address_id: payload.storage_address_id,
       quantity: payload.quantity,
       // 既存の格納先がある場合
-      stock_storage_id: stock_storage.value.id,
+      stock_storage_id: stock_storage.value ? stock_storage.value.id : null,
     })
     .then((res) => {
       console.log(res.data);
