@@ -221,6 +221,7 @@ onMounted(() => {
               form.shipment.address_id,
             'bg-gray-500 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500':
               !form.shipment.address_id,
+              'appeal' : success
           }"
         >
           {{
@@ -521,7 +522,7 @@ onMounted(() => {
   <img
     v-if="success"
     id="shipment_success_gif"
-    src="/images/stocks/shipment-success.gif"
+    src="/images/stocks/shipment_success.gif"
     alt=""
   />
   <audio id="shipment_success_mp3">
@@ -591,6 +592,21 @@ onMounted(() => {
   z-index: 3;
 
   height: auto;
-  width: 70vw;
+  width: 34vw;
+  border-radius: 10px;
+  opacity: 0.9;
+}
+
+.appeal {
+  animation: moveRight 0.3s ease-in-out 10 alternate;
+}
+
+@keyframes moveRight {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(10px);
+  }
 }
 </style>
