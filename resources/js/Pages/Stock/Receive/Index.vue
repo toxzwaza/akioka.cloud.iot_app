@@ -13,16 +13,51 @@ const modalImage = (target) => {
 const handleCloseModal = () => {
   modalStatus.value = !modalStatus.value;
 };
+
+// 検索用取引先リスト
+const initial_order_suppliers = ref([]);
+const searchText = ref("")
+const handleChangeSupplier = (comName) => {
+  if (comName) {
+    initial_orders.value = base_initial_orders.value.filter(
+      (initial_order) => initial_order.com_name === comName
+    );
+  } else {
+    initial_orders.value = base_initial_orders.value;
+  }
+};
+// 品名・品番検索
+const searchOrders = () => {
+
+  if (searchText.value) {
+    initial_orders.value = initial_orders.value.map((initial_order) => {
+      const nameMatch = initial_order.name && initial_order.name.includes(searchText.value);
+      const sNameMatch = initial_order.s_name && initial_order.s_name.includes(searchText.value);
+      return {
+        ...initial_order,
+        nameMatch,
+        sNameMatch,
+      };
+    });
+  }
+};
+
+const highlightMatch = (text, isMatch) => {
+  if (!isMatch) return `${text}`;
+  const regex = new RegExp(`(${searchText.value})`, "gi");
+  return text.replace(regex, '<span class="font-bold bg-yellow-400 text-lg">$1</span>');
+};
+
 const base_initial_orders = ref([]);
 const initial_orders = ref([]);
 
 const select_list = ref([]);
 const updateSelectList = (orderId, isChecked) => {
-  console.log(isChecked)
+  console.log(isChecked);
   if (isChecked) {
     select_list.value.push(orderId);
   } else {
-    select_list.value = select_list.value.filter(id => id !== orderId);
+    select_list.value = select_list.value.filter((id) => id !== orderId);
   }
   console.log(select_list.value);
 };
@@ -33,6 +68,9 @@ const getInitialOrders = () => {
     .then((res) => {
       initial_orders.value = res.data;
       base_initial_orders.value = res.data;
+      initial_order_suppliers.value = [
+        ...new Set(initial_orders.value.map((order) => order.com_name)),
+      ].sort();
       console.log(initial_orders.value);
     })
     .catch((error) => {
@@ -42,11 +80,11 @@ const getInitialOrders = () => {
 
 const uploadFile = async (id) => {
   // １つも選択されていない場合、選択された注文IDを選択状態にする
-  if(select_list.value.length === 0){
-    updateSelectList(id, true)
+  if (select_list.value.length === 0) {
+    updateSelectList(id, true);
   }
 
-  console.log(select_list.value)
+  console.log(select_list.value);
 
   const input = document.createElement("input");
   input.type = "file";
@@ -83,42 +121,26 @@ const uploadFile = async (id) => {
 };
 
 const deleteInitialOrder = (id) => {
-  console.log(id)
-  if(id && confirm('削除してよろしいですか？')){
-    axios.get(route('stock.receive.delete.initialOrder', {order_id: id }))
-    .then(res => {
-      console.log(res.data)
-      if(res.data.status === 'ok'){
-        if(confirm('削除が完了しました。再読み込みしますか？')){
-          getInitialOrders()
+  console.log(id);
+  if (id && confirm("削除してよろしいですか？")) {
+    axios
+      .get(route("stock.receive.delete.initialOrder", { order_id: id }))
+      .then((res) => {
+        console.log(res.data);
+        if (res.data.status === "ok") {
+          if (confirm("削除が完了しました。再読み込みしますか？")) {
+            initial_orders.value = initial_orders.value.filter(
+              (order) => order.id !== id
+            );
+            // getInitialOrders();
+          }
         }
-      }
-    })
-    .catch( error => {
-      console.log(error)
-    })
-  }else{
-    alert('キャンセルされました。')
-  }
-}
-const searchOrders = (val) => {
-  console.log(val);
-  if (val) {
-    if (val.length >= 5) {
-      val = val.slice(0, 4) + "-" + val.slice(4);
-    }
-    initial_orders.value = initial_orders.value.filter(
-      (order) => order.order_no && order.order_no.includes(val)
-    );
-
-    if (initial_orders.value.length == 0) {
-      if(confirm('検索内容と一致するデータが見つかりませんでした')){
-        initial_orders.value = base_initial_orders.value;
-      }
-    }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   } else {
-    // 入力値がない場合
-    initial_orders.value = base_initial_orders.value;
+    alert("キャンセルされました。");
   }
 };
 
@@ -132,30 +154,50 @@ onMounted(() => {
       <section class="text-gray-600 body-font">
         <div class="container py-12 mx-auto">
           <div class="flex flex-col text-center w-full mb-8">
-            <h1
-              class="text-3xl font-medium title-font mb-2 text-green-600"
-            >
+            <h1 class="text-3xl font-medium title-font mb-2 text-green-600">
               納品登録
             </h1>
             <p class="lg:w-2/3 mx-auto leading-relaxed text-base">
-              以下の画面より納品書登録を行います。<br/>
-              品名・品番が一致するデータがない場合、背景色が青色で表示されます。<br>
+              以下の画面より納品書登録を行います。<br />
+              品名・品番が一致するデータがない場合、背景色が青色で表示されます。<br />
               一致するデータがない場合、納品登録画面にて作成する必要があります。
             </p>
           </div>
           <div class="w-1/2 mx-auto mb-8">
-            <div class="p-2">
-              <div class="relative">
-                <label for="email" class="leading-7 text-sm text-gray-600"
+            <div class="p-2 flex justify-start">
+              <div class="w-1/3 relative mr-2">
+                <label for="search_text" class="leading-7 text-sm text-gray-600"
+                  >絞込み</label
+                >
+                <select
+                  @change="handleChangeSupplier($event.target.value)"
+                  name=""
+                  id=""
+                  class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                >
+                  <option value="">全ての取引先</option>
+                  <option
+                    v-for="comName in initial_order_suppliers"
+                    :key="comName"
+                    :value="comName"
+                  >
+                    {{ comName }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="w-1/2 relative ml-2">
+                <label for="search_text" class="leading-7 text-sm text-gray-600"
                   >検索</label
                 >
                 <input
-                  @input="searchOrders($event.target.value)"
-                  type="email"
-                  id="email"
-                  name="email"
+                  @input="searchOrders"
+                  v-model="searchText"
+                  type="text"
+                  id="search_text"
+                  name="search_text"
                   class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                  placeholder="注文No"
+                  placeholder="品名・品番"
                 />
               </div>
             </div>
@@ -213,9 +255,20 @@ onMounted(() => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="order in initial_orders" :key="order.id" :class="{'bg-red-100': order.not_found_flg}">
+                <tr
+                  v-for="order in initial_orders"
+                  :key="order.id"
+                  :class="{ 'bg-red-100': order.not_found_flg }"
+                >
                   <td class="px-4 py-6">
-                    <input type="checkbox" name="selectList" id="" @change="updateSelectList(order.id, $event.target.checked)">
+                    <input
+                      type="checkbox"
+                      name="selectList"
+                      id=""
+                      @change="
+                        updateSelectList(order.id, $event.target.checked)
+                      "
+                    />
                   </td>
                   <td class="px-4 py-6">{{ order.order_no }}</td>
                   <td class="w-24 px-4 py-6">
@@ -235,7 +288,13 @@ onMounted(() => {
                   </td>
                   <td class="px-4 py-6">{{ order.com_name }}</td>
                   <td class="px-4 py-6">
-                    {{ order.name + " : " + order.s_name }}
+                    <span
+                      v-html="highlightMatch(order.name, order.nameMatch)"
+                    ></span>
+                    :
+                    <span
+                      v-html="highlightMatch(order.s_name, order.sNameMatch)"
+                    ></span>
                   </td>
                   <td class="px-4 py-6">
                     {{ order.quantity + order.order_unit }}
@@ -251,7 +310,7 @@ onMounted(() => {
                   <td class="w-10 text-center px-2">
                     <button
                       @click="deleteInitialOrder(order.id)"
-                      class=" bg-red-500 text-white font-semibold  py-2 px-4 border border-red-500 hover:border-transparent rounded text-sm whitespace-nowrap"
+                      class="bg-red-500 text-white font-semibold py-2 px-4 border border-red-500 hover:border-transparent rounded text-sm whitespace-nowrap"
                     >
                       削除
                     </button>
@@ -271,5 +330,6 @@ onMounted(() => {
     </template>
   </ReceiveLayout>
 </template>
-<style scoped>
+<style scoped lang="scss">
+
 </style>
