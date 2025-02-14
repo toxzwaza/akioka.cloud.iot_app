@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use App\Http\Services\Helper;
 use App\Models\Stock;
+use App\Models\User;
 
 class OrderController extends Controller
 {
@@ -37,10 +38,19 @@ class OrderController extends Controller
 
         if ($status) {
             $stock = Stock::find($stock_id);
+
             // 発注依頼を通知
             $message = "{$stock->name}{$stock->s_name}の発注依頼を受付ました。以下のURLから発注を完了させてください。";
-            Helper::sendNotify(['to-murakami@akioka-ltd.jp', 'yuzu-mitani@akioka-ltd.jp', 'ri-okado@akioka-ltd.jp', '	
-hit-nakamura@akioka-ltd.jp'], $message, 'http://monokanri-manage.local/stock/stocks/order_requests?user_id=91');
+
+            // 通知者リスト
+            $notify_list = ['村上飛羽', '三谷優月', '岡堂莉子', '中村仁美', '中原清忠'];
+            foreach ($notify_list as $notify) {
+                $user = User::where('name', $notify)->first();
+
+                if ($user) {
+                    Helper::sendNotify([$user->email], $message, "http://monokanri-manage.local/stock/stocks/order_requests?user_id={$user->id}");
+                }
+            }
         }
 
         return response()->json(['status' => $status, 'msg' => $msg]);
@@ -62,8 +72,16 @@ hit-nakamura@akioka-ltd.jp'], $message, 'http://monokanri-manage.local/stock/sto
         if ($status) {
             $stock = Stock::find($stock_id);
             $message = "{$stock->name}{$stock->s_name}の発注依頼を削除しました。";
-            Helper::sendNotify(['to-murakami@akioka-ltd.jp', 'yuzu-mitani@akioka-ltd.jp', 'ri-okado@akioka-ltd.jp', '	
-            hit-nakamura@akioka-ltd.jp'], $message);
+
+            // 通知者リスト
+            $notify_list = ['村上飛羽', '三谷優月', '岡堂莉子', '中村仁美', '中原清忠'];
+            foreach ($notify_list as $notify) {
+                $user = User::where('name', $notify)->first();
+
+                if ($user) {
+                    Helper::sendNotify([$user->email], $message);
+                }
+            }
         }
 
         return response()->json(['status' => $status]);
