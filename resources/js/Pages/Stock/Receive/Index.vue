@@ -239,7 +239,12 @@ onMounted(() => {
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
                   >
-                    品名:品番
+                    品名
+                  </th>
+                  <th
+                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                  >
+                    品番
                   </th>
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
@@ -291,9 +296,11 @@ onMounted(() => {
                     <span
                       v-html="highlightMatch(order.name, order.nameMatch)"
                     ></span>
-                    :
+
+                  </td>
+                  <td class="px-4 py-6">
                     <span
-                      v-html="highlightMatch(order.s_name, order.sNameMatch)"
+                      v-html="highlightMatch(order.s_name ?? '', order.sNameMatch)"
                     ></span>
                   </td>
                   <td class="px-4 py-6">
