@@ -112,4 +112,12 @@ class ApiController extends Controller
 
         return response()->json(['status' => $status, 'msg' => $msg], 200);
     }
+
+
+    // 発注依頼ユーザー紐づけ用途
+    public function getUserAndProcess(){
+        $users = User::select('users.id', 'users.name','users.process_id', 'processes.name as process_name')->leftJoin('processes', 'processes.id', 'users.process_id')->where('del_flg', 0)->get();
+
+        return response()->json($users);
+    }
 }
