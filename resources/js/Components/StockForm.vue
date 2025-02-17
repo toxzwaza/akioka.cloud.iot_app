@@ -355,7 +355,7 @@ onMounted(() => {
         </div>
 
         <button
-          v-if="form.shipment.address_id && form.shipment.quantity"
+          v-if="form.shipment.address_id && form.shipment.quantity && form.shipment.user_id"
           @click.prevent="clickedButton('shipment')"
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
