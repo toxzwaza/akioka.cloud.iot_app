@@ -366,7 +366,6 @@ class ReceiveController extends Controller
                 if ($order->quantity == ($quantity_sum + $quantity)) {
                     // 注文分をすべて納品した場合、受け取りフラグを立てる
                     $order->receive_flg = 1;
-                    $order->delivery_date = now();
                     $order->save();
 
                     if ($stock_id) {
@@ -438,7 +437,6 @@ class ReceiveController extends Controller
         $order = InitialOrder::find($order_id);
         $order->receive_flg = 1;
         $order->none_storage_flg = 1;
-        $order->delivery_date = now();
         $order->save();
 
         return to_route('stock.receive.archive');
