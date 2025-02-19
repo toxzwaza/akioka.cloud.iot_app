@@ -109,6 +109,7 @@ Route::get('/getAllStocks', [ApiController::class, 'getAllStocks'])->name('getAl
 Route::get('/getStockByAlias', [ApiController::class, 'getStockByAlias'])->name('getStockByAlias');
 Route::get('/getStocks', [ApiController::class, 'getStocks'])->name('getStocks');
 Route::get('/getUserAndProcess', [ApiController::class, 'getUserAndProcess'])->name('getUserAndProcess');
+Route::get('/getStockByNameAndSName', [ApiController::class, 'getStockByNameAndSName'])->name('getStockByNameAndSName');
 
 // 在庫格納先アドレス取得
 Route::get('/getStockStorages', [ApiController::class, 'getStockStorages'])->name('getStockStorages');

@@ -76,6 +76,15 @@ class ApiController extends Controller
         return response()->json($stocks);
     }
 
+    public function getStockByNameAndSName(Request $request){
+        $name = $request->name;
+        $s_name = $request->s_name;
+
+        $stock = Stock::select('id')->where('name', $name)->orWhere('s_name', $s_name)->first();
+
+        return response()->json($stock);
+    }
+
     public function getStockByAlias(Request $request){
         $alias = $request->alias;
         $stock_aliases = StockAlias::select('stock_id')->where('alias', $alias)->get();
@@ -94,6 +103,7 @@ class ApiController extends Controller
 
         return response()->json($stock);
     }
+
 
     // 外部からファイルをアップロード
     public function uploadFile(Request $request)
