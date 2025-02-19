@@ -123,6 +123,8 @@ const clickedButton = (button_name) => {
         });
       break;
   }
+
+
 };
 
 // 在庫IDもしくはJANコードを取得
