@@ -70,6 +70,11 @@ class ApiController extends Controller
         }
     }
 
+    public function getAllStocks(){
+        $stocks = Stock::select('id', 'name', 's_name')->where('del_flg', 0)->get();
+        return response()->json($stocks);
+    }
+
     public function getStockStorages(Request $request)
     {
         $stock_id = $request->stock_id;

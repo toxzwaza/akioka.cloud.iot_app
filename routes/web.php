@@ -105,6 +105,7 @@ Route::get('/retentions/stocks/getRetentionStocks', [RetentionController::class,
 ////////// API用 //////////
 Route::get('/getGroups', [ApiController::class, 'getGroups'])->name('getGroups');
 Route::get('/getUsersByGroup', [ApiController::class, 'getUsersByGroup'])->name('getUsersByGroup');
+Route::get('/getAllStocks', [ApiController::class, 'getAllStocks'])->name('getAllStocks');
 Route::get('/getStocks', [ApiController::class, 'getStocks'])->name('getStocks');
 Route::get('/getUserAndProcess', [ApiController::class, 'getUserAndProcess'])->name('getUserAndProcess');
 
