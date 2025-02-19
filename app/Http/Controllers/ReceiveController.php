@@ -8,6 +8,7 @@ use App\Models\InventoryOperationRecord;
 use App\Models\Location;
 use App\Models\SplitOrderQuantity;
 use App\Models\Stock;
+use App\Models\StockPriceArchive;
 use App\Models\StockStorage;
 use App\Models\StockSupplier;
 use App\Models\StorageAddress;
@@ -368,6 +369,7 @@ class ReceiveController extends Controller
                     $order->receive_flg = 1;
                     $order->save();
 
+
                     if ($stock_id) {
                         // 納品記録
                         $inventory_operation_records = new InventoryOperationRecord();
@@ -380,6 +382,20 @@ class ReceiveController extends Controller
                             $inventory_operation_records->quantity = $order->quantity;
                         }
                         $inventory_operation_records->save();
+
+                        // 単価の変更
+                        $stock = Stock::find($stock_id);
+                        if ($stock->price != $order->price) {
+                            // 単価が異なる場合単価設定を変更
+                            $stock->price = $order->price;
+                            $stock->save();
+
+                            // 変更履歴作成
+                            $stock_price_archive = new StockPriceArchive();
+                            $stock_price_archive->stock_id = $stock_id;
+                            $stock_price_archive->price = $order->price;
+                            $stock_price_archive->save();
+                        }
                     }
 
                     // 納品した分を格納先に追加
@@ -390,6 +406,8 @@ class ReceiveController extends Controller
                     }
 
                     $stock_storage->save();
+
+
 
                     // 一覧へリダイレクト
                     return to_route('stock.receive.archive');
