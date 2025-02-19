@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Group;
 use App\Models\Stock;
+use App\Models\StockAlias;
 use App\Models\StockStorage;
 use App\Models\User;
 use Exception;
@@ -73,6 +74,13 @@ class ApiController extends Controller
     public function getAllStocks(){
         $stocks = Stock::select('id', 'name', 's_name')->where('del_flg', 0)->get();
         return response()->json($stocks);
+    }
+
+    public function getStockByAlias(Request $request){
+        $alias = $request->alias;
+        $stock_aliases = StockAlias::select('stock_id')->where('alias', $alias)->get();
+
+        return response()->json($stock_aliases);
     }
 
     public function getStockStorages(Request $request)
