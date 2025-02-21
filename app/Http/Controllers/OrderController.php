@@ -18,6 +18,7 @@ class OrderController extends Controller
         $status = true;
         $msg = '';
         $stock_id = $request->stock_id;
+        $request_user_id = $request->request_user_id;
 
         if (!$stock_id) {
             $status = false;
@@ -29,6 +30,7 @@ class OrderController extends Controller
 
             $order_request = new OrderRequest();
             $order_request->stock_id = $stock_id;
+            $order_request->request_user_id = $request_user_id;
             $order_request->save();
         } catch (Exception $e) {
             $status = false;
@@ -43,7 +45,7 @@ class OrderController extends Controller
             $message = "{$stock->name}{$stock->s_name}の発注依頼を受付ました。以下のURLから発注を完了させてください。";
 
             // 通知者リスト
-            $notify_list = ['村上飛羽', '三谷優月', '岡堂莉子', '中村仁美', '中原清忠'];
+            $notify_list = ['村上飛羽', '三谷優月', '岡堂莉子', '中村仁美'];
             foreach ($notify_list as $notify) {
                 $user = User::where('name', $notify)->first();
 

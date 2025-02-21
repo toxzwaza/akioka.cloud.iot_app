@@ -1,6 +1,6 @@
 <script setup>
 import { getImgPath } from "@/Helper/method";
-import { Link } from "@inertiajs/vue3";
+import { Link, router } from "@inertiajs/vue3";
 import axios from "axios";
 import { onMounted, ref, reactive } from "vue";
 
@@ -111,7 +111,9 @@ const clickedButton = (button_name) => {
           if (res.data.status) {
             success.value = true;
             playAudio();
-            alert("出庫登録が完了しました。\n発注が必要な場合は「詳細・発注画面へ進む」ボタンから発注依頼を行ってください。");
+            alert(
+              "出庫登録が完了しました。\n発注が必要な場合は「詳細・発注画面へ進む」ボタンから発注依頼を行ってください。"
+            );
           } else {
             alert(
               "出庫登録が失敗しました。再度お試し頂くか、管理者に問い合わせてください。"
@@ -123,8 +125,6 @@ const clickedButton = (button_name) => {
         });
       break;
   }
-
-
 };
 
 // 在庫IDもしくはJANコードを取得
@@ -178,10 +178,15 @@ const focus_input_stock_id = () => {
 };
 
 const clickStockInventoryButton = () => {
-  window.location.href = route("stock.inventory.show", {
-    stock_id: form.shipment.stock_id,
-    stock_storage_id: form.shipment.address_id,
-  });
+  router.get(
+    route("stock.inventory.show", {
+      stock_id: form.shipment.stock_id,
+      stock_storage_id: form.shipment.address_id,
+    }),
+    {
+      request_user_id : form.shipment.user_id
+    }
+  );
 };
 
 onMounted(() => {
@@ -216,6 +221,7 @@ onMounted(() => {
       >
         <!-- 詳細画面へ遷移するボタン -->
         <button
+          v-if="form.shipment.user_id"
           @click="clickStockInventoryButton"
           :class="{
             'inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white  rounded-lg  focus:ring-4 focus:outline-none dark:focus:ring-green-800 focus:ring-green-300': true,
@@ -223,7 +229,7 @@ onMounted(() => {
               form.shipment.address_id,
             'bg-gray-500 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500':
               !form.shipment.address_id,
-              'appeal' : success
+            appeal: success,
           }"
         >
           {{
@@ -357,7 +363,11 @@ onMounted(() => {
         </div>
 
         <button
-          v-if="form.shipment.address_id && form.shipment.quantity && form.shipment.user_id"
+          v-if="
+            form.shipment.address_id &&
+            form.shipment.quantity &&
+            form.shipment.user_id
+          "
           @click.prevent="clickedButton('shipment')"
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >

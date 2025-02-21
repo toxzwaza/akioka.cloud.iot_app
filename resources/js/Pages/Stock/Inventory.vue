@@ -6,16 +6,21 @@ import axios from "axios";
 import { getImgPath, changeDateFormat } from "@/Helper/method";
 import Chart from "@/Components/Stock/Inventory/BarChart.vue";
 import PickStorageAddress from "@/Components/Stock/Inventory/PickStorageAddress.vue";
-import EditAlias from "@/Components/Stock/Inventory/EditAlias.vue"
+import EditAlias from "@/Components/Stock/Inventory/EditAlias.vue";
 import _ from "lodash";
 
 const props = defineProps({
   stock: Object,
+  request_user: Object,
+});
+
+const request_user = reactive({
+  id: 0,
+  name: "未設定",
 });
 
 const stock_storage = ref(null);
 const initial_orders = ref(null);
-
 
 // 滞留品フラグ
 const retention = reactive({
@@ -129,13 +134,19 @@ const orderStock = () => {
     }
   } else {
     if (
-      !confirm(`${props.stock.name} の発注依頼を行います。よろしいですか？`)
+      !confirm(
+        `以下の内容で発注依頼を行います。よろしいですか？\n発注依頼者: ${request_user.name}\n物品: ${props.stock.name}`
+      )
     ) {
       return;
     }
   }
+
   axios
-    .post(route("stock.order.store"), { stock_id: props.stock.id })
+    .post(route("stock.order.store"), {
+      stock_id: props.stock.id,
+      request_user_id: request_user.id,
+    })
     .then((res) => {
       console.log(res.data);
       if (res.data.status) {
@@ -215,7 +226,10 @@ const handleUpdateLocation = (payload) => {
 };
 onMounted(() => {
   console.log(props.stock);
-  // console.log(props.stock.stock_storage.length)
+  if (props.request_user) {
+    request_user.id = props.request_user.id;
+    request_user.name = props.request_user.name;
+  }
 
   stock_storage.value = props.stock.stock_storage;
   initial_orders.value = props.stock.initial_orders;
@@ -283,8 +297,12 @@ onMounted(() => {
       </div>
       <div :class="{ flex: true, 'opacity-20': previewImage.img_path }">
         <div id="left_container" class="w-1/2">
-          <h1 class="stock_name">
-            {{ props.stock.name }}
+          <h2 class="stock_id text-gray-700 text-sm font-mono">
+            ID: {{ props.stock.id }}
+          </h2>
+
+          <h1 class="stock_name font-mono">
+            {{ `${props.stock.name}` }}
             <a
               :href="`http://monokanri-manage.local/stock/edit/stocks/${props.stock.id}`"
               target="blank"
@@ -292,10 +310,10 @@ onMounted(() => {
             ></a>
           </h1>
 
-          <h2 class="stock_s_name">品番: {{ props.stock.s_name }}</h2>
+          <h2 class="stock_s_name font-mono">品番: {{ props.stock.s_name }}</h2>
 
           <!-- 略名 -->
-          <h3 class="stock_aliases">
+          <h3 class="stock_aliases font-mono">
             略名:
             <span
               v-for="alias in props.stock.aliases"
@@ -371,8 +389,10 @@ onMounted(() => {
                 <summary class="text-white pl-4 mt-4">
                   略名登録・編集・削除
                 </summary>
-                <EditAlias :aliases="props.stock.aliases" :stock_id ="props.stock.id"/>
-
+                <EditAlias
+                  :aliases="props.stock.aliases"
+                  :stock_id="props.stock.id"
+                />
               </details>
             </div>
 
@@ -463,6 +483,11 @@ onMounted(() => {
                     <th
                       class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
                     >
+                      注文依頼者
+                    </th>
+                    <th
+                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                    >
                       注文者
                     </th>
                     <th
@@ -495,6 +520,11 @@ onMounted(() => {
                     <td class="py-4">
                       {{
                         order_request.quantity ? order_request.quantity : "-"
+                      }}
+                    </td>
+                    <td class="py-4">
+                      {{
+                        order_request.request_user_name ? order_request.request_user_name : "-"
                       }}
                     </td>
                     <td class="py-4">
@@ -600,7 +630,7 @@ onMounted(() => {
         >
           <div class="container mx-auto mr-2">
             <h3 class="font-bold text-gray-500">
-              平均入庫数 : {{ receive_average + props.stock.solo_unit }}
+              月平均入庫数 : {{ receive_average + props.stock.solo_unit }}
             </h3>
             <Chart
               :title="'過去12カ月間入庫データ'"
@@ -611,7 +641,7 @@ onMounted(() => {
           </div>
           <div class="container mx-auto ml-2">
             <h3 class="font-bold text-gray-500">
-              平均出庫数 : {{ shipment_average + props.stock.solo_unit }}
+              月平均出庫数 : {{ shipment_average + props.stock.solo_unit }}
             </h3>
             <Chart
               :title="'過去12カ月間出庫データ'"

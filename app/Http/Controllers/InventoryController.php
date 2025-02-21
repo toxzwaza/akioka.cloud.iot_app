@@ -10,6 +10,7 @@ use App\Models\Stock;
 use App\Models\StockAlias;
 use App\Models\StockStorage;
 use App\Models\StorageAddress;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -21,13 +22,17 @@ class InventoryController extends Controller
     //
     public function create() {}
     public function store(Request $request) {}
-    public function show($stock_id, $stock_storage_id)
+    public function show($stock_id, $stock_storage_id, Request $request)
     {
+        $request_user_id = $request->request_user_id;
+        $request_user = null;
+
         $stock = Stock::find($stock_id);
         $stock_storage = null;
         $stock->shipments = null;
         $stock->receives = null;
         $stock->aliases = null;
+        
 
         if ($stock_storage_id) {
             $stock_storage = StockStorage::select('stock_storages.*', 'locations.name as location_name', 'storage_addresses.address')->join('storage_addresses', 'stock_storages.storage_address_id', 'storage_addresses.id')
@@ -36,7 +41,12 @@ class InventoryController extends Controller
 
 
             // 発注依頼を取得
-            $order_requests = OrderRequest::select('order_requests.*', 'users.name as user_name')->leftJoin('users', 'order_requests.user_id', 'users.id')->where('stock_id', $stock_id)->get();
+            $order_requests = OrderRequest::select('order_requests.*', 'users.name as user_name', 'request_users.name as request_user_name')
+                ->leftJoin('users', 'order_requests.user_id', '=', 'users.id')
+                ->leftJoin('users as request_users', 'order_requests.request_user_id','request_users.id')
+                ->where('stock_id', $stock_id)
+                ->orderBy('created_at', 'desc')
+                ->get();
             $stock->order_requests = $order_requests;
 
             // 発注履歴データ
@@ -88,9 +98,15 @@ class InventoryController extends Controller
             // 略名を取得
             $aliases = StockAlias::where('stock_id', $stock_id)->get();
             $stock->aliases = $aliases;
+
+            // 発注依頼者を取得
+            if ($request_user_id) {
+                $request_user = User::select('id', 'name')->find($request_user_id);
+                
+            }
         }
 
-        return Inertia::render('Stock/Inventory', ['stock' => $stock]);
+        return Inertia::render('Stock/Inventory', ['stock' => $stock, 'request_user' => $request_user]);
     }
 
 
