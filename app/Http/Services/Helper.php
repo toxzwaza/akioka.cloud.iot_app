@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 class Helper
 {
     // Teamsより通知
-    public static function sendNotify($mentionIds, $message, $url = null)
+    public static function sendNotifyWithUrl($mentionIds, $message, $url = null)
     {
         $status = false;
 

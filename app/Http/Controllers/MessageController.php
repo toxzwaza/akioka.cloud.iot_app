@@ -28,7 +28,7 @@ class MessageController extends Controller
             foreach ($notify_users as $notify_user) {
                 
                 // メッセージ送信
-                Helper::sendNotify($notify_user, $message);
+                Helper::sendNotifyWithUrl($notify_user, $message);
             }
         } catch (Exception $e) {
             $status = false;
