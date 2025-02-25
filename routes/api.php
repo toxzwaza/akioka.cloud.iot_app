@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\MessageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,3 +20,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 Route::get('/stock/uploadFile', [ApiController::class, 'uploadFile'])->name('stock.uploadFile');
+
+// メッセージAPI
+Route::post('/sendMessage', [MessageController::class, 'sendMessage'])->name('sendMessage');

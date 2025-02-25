@@ -139,8 +139,7 @@ Route::get('/getFacilitySchedule', [ContentController::class, 'getFacilitySchedu
 Route::get('/getLatestData', [DataController::class, 'getLatestData'])->name('getLatestData');
 Route::get('/getTempHumiCo2', [DataController::class, 'getTempHumiCo2'])->name('getTempHumiCo2');
 
-// メッセージAPI
-Route::post('/sendMessage', [MessageController::class, 'sendMessage'])->name('sendMessage');
+
 
 Route::get('/test', [TestController::class, 'test'])->name('test');
 
