@@ -12,6 +12,7 @@ class MessageController extends Controller
     public function sendMessage(Request $request)
     {
         $status  = true;
+        $msg ="";
 
 
         // 送信先ユーザID 配列
@@ -28,7 +29,7 @@ class MessageController extends Controller
             foreach ($notify_users as $notify_user) {
                 
                 // メッセージ送信
-                Helper::sendNotifyWithUrl($notify_user, $message);
+                Helper::sendNotify($notify_user, $message);
             }
         } catch (Exception $e) {
             $status = false;
