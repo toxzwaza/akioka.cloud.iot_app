@@ -6,6 +6,7 @@ use App\Http\Controllers\DataController;
 use App\Http\Controllers\HeatStrokeController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\MainController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReceiveController;
@@ -137,6 +138,9 @@ Route::get('/getPlaceId', [DataController::class, 'getPlaceId']);
 Route::get('/getFacilitySchedule', [ContentController::class, 'getFacilitySchedule'])->name('getFacilitySchedule');
 Route::get('/getLatestData', [DataController::class, 'getLatestData'])->name('getLatestData');
 Route::get('/getTempHumiCo2', [DataController::class, 'getTempHumiCo2'])->name('getTempHumiCo2');
+
+// メッセージAPI
+Route::post('/sendMessage', [MessageController::class, 'sendMessage'])->name('sendMessage');
 
 Route::get('/test', [TestController::class, 'test'])->name('test');
 
