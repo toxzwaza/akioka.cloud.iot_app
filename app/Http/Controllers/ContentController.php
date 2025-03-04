@@ -68,7 +68,7 @@ class ContentController extends Controller
         ->leftJoin('places', 'places.id', 'processes.place_id')
         ->where(function ($query) {
             $query->where('receive_flg', 1)
-                  ->orWhere('none_storage_flg', 1);
+                  ->Where('none_storage_flg', 1);
         })
         ->where('receipt_flg', 0)
         ->where('initial_orders.del_flg', 0)
@@ -106,7 +106,7 @@ class ContentController extends Controller
         ->leftJoin('places', 'places.id', 'processes.place_id')
         ->where(function ($query) {
             $query->where('receive_flg', 1)
-                  ->orWhere('none_storage_flg', 1);
+                  ->Where('none_storage_flg', 1);
         })
         ->where('receipt_flg', 0)
         ->where('initial_orders.del_flg', 0)

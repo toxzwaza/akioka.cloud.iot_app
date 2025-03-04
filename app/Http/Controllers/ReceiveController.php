@@ -239,7 +239,7 @@ class ReceiveController extends Controller
     {
         $initial_orders = InitialOrder::where(function ($query) {
             $query->where('receive_flg', 1)
-                ->orWhere('none_storage_flg', 1);
+                ->Where('none_storage_flg', 1);
         })->where('receipt_flg', 0)->where('del_flg', 0)->orderby('updated_at', 'desc')->get();
 
         foreach ($initial_orders as $order) {

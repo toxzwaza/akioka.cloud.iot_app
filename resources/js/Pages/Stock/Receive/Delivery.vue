@@ -403,9 +403,9 @@ onMounted(() => {
                               none_storage_flg: 2
                             })
                           "
-                          class="mt-2 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                          class="ml-2 mt-2 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
                         >
-                          在庫登録とサイネージ表示
+                          在庫登録とサイネージ表示をスキップ
                         </Link>
                       </div>
 
