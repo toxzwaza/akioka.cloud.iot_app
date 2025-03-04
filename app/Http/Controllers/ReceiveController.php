@@ -437,11 +437,13 @@ class ReceiveController extends Controller
         return response()->json($suppliers);
     }
 
-    public function none_storage($order_id)
+    public function none_storage($order_id, Request $request)
     {
+        $none_storage_flg = $request->none_storage_flg;
+
         $order = InitialOrder::find($order_id);
         $order->receive_flg = 1;
-        $order->none_storage_flg = 1;
+        $order->none_storage_flg = $none_storage_flg;
         $order->save();
 
         return to_route('stock.receive.archive');

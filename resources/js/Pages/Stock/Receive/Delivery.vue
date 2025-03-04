@@ -389,11 +389,23 @@ onMounted(() => {
                           :href="
                             route('stock.receive.none_storage', {
                               order_id: props.order.id,
+                              none_storage_flg: 1
                             })
                           "
                           class="mt-2 bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
                         >
                           在庫登録をスキップしてサイネージ表示
+                        </Link>
+                        <Link
+                          :href="
+                            route('stock.receive.none_storage', {
+                              order_id: props.order.id,
+                              none_storage_flg: 2
+                            })
+                          "
+                          class="mt-2 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                        >
+                          在庫登録とサイネージ表示
                         </Link>
                       </div>
 
