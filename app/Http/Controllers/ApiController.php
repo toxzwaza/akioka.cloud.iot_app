@@ -80,8 +80,7 @@ class ApiController extends Controller
         $name = $request->name;
         $s_name = $request->s_name;
 
-
-        $stock = Stock::select('id')->where('name', $name)->Where('s_name', $s_name)->where('del_flg', 0)->first();
+        $stock = Stock::select('id')->where('name', $name)->where('s_name', $s_name)->where('del_flg', 0)->first();
 
         return response()->json($stock);
     }

@@ -47,14 +47,10 @@ class ReceiveController extends Controller
         $initial_orders = InitialOrder::where(function ($query) {
             $query->whereNull('receive_flg')
                 ->orWhere('receive_flg', 0);
-        })->whereNull('delifile_path')->get();
+        })->whereNull('delifile_path')->where('del_flg', 0)->get();
 
         foreach ($initial_orders as $order) {
-            $stock = Stock::where('name', $order->name)
-                ->where(function ($query) use ($order) {
-                    $query->where('s_name', 'like', "$order->s_name")
-                        ->orWhere('s_name', $order->s_name);
-                })->first();
+            $stock = Stock::find($order->stock_id);
             if ($stock) {
                 $order->img_path = $stock->img_path;
                 $order->stock_id = $stock->id;
@@ -91,8 +87,7 @@ class ReceiveController extends Controller
 
                 // 品名・品番が一致する在庫データを取得
                 // 見つからない場合は、フラグを立てる
-                $stock = Stock::where('name', $order->name)
-                    ->where('s_name', $order->s_name)->first();
+                $stock = Stock::find($order->stock_id);
 
                 if (!$stock) {
                     $order->not_found_flg = 1;
@@ -118,7 +113,8 @@ class ReceiveController extends Controller
 
         try {
             $initial_order = InitialOrder::find($order_id);
-            $initial_order->delete();
+            $initial_order->del_flg = 1;
+            $initial_order->save();
             $status = "ok";
             $msg = '削除処理が完了しました。';
         } catch (Exception $e) {
@@ -140,16 +136,12 @@ class ReceiveController extends Controller
         $initial_orders = InitialOrder::where(function ($query) {
             $query->whereNull('receive_flg')
                 ->orWhere('receive_flg', 0);
-        })->whereNotNull('delifile_path')
+        })->where('del_flg', 0)->whereNotNull('delifile_path')
             ->whereNull('none_storage_flg')
             ->orderby('updated_at', 'desc')->get();
 
         foreach ($initial_orders as $order) {
-            $stock = Stock::where('name', $order->name)
-                ->where(function ($query) use ($order) {
-                    $query->where('s_name', 'like', "$order->s_name")
-                        ->orWhere('s_name', $order->s_name);
-                })->first();
+            $stock = Stock::find($order->stock_id);
 
             if ($stock) {
                 $order->img_path = $stock->img_path;
@@ -188,8 +180,7 @@ class ReceiveController extends Controller
             $order->split_quantity_sum = $quantity_sum;
 
             // 物品データ取得
-            $stock = Stock::where('name', $order->name)
-                ->where('s_name', $order->s_name)->first();
+            $stock = Stock::find($order->stock_id);
 
 
             if ($stock) {
@@ -249,14 +240,10 @@ class ReceiveController extends Controller
         $initial_orders = InitialOrder::where(function ($query) {
             $query->where('receive_flg', 1)
                 ->orWhere('none_storage_flg', 1);
-        })->where('receipt_flg', 0)->orderby('updated_at', 'desc')->get();
+        })->where('receipt_flg', 0)->where('del_flg', 0)->orderby('updated_at', 'desc')->get();
 
         foreach ($initial_orders as $order) {
-            $stock = Stock::where('name', $order->name)
-                ->where(function ($query) use ($order) {
-                    $query->where('s_name', 'like', "$order->s_name")
-                        ->orWhere('s_name', $order->s_name);
-                })->first();
+            $stock = Stock::find($order->stock_id);
 
             if ($stock) {
                 $order->img_path = $stock->img_path;
