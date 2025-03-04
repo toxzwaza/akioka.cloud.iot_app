@@ -62,10 +62,10 @@ if (props.initial_orders.length > ordersPerPage) {
               {{ order.order_user }}
             </td>
             <td class="w-3/5  font-bold py-8 px-4 border-b border-gray-200 text-left">
-              {{ order.name }}
+              {{ order.name.length > 15 ? order.name.slice(0, 15) + '...' : order.name }}
             </td>
             <td class="w-1/5  font-bold py-8 px-4 border-b border-gray-200 text-left">
-              {{ order.s_name }}
+              {{ order.s_name.length > 15 ? order.s_name.slice(0, 15) + '...' : order.s_name }}
             </td>
             <!-- <td class="text-4xl font-bold py-8 px-4 border-b border-gray-200">
               {{ order.deli_location }}
@@ -103,6 +103,6 @@ if (props.initial_orders.length > ordersPerPage) {
 }
 
 td{
-    font-size: 3.8rem;
+    font-size: 3.9rem;
 }
 </style>
