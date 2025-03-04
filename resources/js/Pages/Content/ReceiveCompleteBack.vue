@@ -92,6 +92,7 @@ if (props.initial_orders.length > ordersPerPage) {
   background-color: black;
   color: yellow;
   height: 100vh;
+  padding: 0.6rem;
 
   & #page_number{
     position: fixed;
