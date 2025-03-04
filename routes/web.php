@@ -128,7 +128,11 @@ Route::get('/watchData', [ContentController::class, 'watchData'])->name('content
 // 施設使用状況
 Route::get('/facilitySchedule', [ContentController::class, 'facilitySchedule'])->name('content.facilitySchedule');
 // 納品完了表示画面
+// 食堂後ろモニター
+Route::get('/receive/complete/back', [ContentController::class, 'receiveCompleteBack'])->name('stock.receive.complete.back');
+// 現場モニター
 Route::get('/receive/complete', [ContentController::class, 'receiveComplete'])->name('stock.receive.complete');
+
 
 
 ////////// データ登録API //////////
