@@ -1,13 +1,31 @@
 <script setup>
-import { onMounted } from "vue";
+import { onMounted , ref } from "vue";
 
 const props = defineProps({
   initial_orders: Array,
   place_name: String,
 });
 
+const active_orders = ref([])
+const pageNumber = ref(1);
+const ordersPerPage = 5;
+
 onMounted(() => {
-  console.log(props.initial_orders, props.place_name);
+const updateActiveOrders = () => {
+  const start = (pageNumber.value - 1) * ordersPerPage;
+  const end = start + ordersPerPage;
+  active_orders.value = props.initial_orders.slice(start, end);
+};
+
+if (props.initial_orders.length > ordersPerPage) {
+  updateActiveOrders();
+  setInterval(() => {
+    pageNumber.value = (pageNumber.value % Math.ceil(props.initial_orders.length / ordersPerPage)) + 1;
+    updateActiveOrders();
+  }, 300000); // 5分周期
+} else {
+  active_orders.value = props.initial_orders;
+}
 });
 </script>
 <template>
@@ -18,6 +36,9 @@ onMounted(() => {
     <p class="mb-8 text-center text-2xl text-white font-bold underline">
       自分の納品物が表示されている場合、該当の納品場所まで取りに来てください。
     </p>
+
+    <!-- ページ番号 -->
+    <span id="page_number">{{ pageNumber }}</span>
 
     <div class="overflow-x-auto">
       <table class="w-full bg-white">
@@ -33,17 +54,17 @@ onMounted(() => {
         </thead>
         <tbody>
           <tr
-            v-for="order in props.initial_orders"
+            v-for="order in active_orders"
             :key="order.id"
             class="text-center bg-black"
           >
-            <td class="w-1/5 font-bold py-8 px-4 border-b border-gray-200">
+            <td class="w-1/5 font-bold py-8 px-4 border-b border-gray-200 text-left">
               {{ order.order_user }}
             </td>
-            <td class="w-3/5  font-bold py-8 px-4 border-b border-gray-200">
+            <td class="w-3/5  font-bold py-8 px-4 border-b border-gray-200 text-left">
               {{ order.name }}
             </td>
-            <td class="w-1/5  font-bold py-8 px-4 border-b border-gray-200">
+            <td class="w-1/5  font-bold py-8 px-4 border-b border-gray-200 text-left">
               {{ order.s_name }}
             </td>
             <!-- <td class="text-4xl font-bold py-8 px-4 border-b border-gray-200">
@@ -70,9 +91,18 @@ onMounted(() => {
 
   background-color: black;
   color: yellow;
+  height: 100vh;
+
+  & #page_number{
+    position: fixed;
+    top: 2%;
+    right: 2%;
+    font-size: 3rem;
+    color: white;
+  }
 }
 
 td{
-    font-size: 3.6rem;
+    font-size: 3.8rem;
 }
 </style>
