@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FacilitySchedule;
 use App\Models\FacilityScheduleParticipant;
 use App\Models\InitialOrder;
+use App\Models\Place;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -47,6 +48,8 @@ class ContentController extends Controller
 
         $place_id = $request->place_id;
 
+        $place_name = $place_id ? Place::find($place_id)->name : '全て';
+
         $query = InitialOrder::select(
             'initial_orders.name',
             'initial_orders.s_name',
@@ -77,7 +80,7 @@ class ContentController extends Controller
 
         $initial_orders = $query->get();
 
-        return Inertia::render('Content/ReceiveComplete', ['initial_orders' => $initial_orders]);
+        return Inertia::render('Content/ReceiveComplete', ['initial_orders' => $initial_orders, 'place_name' => $place_name]);
     }
 
 }
