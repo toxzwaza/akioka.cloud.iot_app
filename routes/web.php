@@ -5,6 +5,7 @@ use App\Http\Controllers\ContentController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\HeatStrokeController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\LunchController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\OrderController;
@@ -103,6 +104,16 @@ Route::get('/receive/none_storage/{order_id}', [ReceiveController::class, 'none_
 Route::get('/retentions', [RetentionController::class, 'home'])->name('stock.retention.home');
 Route::get('/retentions/stocks', [RetentionController::class, 'index'])->name('stock.retention');
 Route::get('/retentions/stocks/getRetentionStocks', [RetentionController::class, 'getRetentionStocks'])->name('stock.retention.getRetentionStocks');
+
+//////////弁当注文用 //////////
+Route::get('/lunch', [LunchController::class, 'index'])->name('lunch.home');
+// 注文
+Route::post('/lunch/order', [LunchController::class, 'order'])->name('lunch.order');
+// 受け取り
+Route::post('/lunch/receive', [LunchController::class, 'receive'])->name('lunch.receive');
+Route::get('/lunch/getOrders', [LunchController::class, 'getOrders'])->name('lunch.getOrders');
+Route::get('/lunch/getUsers', [LunchController::class, 'getUsers'])->name('lunch.getUsers');
+
 
 ////////// API用 //////////
 Route::get('/getGroups', [ApiController::class, 'getGroups'])->name('getGroups');
