@@ -5,6 +5,7 @@ use App\Http\Controllers\ContentController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\HeatStrokeController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\LunchController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\OrderController;
@@ -104,6 +105,16 @@ Route::get('/retentions', [RetentionController::class, 'home'])->name('stock.ret
 Route::get('/retentions/stocks', [RetentionController::class, 'index'])->name('stock.retention');
 Route::get('/retentions/stocks/getRetentionStocks', [RetentionController::class, 'getRetentionStocks'])->name('stock.retention.getRetentionStocks');
 
+//////////弁当注文用 //////////
+Route::get('/lunch', [LunchController::class, 'index'])->name('lunch.home');
+// 注文
+Route::post('/lunch/order', [LunchController::class, 'order'])->name('lunch.order');
+// 受け取り
+Route::post('/lunch/receive', [LunchController::class, 'receive'])->name('lunch.receive');
+Route::get('/lunch/getOrders', [LunchController::class, 'getOrders'])->name('lunch.getOrders');
+Route::get('/lunch/getUsers', [LunchController::class, 'getUsers'])->name('lunch.getUsers');
+
+
 ////////// API用 //////////
 Route::get('/getGroups', [ApiController::class, 'getGroups'])->name('getGroups');
 Route::get('/getUsersByGroup', [ApiController::class, 'getUsersByGroup'])->name('getUsersByGroup');
@@ -123,8 +134,13 @@ Route::get('/setting', [HeatStrokeController::class ,'setting'])->name('setting'
 
 
 ////////// サイネージ用コンテンツ //////////
-// 工場全体の作業場ごと温度・湿度・CO２濃度をマップにプロット
+// 工場全体の温度・湿度・CO２濃度をマップにプロット
 Route::get('/watchData', [ContentController::class, 'watchData'])->name('content.watchData');
+// 作業場所ごとの環境データを表示する
+Route::get('/factoryEnvMonitor/{place_id}', [ContentController::class, "factoryEnvMonitor"])->name('factoryEnvMonitor');
+Route::get('/getData/{place_id}', [ContentController::class, 'getData'])->name('getData');
+Route::get('/getWeather', [ContentController::class, 'getWeather'])->name('getWeather');
+
 // 施設使用状況
 Route::get('/facilitySchedule', [ContentController::class, 'facilitySchedule'])->name('content.facilitySchedule');
 // 納品完了表示画面
