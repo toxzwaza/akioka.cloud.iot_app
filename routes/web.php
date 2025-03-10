@@ -134,8 +134,11 @@ Route::get('/setting', [HeatStrokeController::class ,'setting'])->name('setting'
 
 
 ////////// サイネージ用コンテンツ //////////
-// 工場全体の作業場ごと温度・湿度・CO２濃度をマップにプロット
+// 工場全体の温度・湿度・CO２濃度をマップにプロット
 Route::get('/watchData', [ContentController::class, 'watchData'])->name('content.watchData');
+// 作業場所ごとの環境データを表示する
+Route::get('/factoryEnvMonitor/{place_id}', [ContentController::class, "factoryEnvMonitor"])->name('factoryEnvMonitor');
+Route::get('/getData/{place_id}', [ContentController::class, 'getData'])->name('getData');
 // 施設使用状況
 Route::get('/facilitySchedule', [ContentController::class, 'facilitySchedule'])->name('content.facilitySchedule');
 // 納品完了表示画面

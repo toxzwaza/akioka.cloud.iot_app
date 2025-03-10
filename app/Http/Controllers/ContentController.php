@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Data;
 use App\Models\FacilitySchedule;
 use App\Models\FacilityScheduleParticipant;
 use App\Models\InitialOrder;
@@ -119,6 +120,17 @@ class ContentController extends Controller
         $initial_orders = $query->get();
 
         return Inertia::render('Content/ReceiveCompleteBack', ['initial_orders' => $initial_orders, 'place_name' => $place_name]);
+    }
+
+    public function factoryEnvMonitor($place_id){
+
+        return Inertia::render('Content/FactoryEnvMonitor', ['place_id' => $place_id ]);
+    }
+
+    public function getData($place_id){
+        $data = Data::select('data.*' , 'places.name as place_name')->join('places', 'places.id' , 'data.place_id')->where('place_id', $place_id)->orderBy('id', 'desc')->first();
+
+        return response()->json($data);
     }
 
 }
