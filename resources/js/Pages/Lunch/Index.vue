@@ -121,7 +121,7 @@ const clearForm = () => {
 };
 
 const checkTimeFlg = () => {
-    const test_time = "2025-01-01 8:00:00";
+    // const test_time = "2025-01-01 8:00:00";
     const now = test_time ? new Date(test_time) : new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();

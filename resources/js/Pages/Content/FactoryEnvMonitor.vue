@@ -9,6 +9,7 @@ const props = defineProps({
 
 const data = ref(null)
 
+const weatherData = ref(null)
 
 const getData = () => {
     axios.get(route('getData', { place_id : props.place_id }))
@@ -24,6 +25,13 @@ const getData = () => {
     })
 
 }
+const getWeather = () => {
+    axios.get(route('getWeather'))
+    .then(res => {
+        console.log(res.data)
+        weatherData.value = res.data
+    })
+}
 
 const calculateWbgt = (temperature, humidity) => {
     return Math.round(0.725 * temperature + 0.0368 * humidity + 0.00364 * (temperature * humidity) * 10) / 10;
@@ -31,15 +39,18 @@ const calculateWbgt = (temperature, humidity) => {
 
 onMounted(() => {
   getData()
+  getWeather()
 
-  
+  setInterval(() => {
+    getData()
+  }, 1000 * 60 * 10)
 });
 </script>
 <template>
   <main id="main_container">
     <div id="meta_content" class="">
-      <p>{{ data.place_name }}</p>
-      <p>データ取得時刻： {{ data.created_at }}</p>
+      <p v-if="data && data.place_name ">{{ data.place_name }}</p>
+      <p v-if="data && data.created_at">データ取得時刻： {{ new Date(data.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) }}</p>
     </div>
 
     <div id="top_content">
@@ -85,19 +96,19 @@ onMounted(() => {
     <div id="bottom_content">
       <div class="content">
         <p class="time_label">0 - 6</p>
-        <div class="val">60%</div>
+        <div class="val" v-if="weatherData && weatherData.T00_06">{{ weatherData.T00_06 }}</div>
       </div>
       <div class="content">
         <p class="time_label">6 - 12</p>
-        <div class="val">60%</div>
+        <div class="val" v-if="weatherData && weatherData.T06_12">{{ weatherData.T06_12 }}</div>
       </div>
       <div class="content">
         <p class="time_label">12 - 18</p>
-        <div class="val">60%</div>
+        <div class="val" v-if="weatherData && weatherData.T12_18">{{ weatherData.T12_18 }}</div>
       </div>
       <div class="content">
         <p class="time_label">18 - 24</p>
-        <div class="val">60%</div>
+        <div class="val" v-if="weatherData && weatherData.T18_24">{{ weatherData.T18_24 }}</div>
       </div>
     </div>
   </main>

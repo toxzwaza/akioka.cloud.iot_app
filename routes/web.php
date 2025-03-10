@@ -139,6 +139,8 @@ Route::get('/watchData', [ContentController::class, 'watchData'])->name('content
 // 作業場所ごとの環境データを表示する
 Route::get('/factoryEnvMonitor/{place_id}', [ContentController::class, "factoryEnvMonitor"])->name('factoryEnvMonitor');
 Route::get('/getData/{place_id}', [ContentController::class, 'getData'])->name('getData');
+Route::get('/getWeather', [ContentController::class, 'getWeather'])->name('getWeather');
+
 // 施設使用状況
 Route::get('/facilitySchedule', [ContentController::class, 'facilitySchedule'])->name('content.facilitySchedule');
 // 納品完了表示画面
