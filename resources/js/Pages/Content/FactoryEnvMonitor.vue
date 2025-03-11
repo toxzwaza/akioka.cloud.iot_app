@@ -242,6 +242,7 @@ onMounted(() => {
         font-weight: bold;
         text-align: center;
         width: 78%;
+        padding-top: 3%;
 
         & .unit {
           font-size: 6rem;
