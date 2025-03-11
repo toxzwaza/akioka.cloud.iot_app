@@ -381,7 +381,7 @@ main {
     position: relative;
     & .button_content {
       position: absolute;
-      bottom: 10%;
+      bottom: 30%;
       left: 0;
     }
   }
