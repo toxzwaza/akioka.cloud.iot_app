@@ -285,7 +285,7 @@ onMounted(() => {
           </h1>
           <DotLottieVue
             class="mx-auto"
-            style="height: 500px; width: 500px"
+            style="height: 400px; width: 400px"
             autoplay
             loop
             src="https://lottie.host/061aefbf-c9fb-4081-bd58-fb534a5e2c9c/WwBjZin5yr.lottie"
@@ -387,7 +387,7 @@ main {
   }
   & #button_content {
     position: absolute;
-    bottom: 2%;
+    bottom: 4%;
     left: 4%;
     width: 96%;
     padding: 2%;
