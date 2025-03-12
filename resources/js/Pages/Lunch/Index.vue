@@ -127,7 +127,7 @@ const clearForm = () => {
 };
 
 const checkTimeFlg = () => {
-  let test_time;
+  let test_time = null;
   // test_time = "2025-01-01 8:00:00";
   const now = test_time ? new Date(test_time) : new Date();
   const hours = now.getHours();
@@ -144,7 +144,7 @@ const checkTimeFlg = () => {
 
 const checkTimeFlagInterval = () => {
   setInterval(() => {
-    checkTimeFlg();
+    window.location.reload()
   }, 360000);
 };
 
@@ -273,7 +273,7 @@ onMounted(() => {
           />
           <button
             class="w-1/3 bg-blue-500 hover:bg-blue-700 text-white py-4 px-4 rounded whitespace-nowrap font-bold text-xl"
-            @click="clearForm"
+            @click.prevent ="clearForm"
           >
             再スキャン
           </button>
@@ -301,22 +301,22 @@ onMounted(() => {
           >
             <button
               v-if="!form.order_flg && time_flg == 'order'"
-              @click="sendOrder('order')"
+              @click.prevent ="sendOrder('order')"
               class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-12 px-16 rounded text-4xl w-4/5"
             >
               注文
             </button>
             <button
               v-else-if="form.order_flg && time_flg == 'order'"
-              @click="sendOrder('cancel')"
+              @click.prevent ="sendOrder('cancel')"
               class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-12 px-16 rounded text-4xl w-4/5"
             >
               キャンセル
             </button>
 
             <button
-              v-else-if="form.order_flg && time_flg == 'receive'"
-              @click="sendOrder('receive')"
+              v-else-if="form.order_flg && !form.receive_flg && time_flg == 'receive'"
+              @click.prevent ="sendOrder('receive')"
               class="bg-green-500 hover:bg-green-700 text-white font-bold py-12 px-16 rounded text-4xl w-4/5"
             >
               受け取り
