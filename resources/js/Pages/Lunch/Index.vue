@@ -99,7 +99,6 @@ const sendOrder = (type) => {
         })
         .then((res) => {
           console.log(res.data);
-          getOrders();
           clearForm();
         });
       break;
@@ -110,7 +109,6 @@ const sendOrder = (type) => {
         })
         .then((res) => {
           console.log(res.data);
-          getOrders();
           clearForm();
         });
       break;
@@ -118,12 +116,13 @@ const sendOrder = (type) => {
 };
 
 const clearForm = () => {
-  form.user_id = null;
-  form.user_name = null;
-  form.order_flg = null;
-  form.receive_flg = null;
-  form.order_id = null;
-  scan_input_available();
+  // form.user_id = null;
+  // form.user_name = null;
+  // form.order_flg = null;
+  // form.receive_flg = null;
+  // form.order_id = null;
+  // scan_input_available();
+  window.location.reload()
 };
 
 const checkTimeFlg = () => {
