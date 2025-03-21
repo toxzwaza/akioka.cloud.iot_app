@@ -6,6 +6,8 @@ use App\Models\Group;
 use App\Models\Stock;
 use App\Models\StockAlias;
 use App\Models\StockStorage;
+use App\Models\StockSupplier;
+use App\Models\Supplier;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -79,8 +81,30 @@ class ApiController extends Controller
     public function getStockByNameAndSName(Request $request){
         $name = $request->name;
         $s_name = $request->s_name;
+        $com_name = $request->com_name;
 
-        $stock = Stock::select('id')->where('name', $name)->where('s_name', $s_name)->where('del_flg', 0)->first();
+        $stock = null;
+        $supplier = null;
+
+        if($com_name){
+            $supplier = Supplier::where('name', $com_name)->first();
+        }
+
+        if($supplier){
+            $stock = StockSupplier::select('stocks.id', 'stock_suppliers.supplier_id', 'stock_suppliers.lead_time')
+            ->join('stocks', 'stocks.id', 'stock_suppliers.stock_id')
+            ->where('stocks.name', $name)
+            ->where('stocks.s_name', $s_name)
+            ->where('stocks.del_flg', 0)
+            ->where('stock_suppliers.supplier_id', $supplier->id)
+            ->first();
+        }else{
+            $stock = Stock::select('id')
+            ->where('name', $name)
+            ->where('s_name', $s_name)
+            ->where('del_flg', 0)
+            ->first();
+        }
 
         return response()->json($stock);
     }
