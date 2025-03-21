@@ -13,7 +13,7 @@ class LunchController extends Controller
     //
     public function index()
     {
-        $always_orders = User::select('name', 'duty_flg')->where('always_order_flg', 1)->get();
+        $always_orders = User::select('name', 'duty_flg')->where('always_order_flg', 1)->where('del_flg', 0)->get();
         return Inertia::render('Lunch/Index', ['always_orders' => $always_orders ]);
     }
 
