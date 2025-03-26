@@ -146,6 +146,7 @@ const orderStock = () => {
     .post(route("stock.order.store"), {
       stock_id: props.stock.id,
       request_user_id: request_user.id,
+      stock_storage_id: stock_storage.value.id
     })
     .then((res) => {
       console.log(res.data);

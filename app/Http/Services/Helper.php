@@ -2,7 +2,10 @@
 
 namespace App\Http\Services;
 
+use App\Models\NotifyQueue;
+use App\Models\NotifyQueueUser;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -99,4 +102,35 @@ class Helper
         return $status;
     }
 
+    public static function createNotifyQueue($title, $msg, $url, $users)
+    {
+        $status = true;
+
+        try {
+            DB::beginTransaction();
+            try {
+                $notifyQueue = new NotifyQueue();
+                $notifyQueue->title = $title;
+                $notifyQueue->msg = $msg;
+                $notifyQueue->url = $url;
+                $notifyQueue->save();
+
+                foreach ($users as $user) {
+                    $notifyQueueUser = new NotifyQueueUser();
+                    $notifyQueueUser->notify_queue_id = $notifyQueue->id;
+                    $notifyQueueUser->user_id = $user;
+                    $notifyQueueUser->save();
+                }
+
+                DB::commit();
+            } catch (Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+        } catch (Exception $e) {
+            $status = false;
+        }
+
+        return $status;
+    }
 }

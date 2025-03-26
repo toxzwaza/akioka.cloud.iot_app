@@ -8,6 +8,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\LunchController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\NotifyController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReceiveController;
@@ -123,6 +124,8 @@ Route::get('/getStockByAlias', [ApiController::class, 'getStockByAlias'])->name(
 Route::get('/getStocks', [ApiController::class, 'getStocks'])->name('getStocks');
 Route::get('/getUserAndProcess', [ApiController::class, 'getUserAndProcess'])->name('getUserAndProcess');
 Route::get('/getStockByNameAndSName', [ApiController::class, 'getStockByNameAndSName'])->name('getStockByNameAndSName');
+// 未通知データ
+Route::get('/getUnNotifyData', [NotifyController::class, 'getUnNotifyData'])->name('getUnNotifyData');
 
 // 在庫格納先アドレス取得
 Route::get('/getStockStorages', [ApiController::class, 'getStockStorages'])->name('getStockStorages');
