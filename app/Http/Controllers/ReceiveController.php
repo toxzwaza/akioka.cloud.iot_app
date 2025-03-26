@@ -13,6 +13,8 @@ use App\Models\StockStorage;
 use App\Models\StockSupplier;
 use App\Models\StorageAddress;
 use App\Models\Supplier;
+use App\Services\Method;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -83,6 +85,8 @@ class ReceiveController extends Controller
                 if ($order) {
                     $order->delifile_path = '/deli_file/' . $filename;
                     $order->save();
+
+                    Method::setDeliveryDateAndUpdateLeadTime($order->id);
                 }
 
                 // 品名・品番が一致する在庫データを取得
