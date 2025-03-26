@@ -17,7 +17,7 @@ class NotifyController extends Controller
         ->get();
 
         foreach ($notifyQueue as $notify) {
-            $notify->users = NotifyQueueUser::select('email')->join('users', 'notify_queue_users.user_id', 'users.id')->where('notify_queue_id', $notify->id)->get();
+            $notify->users = NotifyQueueUser::join('users', 'notify_queue_users.user_id', 'users.id')->where('notify_queue_id', $notify->id)->pluck('email');
         }
 
         return response()->json($notifyQueue);
