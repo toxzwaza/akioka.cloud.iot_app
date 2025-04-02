@@ -146,7 +146,7 @@ const orderStock = () => {
     .post(route("stock.order.store"), {
       stock_id: props.stock.id,
       request_user_id: request_user.id,
-      stock_storage_id: stock_storage.value.id
+      stock_storage_id: stock_storage.value.id,
     })
     .then((res) => {
       console.log(res.data);
@@ -397,6 +397,14 @@ onMounted(() => {
               </details>
             </div>
 
+            <div class="my-8">
+              <!-- 発注点 -->
+              <h1 id="reorder_point" class="">
+                <span class="label">発注点：</span>
+                <span class="value">{{ stock_storage.reorder_point }}個</span>
+              </h1>
+            </div>
+
             <div id="button_container" class="mt-12 mb-12">
               <Link
                 :href="
@@ -525,7 +533,9 @@ onMounted(() => {
                     </td>
                     <td class="py-4">
                       {{
-                        order_request.request_user_name ? order_request.request_user_name : "-"
+                        order_request.request_user_name
+                          ? order_request.request_user_name
+                          : "-"
                       }}
                     </td>
                     <td class="py-4">
@@ -760,6 +770,28 @@ onMounted(() => {
       &#quantity {
         font-weight: normal;
         color: rgb(102, 102, 102);
+      }
+      &#reorder_point {
+        display: flex;
+        justify-content: center;
+        align-items: baseline;
+        color: rgb(44, 44, 44);
+        border-bottom: 2px dashed rgba(126, 126, 126, 0.575);
+
+        & span {
+          display: inline-block;
+          text-align: center;
+
+          &.label {
+            font-size: 2rem;
+            width: 30%;
+          }
+          &.value {
+            font-size: 3rem;
+            color: rgb(255, 51, 51);
+            width: 20%;
+          }
+        }
       }
     }
 
