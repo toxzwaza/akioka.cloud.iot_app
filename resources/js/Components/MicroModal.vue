@@ -45,15 +45,6 @@ const emit = defineEmits(["closeModal"]);
             data-micromodal-close
           ></button>
         </header>
-        <div class="text-right mb-4">
-          <a v-if="currentStockId"
-            :class="{
-              'bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded  text-sm font-mono': true,
-            }"
-            :href="route('stock.edit.stocks', { stock_id: currentStockId })"
-            >在庫編集ページへ遷移</a
-          >
-        </div>
 
         <main class="modal__content" id="modal-1-content">
           <img :src="currentImageSrc" alt="サンプル画像" />
@@ -122,6 +113,11 @@ main img {
 .modal__close {
   background: transparent;
   border: 0;
+  transform: scale(2);
+  background: #00449e;
+  color: white;
+  padding: 0.6rem 1rem;
+  border-radius: 4px;
 }
 
 .modal__header .modal__close:before {

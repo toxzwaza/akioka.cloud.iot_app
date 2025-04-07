@@ -17,6 +17,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\StockAliasController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\StockRequestController;
 use App\Http\Controllers\TestController;
 use App\Models\ProductAlias;
 use App\Models\StockAliase;
@@ -105,6 +106,13 @@ Route::get('/receive/none_storage/{order_id}', [ReceiveController::class, 'none_
 Route::get('/retentions', [RetentionController::class, 'home'])->name('stock.retention.home');
 Route::get('/retentions/stocks', [RetentionController::class, 'index'])->name('stock.retention');
 Route::get('/retentions/stocks/getRetentionStocks', [RetentionController::class, 'getRetentionStocks'])->name('stock.retention.getRetentionStocks');
+
+// 現場物品依頼画面
+Route::get('/requests', [StockRequestController::class, 'home'])->name('stock.request.home');
+Route::post('/requests/store', [StockRequestController::class, 'store'])->name('stock.request.store');
+Route::post('/requests/complete', [StockRequestController::class, 'complete'])->name('stock.request.complete');
+// Route::get('/requests/stocks', [RequestController::class, 'index'])->name('stock.request');
+// Route::get('/requests/stocks/getRequestStocks', [RequestController::class, 'getRequestStocks'])->name('stock.request.getRequestStocks');
 
 //////////弁当注文用 //////////
 Route::get('/lunch', [LunchController::class, 'index'])->name('lunch.home');

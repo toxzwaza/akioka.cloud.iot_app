@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Services\Helper;
 use App\Models\InitialOrder;
+use App\Models\LunchOrder;
 use App\Models\OrderRequest;
 use App\Models\Stock;
 use App\Models\StockPriceArchive;
@@ -20,7 +21,5 @@ class TestController extends Controller
     //
     public function test()
     {
-        Method::setDeliveryDateAndUpdateLeadTime(1134);
-        
     }
 }

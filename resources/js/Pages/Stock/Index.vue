@@ -33,6 +33,16 @@ import { Link } from "@inertiajs/vue3";
           /></Link>
         </div>
 
+        <!-- 現場物品依頼 -->
+        <div class="w-1/2 p-4">
+          <a :href="route('stock.request.home')"
+            ><img
+              class=""
+              src="/images/stocks/icons/request.png"
+              alt="現場物品依頼"
+          /></a>
+        </div>
+
         <!-- 滞留画面 -->
         <div class="w-1/2 p-4">
           <a :href="route('stock.retention.home')"
