@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AcceptController;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\ContentController;
 use App\Http\Controllers\DataController;
@@ -101,6 +102,12 @@ Route::get('/receive/getClassifications', [ReceiveController::class, 'getClassif
 Route::get('/receive/getSuppliers', [ReceiveController::class, 'getSuppliers'])->name('stock.receive.getSuppliers');
 
 Route::get('/receive/none_storage/{order_id}', [ReceiveController::class, 'none_storage'])->name('stock.receive.none_storage');
+
+
+// 発注用承認画面
+Route::get('/accept/order-request', [AcceptController::class, 'index'])->name('accept.order-request');
+// 承認登録
+Route::put('/accept/order-request', [AcceptController::class, 'update'])->name('accept.order-request.update');
 
 // 滞留画面
 Route::get('/retentions', [RetentionController::class, 'home'])->name('stock.retention.home');
