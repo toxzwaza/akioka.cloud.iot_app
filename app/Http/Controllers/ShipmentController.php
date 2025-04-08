@@ -74,7 +74,7 @@ class ShipmentController extends Controller
                 $message = "{$stock->name}{$stock->s_name}の物品が発注点を下回りました、以下のURLから発注を完了させてください。";
                 // 通知者リスト
                 $notify_users = [91, 81, 68, 48];
-                $url = "http://monokanri-manage.local/stock/stocks/order-requests";
+                $url = "http://monokanri-manage.local/stock/order-requests";
 
 
                 DB::beginTransaction();
