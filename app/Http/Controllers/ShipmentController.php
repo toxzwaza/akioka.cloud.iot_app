@@ -8,6 +8,7 @@ use App\Models\NotifyQueueUser;
 use App\Models\OrderRequest;
 use App\Models\Stock;
 use App\Models\StockStorage;
+use App\Models\StockSupplier;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -48,6 +49,8 @@ class ShipmentController extends Controller
             $stock_storage = StockStorage::find($stock_storage_address_id);
             $stock_storage->quantity = $stock_storage->quantity - $quantity;
             $stock_storage->save();
+            $stock = Stock::find($stock_id);
+            $stock_supplier = StockSupplier::where('stock_id', $stock_id)->first();
 
             // 出庫履歴を作成
             $inventory_operation_record = new InventoryOperationRecord();
@@ -65,6 +68,17 @@ class ShipmentController extends Controller
                 $order_request = new OrderRequest();
                 $order_request->stock_id = $stock_id;
                 $order_request->request_user_id = 117;
+                $order_request->price = $stock->price;
+                $order_request->quantity = 1;
+                
+                if ($stock->price !== null) {
+                    $order_request->calc_price = $stock->price;
+                }
+                if ($stock_supplier) {
+                    $order_request->supplier_id = $stock_supplier->id;
+                    $order_request->lead_time = $stock_supplier->lead_time;
+                }
+                
                 $order_request->save();
 
                 $stock = Stock::find($stock_id);
