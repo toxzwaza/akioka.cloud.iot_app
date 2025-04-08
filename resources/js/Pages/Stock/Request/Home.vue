@@ -17,11 +17,16 @@ const left_stock_requests = ref([]);
 const right_stock_requests = ref([]);
 const users = ref([]);
 
+const already_flg = reactive({
+  status: false,
+  delivery_date: null,
+});
+
 const modalStatus = ref(false);
 const modalImageSrc = ref("");
 const modalStockId = ref();
 
-const orderData = ref(null);
+const orderData = ref({});
 
 const is_login = ref(false);
 
@@ -58,15 +63,11 @@ const loginAdmin = () => {
 };
 
 const updateQuantity = (stock_id, quantity) => {
-  if (!orderData.value) {
-    orderData.value = {};
-  }
   orderData.value[stock_id] = quantity;
   console.log(orderData.value);
 };
 
 const orderStockRequest = () => {
-
   axios
     .post(route("stock.request.store"), {
       process_id: form.process_id,
@@ -87,33 +88,43 @@ const orderStockRequest = () => {
 
 const checkAlreadyStockRequest = () => {
   if (
+    // 現在仕掛かり中の物品依頼が存在するか
     props.stock_request_orders.some(
       (order) => order.process_id === form.process_id
     )
   ) {
-    alert("既に来週分の物品依頼が完了しています。");
+    if (
+      confirm("物品依頼が完了しています。確認及び変更を依頼しますか？\nキャンセルした場合新規物品依頼を行います。")
+    ) {
+      props.stock_requests = props.stock_request_orders
+        .filter(
+          (stock_request_order) =>
+            stock_request_order.process_id == form.process_id
+        )
+        .map((stock_request_order) => {
+          const stock_request = props.stock_requests.find(
+            (stock_request) =>
+              stock_request.stock_id == stock_request_order.stock_id
+          );
+          if (stock_request) {
+            stock_request.quantity = stock_request_order.quantity;
+            return stock_request;
+          }
+        })
+        .filter((stock_request) => stock_request !== undefined);
 
-    props.stock_requests = props.stock_request_orders
-      .filter(
-        (stock_request_order) =>
-          stock_request_order.process_id == form.process_id
-      )
-      .map((stock_request_order) => {
-        const stock_request = props.stock_requests.find(
-          (stock_request) =>
-            stock_request.stock_id == stock_request_order.stock_id
-        );
-        if (stock_request) {
-          stock_request.quantity = stock_request_order.quantity;
-          return stock_request;
-        }
-      })
-      .filter((stock_request) => stock_request !== undefined);
+      already_flg.status = true;
+    }else{
+      already_flg.status = false;
+
+    }
   } else {
     props.stock_requests.forEach((stock_request) => {
-      stock_request.quantity = '';
+      stock_request.quantity = "";
     });
+    already_flg.status = false;
   }
+
   sliceStockRequests(props.stock_requests);
 };
 
@@ -123,6 +134,15 @@ const isWeekdayMonToWed = () => {
   const day = today.getDay();
   return day >= 1 && day <= 3;
 };
+
+const setUpAlreadyFlg = () => {
+  if(isWeekdayMonToWed()){
+    const today = new Date();
+    const nextMonday = new Date(today.setDate(today.getDate() + ((1 + 7 - today.getDay()) % 7 || 7)));
+    const days = ['日', '月', '火', '水', '木', '金', '土'];
+    already_flg.delivery_date = `${nextMonday.getFullYear()}/${(nextMonday.getMonth() + 1).toString().padStart(2, '0')}/${nextMonday.getDate().toString().padStart(2, '0')}(${days[nextMonday.getDay()]})`;
+  }
+}
 
 const sliceStockRequests = (stock_requests) => {
   left_stock_requests.value = stock_requests.slice(
@@ -141,6 +161,9 @@ onMounted(() => {
   sliceStockRequests(props.stock_requests);
 
   users.value = props.users;
+
+   
+  setUpAlreadyFlg() //現在の日付からお渡し日を算出
 });
 </script>
 <template>
@@ -149,9 +172,9 @@ onMounted(() => {
       <!-- 管理者ログイン -->
       <div class="flex justify-end mb-12">
         <form class="w-full max-w-sm">
-          <div class="flex items-center border-b border-teal-500 py-2">
+          <div class="flex items-center border-b border-blue-500 py-2">
             <input
-              class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+              class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-4 px-2 leading-tight focus:outline-none text-center text-2xl"
               type="text"
               placeholder="管理者パスワード"
               v-model="form.pwd"
@@ -159,7 +182,7 @@ onMounted(() => {
             <button
               v-if="!is_login"
               @click.prevent="loginAdmin"
-              class="flex-shrink-0 bg-teal-500 hover:bg-teal-700 border-teal-500 hover:border-teal-700 text-sm border-4 text-white py-1 px-2 rounded"
+              class="flex-shrink-0 bg-blue-500 hover:bg-blue-700 border-blue-500 hover:border-blue-700 text-lg border-4 text-white py-1 px-2 rounded"
               type="button"
             >
               ログイン
@@ -187,7 +210,7 @@ onMounted(() => {
             依頼頂いた物品は翌週月曜日の朝礼後に備品倉庫前からお取りください。
           </h2>
         </div>
-        <div v-if="isWeekdayMonToWed">
+        <div>
           <div>
             <label
               for="large"
@@ -229,11 +252,6 @@ onMounted(() => {
             </select>
           </div>
         </div>
-        <div v-else>
-          <h2 class="text-6xl text-center text-red-500 font-bold">
-            物品依頼可能日ではありません。
-          </h2>
-        </div>
 
         <!-- 注文依頼用紙 -->
         <div v-if="form.process_id && form.user_id" class="mt-12">
@@ -265,7 +283,7 @@ onMounted(() => {
                         type="number"
                         name=""
                         id=""
-                        :value="stock.quantity"
+                        v-model="stock.quantity"
                       />
                     </td>
                     <td class="unit text-2xl">{{ stock.solo_unit }}</td>
@@ -296,6 +314,7 @@ onMounted(() => {
                         @change="
                           updateQuantity(stock.stock_id, $event.target.value)
                         "
+                        v-model="stock.quantity"
                         class="text-4xl"
                         type="number"
                         name=""
@@ -309,7 +328,15 @@ onMounted(() => {
             </div>
           </div>
 
-          <div v-if="orderData" class="mt-8">
+          <div
+            v-if="
+              Object.keys(orderData).length > 0 &&
+              isWeekdayMonToWed &&
+              !already_flg.status
+            "
+            class="mt-12"
+          >
+          <h3 v-if="already_flg.delivery_date" class="text-center text-4xl mb-8 text-gray-700 font-bold">お渡し予定日：{{ already_flg.delivery_date }}</h3>
             <!-- 物品依頼ボタン -->
             <button
               @click="orderStockRequest"
