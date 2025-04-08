@@ -13,9 +13,10 @@ const props = defineProps({
   stock_request_orders: Array,
 });
 
-const left_stock_requests = ref([]);
-const right_stock_requests = ref([]);
-const users = ref([]);
+const stock_requests = ref([])
+const left_stock_requests = ref([])
+const right_stock_requests = ref([])
+const users = ref([])
 
 const already_flg = reactive({
   status: false,
@@ -96,13 +97,13 @@ const checkAlreadyStockRequest = () => {
     if (
       confirm("物品依頼が完了しています。確認及び変更を依頼しますか？\nキャンセルした場合新規物品依頼を行います。")
     ) {
-      props.stock_requests = props.stock_request_orders
+      stock_requests.value = props.stock_request_orders
         .filter(
           (stock_request_order) =>
             stock_request_order.process_id == form.process_id
         )
         .map((stock_request_order) => {
-          const stock_request = props.stock_requests.find(
+          const stock_request = stock_requests.value.find(
             (stock_request) =>
               stock_request.stock_id == stock_request_order.stock_id
           );
@@ -115,17 +116,19 @@ const checkAlreadyStockRequest = () => {
 
       already_flg.status = true;
     }else{
+      stock_requests.value = props.stock_requests
       already_flg.status = false;
 
     }
   } else {
-    props.stock_requests.forEach((stock_request) => {
+    stock_requests.value = props.stock_requests
+    stock_requests.value.forEach((stock_request) => {
       stock_request.quantity = "";
     });
     already_flg.status = false;
   }
 
-  sliceStockRequests(props.stock_requests);
+  sliceStockRequests(stock_requests.value);
 };
 
 // 依頼可能期間かチェック
@@ -157,8 +160,8 @@ const sliceStockRequests = (stock_requests) => {
 };
 
 onMounted(() => {
-  console.log(props.stock_requests);
-  sliceStockRequests(props.stock_requests);
+  stock_requests.value = props.stock_requests
+  sliceStockRequests(stock_requests.value);
 
   users.value = props.users;
 
@@ -352,7 +355,7 @@ onMounted(() => {
       <div v-else>
         <Admin
           :processes="props.processes"
-          :stock_requests="props.stock_requests"
+          :stock_requests="stock_requests.value"
           :stock_request_orders="props.stock_request_orders"
         />
       </div>
