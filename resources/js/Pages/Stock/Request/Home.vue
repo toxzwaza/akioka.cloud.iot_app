@@ -37,6 +37,8 @@ const handleCloseModal = () => {
 
 const handleProcessId = (process_id) => {
   console.log(process_id);
+  form.user_id = null
+  
   users.value = props.users.filter((user) => user.process_id == process_id);
   checkAlreadyStockRequest();
 };
