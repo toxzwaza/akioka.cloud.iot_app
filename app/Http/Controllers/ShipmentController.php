@@ -50,6 +50,7 @@ class ShipmentController extends Controller
             $stock_storage->quantity = $stock_storage->quantity - $quantity;
             $stock_storage->save();
             $stock = Stock::find($stock_id);
+
             $stock_supplier = StockSupplier::where('stock_id', $stock_id)->first();
 
             // 出庫履歴を作成
@@ -75,7 +76,7 @@ class ShipmentController extends Controller
                     $order_request->calc_price = $stock->price;
                 }
                 if ($stock_supplier) {
-                    $order_request->supplier_id = $stock_supplier->id;
+                    $order_request->supplier_id = $stock_supplier->supplier_id;
                     $order_request->lead_time = $stock_supplier->lead_time;
                 }
                 
