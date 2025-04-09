@@ -357,7 +357,7 @@ onMounted(() => {
       <div v-else>
         <Admin
           :processes="props.processes"
-          :stock_requests="stock_requests.value"
+          :stock_requests="props.stock_requests"
           :stock_request_orders="props.stock_request_orders"
         />
       </div>
