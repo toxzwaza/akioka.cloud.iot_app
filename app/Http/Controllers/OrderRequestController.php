@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\OrderRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class OrderRequestController extends Controller
 {
@@ -28,10 +29,10 @@ class OrderRequestController extends Controller
             $timestampedFilename = now()->format('YmdHis') . '.pdf';
 
             // 保存（storage/app/public/order_request に保存）
-            $path = $file->storeAs('public/order_request', $timestampedFilename);
+            $path = $file->storeAs('order_request', $timestampedFilename, 'public');
 
             // 公開URLを生成（public/storage/order_request/...）
-            $fileUrl = asset('storage/order_request/' . $timestampedFilename);
+            $fileUrl = Storage::disk('public')->url('order_request/' . $timestampedFilename);
 
             // 該当データを取得し、パスを保存
             $order_request = OrderRequest::find($order_request_id);
