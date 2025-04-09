@@ -2,19 +2,12 @@
 
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\OrderRequestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
+// 物品依頼 稟議書アップロードAPI
+Route::post('/order_request/upload_file', [OrderRequestController::class, 'uploadFile']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

@@ -182,8 +182,7 @@ Route::get('/getFacilitySchedule', [ContentController::class, 'getFacilitySchedu
 Route::get('/getLatestData', [DataController::class, 'getLatestData'])->name('getLatestData');
 Route::get('/getTempHumiCo2', [DataController::class, 'getTempHumiCo2'])->name('getTempHumiCo2');
 
-// 物品依頼 稟議書アップロードAPI
-Route::post('/order_request/upload_file', [OrderRequestController::class, 'uploadFile']);
+
 
 Route::get('/test', [TestController::class, 'test'])->name('test');
 
