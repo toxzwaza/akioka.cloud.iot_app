@@ -17,11 +17,6 @@ class OrderRequestController extends Controller
         $file = $request->file('upload_file');
         $order_request_id = $request->order_request_id;
 
-        return response()->json([
-            'file_name' => $file->getClientOriginalName(),
-            'file_size' => $file->getSize(),
-            'file_mime' => $file->getMimeType(),
-        ]);
 
         try {
             // ファイル存在＆有効性チェック
