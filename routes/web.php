@@ -11,6 +11,7 @@ use App\Http\Controllers\MainController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotifyController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderRequestController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReceiveController;
 use App\Http\Controllers\RetentionController;
@@ -181,7 +182,8 @@ Route::get('/getFacilitySchedule', [ContentController::class, 'getFacilitySchedu
 Route::get('/getLatestData', [DataController::class, 'getLatestData'])->name('getLatestData');
 Route::get('/getTempHumiCo2', [DataController::class, 'getTempHumiCo2'])->name('getTempHumiCo2');
 
-
+// 物品依頼 稟議書アップロードAPI
+Route::post('/order_request/upload_file', [OrderRequestController::class, 'uploadFile']);
 
 Route::get('/test', [TestController::class, 'test'])->name('test');
 
