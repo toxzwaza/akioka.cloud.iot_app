@@ -20,7 +20,7 @@ class OrderRequestController extends Controller
             $timestampedFilename = now()->format('YmdHis') . '.pdf';
 
             // 保存先パス（public/order_request フォルダ内に保存）
-            $path = $file->storeAs('order_request', $timestampedFilename, 'public');
+            $path = $file->storeAs('public/order_request', $timestampedFilename);
 
             $fileUrl = asset('storage/' . $path);
 
