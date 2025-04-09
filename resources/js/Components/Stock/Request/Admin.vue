@@ -60,20 +60,47 @@ const setProcess = (process_id) => {
             updateQuantity:
               stock_request.stock_storage_quantity -
               stock_request_order.quantity,
-            order_flg: stock_request_order.order_flg == 1 ? 1 : stock_request_order.order_flg,
+            order_flg:
+              stock_request_order.order_flg == 1
+                ? 1
+                : stock_request_order.order_flg,
           });
         }
       }
     });
   }
 
-  console.log('stock_requests.value:', stock_requests.value)
+  console.log("stock_requests.value:", stock_requests.value);
 };
 
 // 発注依頼
-const orderRequestByStockRequestOrder = (stock) =>{
-    console.log(stock)
-}
+const orderRequestByStockRequestOrder = (stock) => {
+  console.log(stock);
+
+  if (
+    confirm(
+      `品名: ${stock.name}\n品番: ${
+        stock.s_name ?? ""
+      }\nの発注依頼を行います。よろしいですか？`
+    )
+  ) {
+    axios
+      .post(route('stock.request.order'), {
+        stock_id: stock.stock_id,
+        request_user_id: 81, //現状三谷さん固定
+      })
+      .then((res) => {
+        console.log(res.data);
+        if (res.data.status) {
+          stock.order_flg = true;
+          alert("発注依頼が完了しました。")
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+};
 
 const checkStockRequest = (process_id) => {
   return props.stock_request_orders.some(
@@ -88,7 +115,7 @@ const updateUpdateQuantity = (val, stock) => {
 const completeStockRequest = (stock) => {
   // return console.log(stock)
   if (!(stock.updateQuantity > 0)) {
-    return alert('出庫後数量を正確に入力してください。')
+    return alert("出庫後数量を正確に入力してください。");
   }
   axios
     .post(route("stock.request.complete"), {

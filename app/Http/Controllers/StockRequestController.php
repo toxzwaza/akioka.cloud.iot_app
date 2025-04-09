@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Services\Helper;
 use App\Models\InventoryOperationRecord;
+use App\Models\OrderRequest;
 use App\Models\Process;
+use App\Models\Stock;
 use App\Models\StockRequest;
 use App\Models\StockRequestOrder;
 use App\Models\StockStorage;
+use App\Models\StockSupplier;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -101,5 +105,75 @@ class StockRequestController extends Controller
         }
 
         return response()->json(['status' => $status]);
+    }
+
+    public function order(Request $request)
+    {
+        $status = true;
+        $msg = '';
+        $stock_id = $request->stock_id;
+        $request_user_id = $request->request_user_id;
+        $stock_storage_id = $request->stock_storage_id;
+
+        $stock = null;
+
+        if (!$stock_id) {
+            $status = false;
+            return response()->json(['status' => $status, 'msg' => '在庫が選択されていません。']);
+        }
+
+
+        try {
+            $stock = Stock::find($stock_id);
+            $stock_supplier = StockSupplier::where('stock_id', $stock_id)->first();
+
+            // 発注依頼 ---------------------------------------------------
+            $order_request = new OrderRequest();
+            $order_request->stock_id = $stock_id;
+            $order_request->request_user_id = $request_user_id == 0 ? 117 : $request_user_id;
+            $order_request->price = $stock->price;
+            $order_request->quantity = 1;
+
+            if ($stock->price !== null) {
+                $order_request->calc_price = $stock->price;
+            }
+            if ($stock_supplier) {
+                $order_request->supplier_id = $stock_supplier->supplier_id;
+                $order_request->lead_time = $stock_supplier->lead_time;
+            }
+            $order_request->save();
+            // -----------------------------------------------------------
+
+            if (!$stock_storage_id) {
+                $stock_storage = StockStorage::where('stock_id', $stock_id)->first();
+                if ($stock_storage) {
+                    $stock_storage_id = $stock_storage->id;
+                }
+            }
+            if ($stock_storage_id) {
+                // 発注点を更新 -----------------------------------------------------------
+                Helper::updateReOrderPoint($stock_storage_id, $stock_id, $stock->quantity);
+                // -----------------------------------------------------------------------
+            }
+
+            // 完了しておらず、stock_idが一致する全てのorder_flgを1にする
+            $stock_request_orders = StockRequestOrder::where('stock_id', $stock_id)
+            ->where('status', 0)
+            ->get();
+            foreach($stock_request_orders as $stock_request_order){
+                $stock_request_order->order_flg = 1;
+                $stock_request_order->save();
+            }
+
+            // 発注依頼を通知 -----------------------------------------------------------
+            Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}のの物品依頼を受付ました。以下のURLから発注を完了させてください。", "http://monokanri-manage.local/stock/order-requests", [91, 81, 68, 48]);
+            // -----------------------------------------------------------
+
+        } catch (Exception $e) {
+            $status = false;
+            $msg = $e->getMessage();
+        }
+
+        return response()->json(['status' => $status, 'msg' => $msg]);
     }
 }

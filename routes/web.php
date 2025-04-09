@@ -118,6 +118,8 @@ Route::get('/retentions/stocks/getRetentionStocks', [RetentionController::class,
 Route::get('/requests', [StockRequestController::class, 'home'])->name('stock.request.home');
 Route::post('/requests/store', [StockRequestController::class, 'store'])->name('stock.request.store');
 Route::post('/requests/complete', [StockRequestController::class, 'complete'])->name('stock.request.complete');
+// 足りない分を発注依頼
+Route::post('/requests/order', [StockRequestController::class, 'order'])->name('stock.request.order');
 // Route::get('/requests/stocks', [RequestController::class, 'index'])->name('stock.request');
 // Route::get('/requests/stocks/getRequestStocks', [RequestController::class, 'getRequestStocks'])->name('stock.request.getRequestStocks');
 

@@ -58,9 +58,17 @@ class OrderController extends Controller
             $order_request->save();
             // -----------------------------------------------------------
 
-            // 発注点を更新 -----------------------------------------------------------
-            Helper::updateReOrderPoint($stock_storage_id, $stock_id, $stock->quantity);
-            // -----------------------------------------------------------
+            if (!$stock_storage_id) {
+                $stock_storage = StockStorage::where('stock_id', $stock_id)->first();
+                if ($stock_storage) {
+                    $stock_storage_id = $stock_storage->id;
+                }
+            }
+            if ($stock_storage_id) {
+                // 発注点を更新 -----------------------------------------------------------
+                Helper::updateReOrderPoint($stock_storage_id, $stock_id, $stock->quantity);
+                // -----------------------------------------------------------------------
+            }
 
             // 発注依頼を通知 -----------------------------------------------------------
             Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}のの物品依頼を受付ました。以下のURLから発注を完了させてください。", "http://monokanri-manage.local/stock/order-requests", [91, 81, 68, 48]);
