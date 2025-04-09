@@ -13,6 +13,7 @@ use App\Models\NotifyQueue;
 use App\Models\NotifyQueueUser;
 use App\Models\Stock;
 use App\Models\StockStorage;
+use App\Models\StockSupplier;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -28,6 +29,8 @@ class OrderController extends Controller
         $request_user_id = $request->request_user_id;
         $stock_storage_id = $request->stock_storage_id;
 
+        $stock = null;
+
         if (!$stock_id) {
             $status = false;
             return response()->json(['status' => $status, 'msg' => '在庫が選択されていません。']);
@@ -35,77 +38,37 @@ class OrderController extends Controller
 
 
         try {
+            $stock = Stock::find($stock_id);
+            $stock_supplier = StockSupplier::where('stock_id', $stock_id)->first();
 
+            // 発注依頼 ---------------------------------------------------
             $order_request = new OrderRequest();
             $order_request->stock_id = $stock_id;
-            $order_request->request_user_id = $request_user_id;
+            $order_request->request_user_id = $request_user_id == 0 ? 117 : $request_user_id;
+            $order_request->price = $stock->price;
+            $order_request->quantity = 1;
+
+            if ($stock->price !== null) {
+                $order_request->calc_price = $stock->price;
+            }
+            if ($stock_supplier) {
+                $order_request->supplier_id = $stock_supplier->supplier_id;
+                $order_request->lead_time = $stock_supplier->lead_time;
+            }
             $order_request->save();
+            // -----------------------------------------------------------
+
+            // 発注点を更新 -----------------------------------------------------------
+            Helper::updateReOrderPoint($stock_storage_id, $stock_id, $stock->quantity);
+            // -----------------------------------------------------------
+
+            // 発注依頼を通知 -----------------------------------------------------------
+            Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}のの物品依頼を受付ました。以下のURLから発注を完了させてください。", "http://monokanri-manage.local/stock/order-requests", [91, 81, 68, 48]);
+            // -----------------------------------------------------------
+
         } catch (Exception $e) {
             $status = false;
             $msg = $e->getMessage();
-        }
-
-
-        if ($status) {
-            // $stock = Stock::find($stock_id);
-            $stock = StockStorage::select(
-                'stocks.*',
-                'stock_storages.reorder_point',
-                'stock_storages.quantity'
-            )
-                ->join('stocks', 'stocks.id', 'stock_storages.stock_id')
-                ->where('stock_storages.id', $stock_storage_id)->first();
-
-            // 発注依頼を記録
-            $inventoryOperationRecord = new InventoryOperationRecord();
-            $inventoryOperationRecord->inventory_operation_id = 7;
-            $inventoryOperationRecord->stock_id = $stock_id;
-            $inventoryOperationRecord->stock_storage_id = $stock_storage_id;
-            $inventoryOperationRecord->bef_quantity = $stock->quantity;
-            $inventoryOperationRecord->save();
-
-            // 発注点再計算
-            $reorder_point_avg = InventoryOperationRecord::where('stock_storage_id', $stock_storage_id)
-                ->where('inventory_operation_id', 7)
-                ->avg('bef_quantity');
-
-            // 発注点を更新
-            $stock_storage = StockStorage::find($stock_storage_id);
-            $stock_storage->reorder_point = $reorder_point_avg;
-            $stock_storage->save();
-
-            // 通知用
-            // 発注依頼を通知
-            $title = "在庫管理システムからの通知です。";
-            $message = "{$stock->name}{$stock->s_name}の発注依頼を受付ました。以下のURLから発注を完了させてください。";
-            // 通知者リスト
-            $notify_users = [91, 81, 68, 48];
-            $url = "http://monokanri-manage.local/stock/order-requests";
-
-            try {
-                DB::beginTransaction();
-                try {
-                    $notifyQueue = new NotifyQueue();
-                    $notifyQueue->title = $title;
-                    $notifyQueue->msg = $message;
-                    $notifyQueue->url = $url;
-                    $notifyQueue->save();
-
-                    foreach ($notify_users as $user) {
-                        $notifyQueueUser = new NotifyQueueUser();
-                        $notifyQueueUser->notify_queue_id = $notifyQueue->id;
-                        $notifyQueueUser->user_id = $user;
-                        $notifyQueueUser->save();
-                    }
-
-                    DB::commit();
-                } catch (Exception $e) {
-                    $msg = $e->getMessage();
-                    DB::rollBack();
-                }
-            } catch (Exception $e) {
-                $status = false;
-            }
         }
 
         return response()->json(['status' => $status, 'msg' => $msg]);

@@ -45,11 +45,12 @@ class InventoryController extends Controller
                 ->leftJoin('users', 'order_requests.user_id', '=', 'users.id')
                 ->leftJoin('users as request_users', 'order_requests.request_user_id','request_users.id')
                 ->where('stock_id', $stock_id)
+                ->where('order_requests.del_flg', 0)
                 ->orderBy('created_at', 'desc')
                 ->get();
             $stock->order_requests = $order_requests;
 
-            // 発注履歴データ
+            // 発注データ
             $initial_orders = InitialOrder::where('name', $stock->name)->where('s_name', $stock->s_name)->orderBy('order_date', 'desc')->get();
             $stock->initial_orders = $initial_orders;
 

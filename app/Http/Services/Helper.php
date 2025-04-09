@@ -2,8 +2,11 @@
 
 namespace App\Http\Services;
 
+use App\Models\InventoryOperation;
+use App\Models\InventoryOperationRecord;
 use App\Models\NotifyQueue;
 use App\Models\NotifyQueueUser;
+use App\Models\StockStorage;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -132,5 +135,26 @@ class Helper
         }
 
         return $status;
+    }
+
+    public static function updateReOrderPoint($stock_storage_id, $stock_id, $quantity)
+    {
+        // 発注依頼を記録
+        $inventoryOperationRecord = new InventoryOperationRecord();
+        $inventoryOperationRecord->inventory_operation_id = 7;
+        $inventoryOperationRecord->stock_id = $stock_id;
+        $inventoryOperationRecord->stock_storage_id = $stock_storage_id;
+        $inventoryOperationRecord->bef_quantity = $quantity;
+        $inventoryOperationRecord->save();
+
+        // 発注点再計算
+        $reorder_point_avg = InventoryOperationRecord::where('stock_storage_id', $stock_storage_id)
+            ->where('inventory_operation_id', 7)
+            ->avg('bef_quantity');
+
+        // 発注点を更新
+        $stock_storage = StockStorage::find($stock_storage_id);
+        $stock_storage->reorder_point = $reorder_point_avg;
+        $stock_storage->save();
     }
 }

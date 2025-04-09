@@ -125,6 +125,7 @@ const uploadFile = () => {
 };
 
 const orderStock = () => {
+
   const hasPendingOrderRequest = props.stock.order_requests.some(
     (order_request) => order_request.status === 0
   );
@@ -141,6 +142,7 @@ const orderStock = () => {
       return;
     }
   }
+
 
   axios
     .post(route("stock.order.store"), {
