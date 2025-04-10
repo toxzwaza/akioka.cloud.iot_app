@@ -21,7 +21,7 @@ class AcceptController extends Controller
 
         // user_idによって処理を振り分ける
         $query = DB::table('order_requests')
-        ->select('order_requests.id', 'order_requests.stock_id', 'order_requests.id as order_request_id', DB::raw('SUBSTRING(order_requests.accept_flg, LOCATE("storage", order_requests.accept_flg)) as accept_flg'), 'stocks.img_path', 'stocks.name', 'stocks.s_name', 'stocks.price as stock_price', 'stocks.url', 'order_requests.quantity', 'order_requests.created_at', 'users.name as request_user_name', 'order_requests.postage', 'order_requests.calc_price', 'order_requests.price', DB::raw('CONCAT("http://localhost/storage/", SUBSTRING_INDEX(order_requests.file_path, "storage/", -1)) as file_path'), 'suppliers.name as supplier_name', 'users.name as request_user_name')
+        ->select('order_requests.id', 'order_requests.stock_id', 'order_requests.id as order_request_id', 'order_requests.accept_flg', 'stocks.img_path', 'stocks.name', 'stocks.s_name', 'stocks.price as stock_price', 'stocks.url', 'order_requests.quantity', 'order_requests.created_at', 'users.name as request_user_name', 'order_requests.postage', 'order_requests.calc_price', 'order_requests.price','order_requests.file_path', 'suppliers.name as supplier_name', 'users.name as request_user_name')
             ->join('stocks', 'stocks.id',  'order_requests.stock_id')
             ->leftJoin('users', 'users.id', 'order_requests.request_user_id')
             ->where('status', 0)

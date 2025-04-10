@@ -12,6 +12,8 @@ const approval_modal = ref(false);
 const viewerUrl = ref("/pdfjs/web/main_viewer.html");
 
 const openApproval = order_request => {
+  console.log(order_request)
+  
   viewerUrl.value = `/pdfjs/web/main_viewer.html?file=/${order_request.file_path}`
   approval_modal.value = true;
 };
