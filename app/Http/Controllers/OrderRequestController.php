@@ -31,8 +31,7 @@ class OrderRequestController extends Controller
             // 保存（storage/app/public/order_request に保存）
             $path = $file->storeAs('order_request', $timestampedFilename, 'public');
 
-            // 公開URLを生成（public/storage/order_request/...）
-            $fileUrl = Storage::disk('public')->url('order_request/' . $timestampedFilename);
+            $fileUrl = 'storage/' . $path;
 
             // 該当データを取得し、パスを保存
             $order_request = OrderRequest::find($order_request_id);
