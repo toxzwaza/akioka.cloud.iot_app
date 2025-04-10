@@ -1,6 +1,6 @@
 <script setup>
 import AcceptLayout from "@/Layouts/AcceptLayout.vue";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { getImgPath } from "@/Helper/method";
 
 const props = defineProps({
@@ -8,6 +8,13 @@ const props = defineProps({
   order_requests: Array,
 });
 
+const approval_modal = ref(false);
+const viewerUrl = ref("/pdfjs/web/main_viewer.html");
+
+const openApproval = order_request => {
+  viewerUrl.value = `/pdfjs/web/main_viewer.html?file=/${order_request.file_path}`
+  approval_modal.value = true;
+};
 const sendAccept = (order_request_id, action) => {
   let accept_flg;
   let msg = "";
@@ -110,7 +117,7 @@ onMounted(() => {
                     発注依頼者
                   </th>
                   <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 w-20"
                   ></th>
                   <th
                     class="w-10 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tr rounded-br"
@@ -153,18 +160,26 @@ onMounted(() => {
                   <td class="px-4 py-8 text-lg text-gray-900">
                     {{ order_request.request_user_name }}
                   </td>
-                  <td class="w-10 text-center">
+                  <td class="w-10 text-center px-8">
+                    <button
+                      v-if="order_request.file_path"
+                      @click.prevent="openApproval(order_request)"
+                      class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                    >
+                      稟議書
+                    </button>
+                    <span v-else>稟議書未登録</span>
+                  </td>
+                  <td class="w-20 text-center">
                     <button
                       @click.prevent="sendAccept(order_request.id, 'accept')"
-                      class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                      class="mr-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
                     >
                       承認
                     </button>
-                  </td>
-                  <td class="w-10 text-center">
                     <button
                       @click.prevent="sendAccept(order_request.id, 'reject')"
-                      class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                      class="ml-2 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
                     >
                       否認
                     </button>
@@ -177,6 +192,16 @@ onMounted(() => {
       </section>
     </template>
   </AcceptLayout>
+
+  <!-- 稟議書用モーダル -->
+  <div v-if="approval_modal" id="approval_modal">
+    <div class="button_container flex justify-end">
+      <button @click="approval_modal = false" class="text-white font-bold py-2 px-4 rounded">閉じる</button>
+    </div>
+    <div class="main_container">
+      <iframe ref="pdfViewer" :src="viewerUrl"></iframe>
+    </div>
+  </div>
 </template>
 <style scoped lang="scss">
 #order_request_table {
@@ -207,6 +232,27 @@ onMounted(() => {
       height: 100%;
       width: 100%;
       object-fit: contain;
+    }
+  }
+}
+
+#approval_modal {
+  position: fixed;
+  bottom: 0;
+  height: 90vh;
+  width: 100vw;
+
+  & .button_container {
+    // height: 8%;
+    background-color: #363636;
+    border-bottom: 3px solid rgb(211, 211, 211);
+
+  }
+  & .main_container {
+    height: 100%;
+    & iframe {
+      height: 100%;
+      width: 100%;
     }
   }
 }
