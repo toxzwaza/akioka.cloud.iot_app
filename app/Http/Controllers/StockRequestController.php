@@ -38,6 +38,7 @@ class StockRequestController extends Controller
 
         // 物品依頼を取得
         $stock_request_orders = StockRequestOrder::select('stock_request_orders.id', 'stock_request_orders.process_id', 'stock_request_orders.stock_id', 'stock_request_orders.status', 'stock_request_orders.quantity', 'stock_request_orders.order_flg', 'stock_request_orders.created_at', 'users.name as user_name')->join('users', 'users.id', 'stock_request_orders.user_id')
+        ->where('stock_request_orders.status', 0)
             ->orderBy('stock_request_orders.created_at', 'desc')->get();
 
         return Inertia::render('Stock/Request/Home', ['processes' => $processes, 'stock_requests' => $stock_requests, 'users' => $users, 'stock_request_orders' => $stock_request_orders]);
