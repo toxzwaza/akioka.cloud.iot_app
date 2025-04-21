@@ -177,7 +177,7 @@ onMounted(() => {
 <template>
   <StockLayout :title="'在庫管理システム'">
     <template #content>
-      <form class="w-full max-w-lg">
+      <form class="w-full">
         <h1 class="text-center text-3xl mb-4 text-gray-700 font-bold">
           稟議書
         </h1>
