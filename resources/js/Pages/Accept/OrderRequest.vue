@@ -14,8 +14,14 @@ const viewerUrl = ref("/pdfjs/web/main_viewer.html");
 const openApproval = order_request => {
   console.log(order_request)
   
-  viewerUrl.value = `/pdfjs/web/main_viewer.html?file=/${order_request.file_path}`
-  approval_modal.value = true;
+  if (order_request.file_path) {
+    const filePath = order_request.file_path.startsWith('/storage/') 
+      ? order_request.file_path 
+      : `/storage/${order_request.file_path}`;
+    
+    viewerUrl.value = `/pdfjs/web/main_viewer.html?file=${filePath}`;
+    approval_modal.value = true;
+  }
 };
 const sendAccept = (order_request_id, action) => {
   let accept_flg;
@@ -196,12 +202,24 @@ onMounted(() => {
   </AcceptLayout>
 
   <!-- 稟議書用モーダル -->
-  <div v-if="approval_modal" id="approval_modal">
-    <div class="button_container flex justify-end">
-      <button @click="approval_modal = false" class="text-white font-bold py-2 px-4 rounded">閉じる</button>
-    </div>
-    <div class="main_container">
-      <iframe ref="pdfViewer" :src="viewerUrl"></iframe>
+  <div v-if="approval_modal" id="approval_modal" class="fixed inset-0 bg-gray-900 bg-opacity-50">
+    <div class="fixed inset-0 flex flex-col">
+      <div class="button_container flex justify-end p-4 bg-gray-800">
+        <button 
+          @click="approval_modal = false" 
+          class="text-white font-bold py-2 px-4 rounded hover:bg-gray-700"
+        >
+          閉じる
+        </button>
+      </div>
+      <div class="flex-1 bg-white">
+        <iframe 
+          ref="pdfViewer" 
+          :src="viewerUrl"
+          class="w-full h-full"
+          frameborder="0"
+        ></iframe>
+      </div>
     </div>
   </div>
 </template>
@@ -239,22 +257,16 @@ onMounted(() => {
 }
 
 #approval_modal {
-  position: fixed;
-  bottom: 0;
-  height: 90vh;
-  width: 100vw;
-
-  & .button_container {
-    // height: 8%;
-    background-color: #363636;
-    border-bottom: 3px solid rgb(211, 211, 211);
-
+  z-index: 50;
+  
+  .button_container {
+    border-bottom: 1px solid #4a5568;
   }
-  & .main_container {
-    height: 100%;
-    & iframe {
-      height: 100%;
+  
+  .main_container {
+    iframe {
       width: 100%;
+      height: 100%;
     }
   }
 }

@@ -5,6 +5,10 @@ import { Link } from "@inertiajs/vue3";
 import { getImgPath } from "@/Helper/method";
 import { ref } from "vue";
 
+const props = defineProps({
+  processes: Array
+})
+
 const stocks = ref([]);
 const handleUpdateStocks = (data) => {
   stocks.value = data;
@@ -22,7 +26,7 @@ const search_box = ref(true);
     <template #content>
       <!-- 検索フォームコンポーネント -->
       <div :class="{ 'hide' : !search_box }">
-        <StockForm  @updateStocks="handleUpdateStocks" />
+        <StockForm  @updateStocks="handleUpdateStocks" :processes="props.processes"/>
       </div>
       <button
         v-if="!search_box"
@@ -74,7 +78,7 @@ const search_box = ref(true);
                   :href="route('stock.inventory.show', {stock_id: stock.id,  stock_storage_id: stock.stock_storage_id ?? 0 })"
                   :class="{ 'mt-4 inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white  rounded-lg  focus:ring-4 focus:outline-none dark:focus:ring-blue-800 focus:ring-blue-300' : true , 'bg-blue-500 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500' : stock.stock_storage_id, 'bg-gray-500 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500' : !stock.stock_storage_id}"
                 >
-                  {{ stock.stock_storage_id ? '詳細画面へ進む' : '格納先アドレスを登録' }}
+                  {{ stock.stock_storage_id ? '詳細画面へ進む' : '詳細画面へ進む' }}
                   <svg
                     class="rtl:rotate-180 w-3.5 h-3.5 ms-2"
                     aria-hidden="true"

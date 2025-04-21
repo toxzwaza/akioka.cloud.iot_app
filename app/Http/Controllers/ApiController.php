@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Group;
+use App\Models\InitialOrder;
 use App\Models\Stock;
 use App\Models\StockAlias;
 use App\Models\StockStorage;
@@ -34,37 +35,60 @@ class ApiController extends Controller
         $address_id = $request->address_id;
         $stock_id = $request->stock_id;
         $alias = $request->alias;
+        $process_id = $request->process_id;
+
 
         try {
-            $query = Stock::select('stocks.*', 'stock_storages.id as stock_storage_id', 'stock_storages.quantity', 'locations.name as location_name', 'storage_addresses.id as storage_address_id', 'storage_addresses.address')
-                ->distinct()
-                ->leftJoin('stock_storages', 'stocks.id',  'stock_storages.stock_id')
-                ->leftJoin('storage_addresses', 'stock_storages.storage_address_id', 'storage_addresses.id')
-                ->leftJoin('locations', 'storage_addresses.location_id', 'locations.id')
-                ->leftJoin('stock_aliases', 'stocks.id', 'stock_aliases.stock_id')
-                ->where('stocks.del_flg', 0)
-                ->orderBy('updated_at', 'desc');
+            if (!$process_id) {
+                $query = Stock::select('stocks.*', 'stock_storages.id as stock_storage_id', 'stock_storages.quantity', 'locations.name as location_name', 'storage_addresses.id as storage_address_id', 'storage_addresses.address')
+                    ->leftJoin('stock_storages', 'stocks.id',  'stock_storages.stock_id')
+                    ->leftJoin('storage_addresses', 'stock_storages.storage_address_id', 'storage_addresses.id')
+                    ->leftJoin('locations', 'storage_addresses.location_id', 'locations.id')
+                    ->leftJoin('stock_aliases', 'stocks.id', 'stock_aliases.stock_id')
+                    ->where('stocks.del_flg', 0)
+                    ->distinct()
+                    ->orderBy('locations.id', 'desc')
+                    ->orderBy('updated_at', 'desc');
 
 
 
-            if ($stock_name) {
-                $query->where('stocks.name', 'like', '%' . $stock_name . '%')->orWhere('stocks.s_name', 'like', '%' . $stock_name . '%');
+                if ($stock_name) {
+                    $query->where('stocks.name', 'like', '%' . $stock_name . '%')->orWhere('stocks.s_name', 'like', '%' . $stock_name . '%');
+                }
+
+                if ($alias) {
+                    $query->where('stock_aliases.alias', 'like', '%' . $alias . '%');
+                }
+
+                if ($address_id) {
+                    $query->where('storage_address_id', $request->address_id);
+                }
+
+                // 在庫IDもしくはJANコードから検索
+                if ($stock_id) {
+                    $query->where('stocks.id', $request->stock_id)->orWhere('stocks.jan_code', $stock_id);
+                }
+
+                $stocks = $query->get();
+
+            } else {
+
+                $stocks =
+                    InitialOrder::select('stocks.*', 'stock_storages.id as stock_storage_id', 'stock_storages.quantity', 'locations.name as location_name', 'storage_addresses.id as storage_address_id', 'storage_addresses.address')
+                    ->Join('users', 'users.id', 'initial_orders.order_user_id')
+                    ->Join('stocks', 'stocks.id', 'initial_orders.stock_id')
+                    ->leftJoin('stock_storages', 'stocks.id',  'stock_storages.stock_id')
+                    ->leftJoin('storage_addresses', 'stock_storages.storage_address_id', 'storage_addresses.id')
+                    ->leftJoin('locations', 'storage_addresses.location_id', 'locations.id')
+                    ->leftJoin('stock_aliases', 'stocks.id', 'stock_aliases.stock_id')
+                    ->where('users.process_id', $process_id)
+                    ->where('stocks.del_flg', 0)
+                    ->distinct()
+                    ->orderBy('locations.id', 'desc')
+                    ->orderBy('updated_at', 'desc')
+                    ->get();
             }
 
-            if ($alias) {
-                $query->where('stock_aliases.alias', 'like', '%' . $alias . '%');
-            }
-
-            if ($address_id) {
-                $query->where('storage_address_id', $request->address_id);
-            }
-
-            // 在庫IDもしくはJANコードから検索
-            if ($stock_id) {
-                $query->where('stocks.id', $request->stock_id)->orWhere('stocks.jan_code', $stock_id);
-            }
-
-            $stocks = $query->get();
 
 
             return response()->json($stocks);
@@ -73,12 +97,14 @@ class ApiController extends Controller
         }
     }
 
-    public function getAllStocks(){
+    public function getAllStocks()
+    {
         $stocks = Stock::select('id', 'name', 's_name')->where('del_flg', 0)->get();
         return response()->json($stocks);
     }
 
-    public function getStockByNameAndSName(Request $request){
+    public function getStockByNameAndSName(Request $request)
+    {
         $name = $request->name;
         $s_name = $request->s_name;
         $com_name = $request->com_name;
@@ -86,30 +112,31 @@ class ApiController extends Controller
         $stock = null;
         $supplier = null;
 
-        if($com_name){
+        if ($com_name) {
             $supplier = Supplier::where('name', $com_name)->first();
         }
 
-        if($supplier){
+        if ($supplier) {
             $stock = StockSupplier::select('stocks.id', 'stock_suppliers.supplier_id', 'stock_suppliers.lead_time')
-            ->join('stocks', 'stocks.id', 'stock_suppliers.stock_id')
-            ->where('stocks.name', $name)
-            ->where('stocks.s_name', $s_name)
-            ->where('stocks.del_flg', 0)
-            ->where('stock_suppliers.supplier_id', $supplier->id)
-            ->first();
-        }else{
+                ->join('stocks', 'stocks.id', 'stock_suppliers.stock_id')
+                ->where('stocks.name', $name)
+                ->where('stocks.s_name', $s_name)
+                ->where('stocks.del_flg', 0)
+                ->where('stock_suppliers.supplier_id', $supplier->id)
+                ->first();
+        } else {
             $stock = Stock::select('id')
-            ->where('name', $name)
-            ->where('s_name', $s_name)
-            ->where('del_flg', 0)
-            ->first();
+                ->where('name', $name)
+                ->where('s_name', $s_name)
+                ->where('del_flg', 0)
+                ->first();
         }
 
         return response()->json($stock);
     }
 
-    public function getStockByAlias(Request $request){
+    public function getStockByAlias(Request $request)
+    {
         $alias = $request->alias;
         $stock_aliases = StockAlias::select('stock_id')->where('alias', $alias)->get();
 
@@ -162,8 +189,9 @@ class ApiController extends Controller
 
 
     // 発注依頼ユーザー紐づけ用途
-    public function getUserAndProcess(){
-        $users = User::select('users.id', 'users.name','users.process_id', 'processes.name as process_name')->leftJoin('processes', 'processes.id', 'users.process_id')->where('del_flg', 0)->get();
+    public function getUserAndProcess()
+    {
+        $users = User::select('users.id', 'users.name', 'users.process_id', 'processes.name as process_name')->leftJoin('processes', 'processes.id', 'users.process_id')->where('del_flg', 0)->get();
 
         return response()->json($users);
     }

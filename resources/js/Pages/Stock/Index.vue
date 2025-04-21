@@ -23,6 +23,26 @@ import { Link } from "@inertiajs/vue3";
           /></Link>
         </div>
 
+        <!-- 定期物品依頼 -->
+        <div class="w-1/2 p-4">
+          <a :href="route('stock.request.home')"
+            ><img
+              class=""
+              src="/images/stocks/icons/per_stock_request.png"
+              alt="現場物品依頼"
+          /></a>
+        </div>
+
+        <!-- 新規品依頼 -->
+        <div class="w-1/2 p-4">
+          <a :href="route('stock.new_item.home')"
+            ><img
+              class=""
+              src="/images/stocks/icons/approval.png"
+              alt="新規品依頼"
+          /></a>
+        </div>
+
         <!-- 納品画面 -->
         <div class="w-1/2 p-4">
           <Link :href="route('stock.receive.home')"
@@ -31,16 +51,6 @@ import { Link } from "@inertiajs/vue3";
               src="/images/stocks/icons/receive.png"
               alt="納品画面"
           /></Link>
-        </div>
-
-        <!-- 現場物品依頼 -->
-        <div class="w-1/2 p-4">
-          <a :href="route('stock.request.home')"
-            ><img
-              class=""
-              src="/images/stocks/icons/request.png"
-              alt="現場物品依頼"
-          /></a>
         </div>
 
         <!-- 滞留画面 -->

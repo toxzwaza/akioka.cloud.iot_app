@@ -9,6 +9,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\LunchController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\NewItemController;
 use App\Http\Controllers\NotifyController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderRequestController;
@@ -124,6 +125,10 @@ Route::post('/requests/order', [StockRequestController::class, 'order'])->name('
 // Route::get('/requests/stocks', [RequestController::class, 'index'])->name('stock.request');
 // Route::get('/requests/stocks/getRequestStocks', [RequestController::class, 'getRequestStocks'])->name('stock.request.getRequestStocks');
 
+// 新規品依頼画面
+Route::get('/new_item', [NewItemController::class, 'home'])->name('stock.new_item.home');
+Route::post('/stock/new-item/store', [NewItemController::class, 'store'])->name('stock.new-item.store');
+
 //////////弁当注文用 //////////
 Route::get('/lunch', [LunchController::class, 'index'])->name('lunch.home');
 // 注文
@@ -185,5 +190,6 @@ Route::get('/getTempHumiCo2', [DataController::class, 'getTempHumiCo2'])->name('
 
 
 Route::get('/test', [TestController::class, 'test'])->name('test');
+
 
 
