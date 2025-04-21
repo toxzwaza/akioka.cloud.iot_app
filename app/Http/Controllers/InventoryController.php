@@ -6,9 +6,11 @@ use App\Models\InitialOrder;
 use App\Models\InventoryOperationRecord;
 use App\Models\Location;
 use App\Models\OrderRequest;
+use App\Models\Process;
 use App\Models\Stock;
 use App\Models\StockAlias;
 use App\Models\StockStorage;
+use App\Models\StockSupplier;
 use App\Models\StorageAddress;
 use App\Models\User;
 use Carbon\Carbon;
@@ -28,31 +30,34 @@ class InventoryController extends Controller
         $request_user = null;
 
         $stock = Stock::find($stock_id);
+
         $stock_storage = null;
         $stock->shipments = null;
         $stock->receives = null;
         $stock->aliases = null;
-        
+
+        // 物品依頼用ユーザーデータ
+        $processes = Process::all();
+        $users = User::where('del_flg', 0)->get();
+
+        // 発注依頼を取得
+        $order_requests = OrderRequest::select('order_requests.*', 'users.name as user_name', 'request_users.name as request_user_name')
+            ->leftJoin('users', 'order_requests.user_id', '=', 'users.id')
+            ->leftJoin('users as request_users', 'order_requests.request_user_id', 'request_users.id')
+            ->where('stock_id', $stock_id)
+            ->where('order_requests.del_flg', 0)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $stock->order_requests = $order_requests;
+
+        // 発注データ
+        $initial_orders = InitialOrder::where('name', $stock->name)->where('s_name', $stock->s_name)->orderBy('order_date', 'desc')->get();
+        $stock->initial_orders = $initial_orders;
 
         if ($stock_storage_id) {
             $stock_storage = StockStorage::select('stock_storages.*', 'locations.name as location_name', 'storage_addresses.address')->join('storage_addresses', 'stock_storages.storage_address_id', 'storage_addresses.id')
                 ->join('locations', 'storage_addresses.location_id', 'locations.id')->where('stock_storages.id', $stock_storage_id)->first();
             $stock->stock_storage = $stock_storage;
-
-
-            // 発注依頼を取得
-            $order_requests = OrderRequest::select('order_requests.*', 'users.name as user_name', 'request_users.name as request_user_name')
-                ->leftJoin('users', 'order_requests.user_id', '=', 'users.id')
-                ->leftJoin('users as request_users', 'order_requests.request_user_id','request_users.id')
-                ->where('stock_id', $stock_id)
-                ->where('order_requests.del_flg', 0)
-                ->orderBy('created_at', 'desc')
-                ->get();
-            $stock->order_requests = $order_requests;
-
-            // 発注データ
-            $initial_orders = InitialOrder::where('name', $stock->name)->where('s_name', $stock->s_name)->orderBy('order_date', 'desc')->get();
-            $stock->initial_orders = $initial_orders;
 
             // 過去12ヶ月間の出庫データ取得
             $shipments = InventoryOperationRecord::where('stock_id', $stock_id)
@@ -102,12 +107,14 @@ class InventoryController extends Controller
 
             // 発注依頼者を取得
             if ($request_user_id) {
-                $request_user = User::select('id', 'name')->find($request_user_id);
-                
+                $request_user = User::select('id', 'name', 'process_id')->find($request_user_id);
             }
         }
 
-        return Inertia::render('Stock/Inventory', ['stock' => $stock, 'request_user' => $request_user]);
+        // 手配先情報を取得
+        $stock_supplier = StockSupplier::where('stock_id', $stock_id)->first();
+        $stock->stock_supplier = $stock_supplier;
+        return Inertia::render('Stock/Inventory', ['stock' => $stock, 'request_user' => $request_user, 'processes' => $processes, 'users' => $users]);
     }
 
 
@@ -204,7 +211,7 @@ class InventoryController extends Controller
                 $stock_storage->quantity = $stock_storage->quantity + $quantity;
                 $stock_storage->save();
             }
-            
+
             // 既存の格納先から数量を減らす
             if ($stock_storage_id) {
                 $already_stock_storage = StockStorage::find($stock_storage_id);

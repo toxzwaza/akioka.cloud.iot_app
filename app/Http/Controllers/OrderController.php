@@ -28,6 +28,9 @@ class OrderController extends Controller
         $stock_id = $request->stock_id;
         $request_user_id = $request->request_user_id;
         $stock_storage_id = $request->stock_storage_id;
+        $desire_delivery_date = $request->desire_delivery_date;
+        $quantity = $request->quantity;
+        $description = $request->description;
 
         $stock = null;
 
@@ -46,10 +49,12 @@ class OrderController extends Controller
             $order_request->stock_id = $stock_id;
             $order_request->request_user_id = $request_user_id == 0 ? 117 : $request_user_id;
             $order_request->price = $stock->price;
-            $order_request->quantity = 1;
+            $order_request->quantity =  $quantity;
+            $order_request->desire_delivery_date = $desire_delivery_date;
+            $order_request->description = $description;
 
             if ($stock->price !== null) {
-                $order_request->calc_price = $stock->price;
+                $order_request->calc_price = $stock->price * $quantity;
             }
             if ($stock_supplier) {
                 $order_request->supplier_id = $stock_supplier->supplier_id;

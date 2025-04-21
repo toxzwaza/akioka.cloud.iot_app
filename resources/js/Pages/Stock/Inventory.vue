@@ -7,11 +7,14 @@ import { getImgPath, changeDateFormat } from "@/Helper/method";
 import Chart from "@/Components/Stock/Inventory/BarChart.vue";
 import PickStorageAddress from "@/Components/Stock/Inventory/PickStorageAddress.vue";
 import EditAlias from "@/Components/Stock/Inventory/EditAlias.vue";
+import StockRequest from "@/Components/Stock/StockRequest.vue";
 import _ from "lodash";
 
 const props = defineProps({
   stock: Object,
   request_user: Object,
+  processes: Array,
+  users: Array,
 });
 
 const request_user = reactive({
@@ -124,8 +127,7 @@ const uploadFile = () => {
     });
 };
 
-const orderStock = () => {
-
+const handleStockRequest = (form) => {
   const hasPendingOrderRequest = props.stock.order_requests.some(
     (order_request) => order_request.status === 0
   );
@@ -136,19 +138,21 @@ const orderStock = () => {
   } else {
     if (
       !confirm(
-        `以下の内容で発注依頼を行います。よろしいですか？\n発注依頼者: ${request_user.name}\n物品: ${props.stock.name}`
+        `以下の内容で発注依頼を行います。よろしいですか？\n物品: ${props.stock.name}`
       )
     ) {
       return;
     }
   }
 
-
   axios
     .post(route("stock.order.store"), {
-      stock_id: props.stock.id,
-      request_user_id: request_user.id,
-      stock_storage_id: stock_storage.value.id,
+      stock_id: props.stock?.id,
+      request_user_id: form?.user_id,
+      stock_storage_id: stock_storage?.value?.id,
+      desire_delivery_date: form?.desire_delivery_date,
+      quantity: form?.quantity,
+      description: form?.description,
     })
     .then((res) => {
       console.log(res.data);
@@ -417,9 +421,9 @@ onMounted(() => {
                 ><img src="/images/stocks/icons/shipment.png" alt="出庫画面"
               /></Link>
 
-              <button @click="orderStock">
+              <!-- <button @click="orderStock">
                 <img src="/images/stocks/icons/order.png" alt="発注画面" />
-              </button>
+              </button> -->
             </div>
 
             <!-- 滞留情報を表示 -->
@@ -455,9 +459,9 @@ onMounted(() => {
           </section>
 
           <!-- 格納先が登録されていない場合 -->
-          <section v-else>
-            <h1 class="text-lg mb-4 text-gray-600 font-bold">
-              以下より格納先を新規登録してください。
+          <section v-else class="bg-gray-50 p-2 rounded">
+            <h1 class="text-xl mb-4 text-gray-600 font-bold">
+              ロケーション登録
             </h1>
             <PickStorageAddress
               :quantity="0"
@@ -466,8 +470,16 @@ onMounted(() => {
           </section>
         </div>
       </div>
+      <!-- 物品依頼画面 -->
+      <StockRequest
+        :processes="props.processes"
+        :stock="props.stock"
+        :users="props.users"
+        :request_user="props.request_user"
+        @submit="handleStockRequest"
+      />
 
-      <div v-if="stock_storage">
+      <div>
         <section
           id="order_container"
           :class="{

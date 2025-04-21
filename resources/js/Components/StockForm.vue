@@ -8,6 +8,7 @@ const props = defineProps({
   orderList: Array,
   title: String,
   stock_storage: Object,
+  processes: Array
 });
 
 // 出庫時のGIF・出庫音再生用
@@ -33,6 +34,7 @@ const form = reactive({
     alias: "",
     address_id: null,
     stock_id: null,
+    process_id: 0
   },
   shipment: {
     stock_id: null,
@@ -82,6 +84,14 @@ const clickedButton = (button_name) => {
   console.log(form);
   switch (button_name) {
     case "search":
+      if(!form.search.stock_name &&
+        !form.search.alias &&
+        !form.search.address_id &&
+        !form.search.stock_id &&
+        !form.search.process_id
+      ){
+        return alert('検索項目を入力して下さい。')
+      }
       // 検索ボタンが押下された場合の処理
       axios
         .get(route("getStocks"), {
@@ -90,6 +100,7 @@ const clickedButton = (button_name) => {
             alias: form.search.alias,
             address_id: form.search.address_id,
             stock_id: form.search.stock_id,
+            process_id: form.search.process_id
           },
         })
         .then((res) => {
@@ -519,6 +530,16 @@ onMounted(() => {
               placeholder="製品ID or JANコード"
               v-model="form.search.stock_id"
             />
+          </div>
+        </div>
+        <!-- 工程選択 -->
+        <div class="flex flex-wrap -mx-3 mb-6">
+          <div class="w-full px-3">
+            <label for="" class="text-red-500 font-bold" >過去の発注から検索する場合はコチラから工程を選択してください。</label>
+            <select name="" id="" v-model="form.search.process_id" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 mt-2">
+              <option value="0">未選択</option>
+              <option v-for="process in props.processes" :key="process.id" :value="process.id">{{ process.name }}</option>
+            </select>
           </div>
         </div>
 
