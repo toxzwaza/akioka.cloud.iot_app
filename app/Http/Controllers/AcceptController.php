@@ -79,7 +79,7 @@ class AcceptController extends Controller
     {
         // 承認ID
         $order_request_approval_id = $request->order_request_approval_id;
-        $status = $request->status;
+        $flg = $request->status;
 
         $status = true;
         $msg = "";
@@ -94,7 +94,7 @@ class AcceptController extends Controller
             $stock = Stock::find($order_request->stock_id);
 
 
-            switch ($status) {
+            switch ($flg) {
 
 
                 case 1: //承認
@@ -118,7 +118,7 @@ class AcceptController extends Controller
 
                     break;
                 case 2: //非承認
-                    $order_request->status = 2;
+                    $order_request->accept_flg = 3;
                     $order_request->save();
 
                     //  コメントを取得してコメントも送信
