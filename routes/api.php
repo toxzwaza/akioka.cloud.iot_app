@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\ChatGptController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\OrderRequestController;
 use Illuminate\Http\Request;
@@ -16,3 +17,6 @@ Route::get('/stock/uploadFile', [ApiController::class, 'uploadFile'])->name('sto
 
 // メッセージAPI
 Route::post('/sendMessage', [MessageController::class, 'sendMessage'])->name('sendMessage');
+
+// ChatGPT API
+Route::get('/chatgpt', [ChatGptController::class, 'api'])->name('chatgpt.api');
