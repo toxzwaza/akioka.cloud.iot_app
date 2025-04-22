@@ -197,10 +197,8 @@ const handleChatGpt = (flg) => {
 
   if (message) {
     axios
-      .get(route("chatgpt.api"), {
-        params: {
-          message: `項目名(${target})についてのテキスト → ${message}`,
-        },
+      .post(route("chatgpt.api"), {
+        message: `項目名(${target})についてのテキスト → ${message}`,
       })
       .then((res) => {
         console.log(res.data)

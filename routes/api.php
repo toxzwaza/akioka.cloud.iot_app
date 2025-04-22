@@ -19,4 +19,4 @@ Route::get('/stock/uploadFile', [ApiController::class, 'uploadFile'])->name('sto
 Route::post('/sendMessage', [MessageController::class, 'sendMessage'])->name('sendMessage');
 
 // ChatGPT API
-Route::get('/chatgpt', [ChatGptController::class, 'api'])->name('chatgpt.api');
+Route::post('/chatgpt', [ChatGptController::class, 'api'])->name('chatgpt.api');
