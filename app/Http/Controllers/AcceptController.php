@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Services\Helper;
 use App\Models\OrderRequest;
+use App\Models\OrderRequestApproval;
 use App\Models\Stock;
 use App\Models\StockSupplier;
 use App\Models\User;
@@ -19,23 +20,50 @@ class AcceptController extends Controller
     {
         $user_id = $request->user_id;
 
-        // user_idによって処理を振り分ける
-        $query = DB::table('order_requests')
-        ->select('order_requests.id', 'order_requests.stock_id', 'order_requests.id as order_request_id', 'order_requests.accept_flg', 'stocks.img_path', 'stocks.name', 'stocks.s_name', 'stocks.price as stock_price', 'stocks.url', 'order_requests.quantity', 'order_requests.created_at', 'users.name as request_user_name', 'order_requests.postage', 'order_requests.calc_price', 'order_requests.price', DB::raw('CONCAT("/storage/", SUBSTRING_INDEX(order_requests.file_path, "storage/", -1)) as file_path'), 'suppliers.name as supplier_name', 'users.name as request_user_name')
-            ->join('stocks', 'stocks.id',  'order_requests.stock_id')
-            ->leftJoin('users', 'users.id', 'order_requests.request_user_id')
-            ->where('status', 0)
-            ->join('suppliers', 'suppliers.id', 'order_requests.supplier_id')
-            ->where('order_requests.del_flg', 0)
-            ->where('accept_flg', 1);
+        $query = DB::table('order_request_approvals')
+            ->select(
+                'order_requests.id',
+                'order_requests.stock_id',
+                'order_requests.id as order_request_id',
+                'order_requests.accept_flg',
+                'stocks.img_path',
+                'stocks.name',
+                'stocks.s_name',
+                'stocks.price as stock_price',
+                'stocks.url',
+                'order_requests.quantity',
+                'order_requests.created_at',
+                'users.name as request_user_name',
+                'order_requests.postage',
+                'order_requests.calc_price',
+                'order_requests.price',
+                DB::raw('CONCAT("/storage/", SUBSTRING_INDEX(order_requests.file_path, "storage/", -1)) as file_path'),
+                'suppliers.name as supplier_name',
+                'order_request_approvals.id as order_request_approval_id',
+                'order_request_approvals.final_flg',
+                'order_request_approvals.user_id as approval_user_id'
+            )
+            ->where('order_request_approvals.status', 0)
+            ->join('order_requests', 'order_requests.id', '=', 'order_request_approvals.order_request_id')
+            ->join('stocks', 'stocks.id', '=', 'order_requests.stock_id')
+            ->leftJoin('users', 'users.id', '=', 'order_requests.request_user_id')
+            ->join('suppliers', 'suppliers.id', '=', 'order_requests.supplier_id')
+            ->where('order_requests.status', '=', 0)
+            ->where('order_requests.del_flg', '=', 0)
+            ->where('order_requests.accept_flg', '=', 1);
 
         if ($user_id == 63) { // 常務
-            $query->where('new_stock_flg', 1);
-        } elseif ($user_id == 36) { // 部長
-            $query->where('new_stock_flg', 0);
-        } else {
-            echo '<p>承認権限はありません。</p>';
-            return;
+            $query->where('order_request_approvals.user_id', 63);
+        } else if ($user_id == 36) { // 部長
+            $query->where('order_request_approvals.user_id', 36);
+        } else if ($user_id == 2) { // 社長
+            $query->where('order_request_approvals.user_id', 2);
+        } else if ($user_id == 16) { //梶谷
+            $query->where('order_request_approvals.user_id', 16);
+        } else if ($user_id == 37) { //長谷川
+            $query->where('order_request_approvals.user_id', 37);
+        } else if ($user_id == 84) { //宮原
+            $query->where('order_request_approvals.user_id', 84);
         }
 
         $order_requests = $query->get();
@@ -49,32 +77,62 @@ class AcceptController extends Controller
 
     public function update(Request $request)
     {
-
-        $order_request_id = $request->order_request_id;
-        $accept_flg = $request->accept_flg;
+        // 承認ID
+        $order_request_approval_id = $request->order_request_approval_id;
+        $status = $request->status;
 
         $status = true;
+        $msg = "";
 
 
         try {
-            $order_request = OrderRequest::find($order_request_id);
-            $order_request->accept_flg = $accept_flg;
-            // $order_request->status = 1;
-            $order_request->save();
+            $order_request_approval = OrderRequestApproval::find($order_request_approval_id);
+            $order_request_approval->status = $status;
+            $order_request_approval->save();
 
+            $order_request = OrderRequest::find($order_request_approval->order_request_id);
             $stock = Stock::find($order_request->stock_id);
 
-            $title = "在庫管理システムからの通知です。";
-            $msg = "{$stock->name}{$stock->s_name}が承認されました。";
-            $url = "";
-            $users = [$order_request->user_id];
 
-            // 承認完了通知
-            Helper::createNotifyQueue($title, $msg, $url, $users);
+            switch ($status) {
+
+
+                case 1: //承認
+                    if ($order_request_approval->final_flg) 
+                    {
+                        $order_request->accept_flg = 2;
+                        $order_request->save();
+
+                        Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}が承認されました。", "", [$order_request->user_id]);
+                    } else { //次の承認を有効化
+                        $new_order_request_approval = OrderRequestApproval::where('order_request_id', $order_request_approval->order_request_id)
+                            ->where('id', '>', $order_request_approval->id)
+                            ->where('order_request_id', $order_request_approval->order_request_id)
+                            ->whereNull('status')
+                            ->first();
+                        $new_order_request_approval->status = 0;
+                        $new_order_request_approval->save();
+
+                        Helper::createNotifyQueue("在庫管理システムからの通知です。", "承認依頼を受け付けました。\n\n以下のURLから承認を行ってください。", "https://akioka.cloud/accept/order-request?user_id=" . $new_order_request_approval->user_id, [$new_order_request_approval->user_id]);
+                    }
+
+                    break;
+                case 2: //非承認
+                    $order_request->status = 2;
+                    $order_request->save();
+
+                    //  コメントを取得してコメントも送信
+                    Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。", "", [$order_request->user_id]);
+                    Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。", "", [$order_request->request_user_id]);
+
+                    break;
+            }
+            $order_request->save();
         } catch (Exception $e) {
             $status = false;
+            $msg = $e->getMessage();
         }
 
-        return response()->json(['status' => $status]);
+        return response()->json(['status' => $status, 'msg' => $msg]);
     }
 }
