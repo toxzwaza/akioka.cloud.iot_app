@@ -580,13 +580,13 @@ onMounted(() => {
     </template>
   </StockLayout>
 </template>
-<style scoped style="scss">
+<style lang="scss" scoped>
 #right_container {
   position: sticky;
   top: 3%;
   height: 100vh;
   overflow-y: scroll;
-  /* スクロールバーのスタイリング */
+
   &::-webkit-scrollbar {
     width: 8px;
   }

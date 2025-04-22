@@ -11,37 +11,37 @@ const props = defineProps({
 const approval_modal = ref(false);
 const viewerUrl = ref("/pdfjs/web/main_viewer.html");
 
-const openApproval = order_request => {
-  console.log(order_request)
-  
+const openApproval = (order_request) => {
+  console.log(order_request);
+
   if (order_request.file_path) {
-    const filePath = order_request.file_path.startsWith('/storage/') 
-      ? order_request.file_path 
+    const filePath = order_request.file_path.startsWith("/storage/")
+      ? order_request.file_path
       : `/storage/${order_request.file_path}`;
-    
+
     viewerUrl.value = `/pdfjs/web/main_viewer.html?file=${filePath}`;
     approval_modal.value = true;
   }
 };
-const sendAccept = (order_request_id, action) => {
-  let accept_flg;
+const sendAccept = (order_request_approval_id, action) => {
+  let status;
   let msg = "";
-  if (order_request_id) {
+  if (order_request_approval_id) {
     switch (action) {
-      case "accept":
-        accept_flg = 2;
-        msg = "承認登録が完了しました。";
+      case "accept": //承認
+        msg = "承認が完了しました。";
+        status = 1;
         break;
-      case "reject":
-        accept_flg = 3;
-        msg = "非承認登録が完了しました。";
+      case "reject": //非承認
+        status = 2;
+        msg = "承認を却下しました。"
         break;
     }
 
     axios
       .put(route("accept.order-request.update"), {
-        order_request_id: order_request_id,
-        accept_flg: accept_flg,
+        order_request_approval_id: order_request_approval_id,
+        status: status,
       })
       .then((res) => {
         console.log(res.data);
@@ -180,13 +180,23 @@ onMounted(() => {
                   </td>
                   <td class="w-20 text-center">
                     <button
-                      @click.prevent="sendAccept(order_request.id, 'accept')"
+                      @click.prevent="
+                        sendAccept(
+                          order_request.order_request_approval_id,
+                          'accept'
+                        )
+                      "
                       class="mr-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
                     >
                       承認
                     </button>
                     <button
-                      @click.prevent="sendAccept(order_request.id, 'reject')"
+                      @click.prevent="
+                        sendAccept(
+                          order_request.order_request_approval_id,
+                          'reject'
+                        )
+                      "
                       class="ml-2 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
                     >
                       否認
@@ -202,19 +212,23 @@ onMounted(() => {
   </AcceptLayout>
 
   <!-- 稟議書用モーダル -->
-  <div v-if="approval_modal" id="approval_modal" class="fixed inset-0 bg-gray-900 bg-opacity-50">
+  <div
+    v-if="approval_modal"
+    id="approval_modal"
+    class="fixed inset-0 bg-gray-900 bg-opacity-50"
+  >
     <div class="fixed inset-0 flex flex-col">
       <div class="button_container flex justify-end p-4 bg-gray-800">
-        <button 
-          @click="approval_modal = false" 
+        <button
+          @click="approval_modal = false"
           class="text-white font-bold py-2 px-4 rounded hover:bg-gray-700"
         >
           閉じる
         </button>
       </div>
       <div class="flex-1 bg-white">
-        <iframe 
-          ref="pdfViewer" 
+        <iframe
+          ref="pdfViewer"
           :src="viewerUrl"
           class="w-full h-full"
           frameborder="0"
@@ -258,11 +272,11 @@ onMounted(() => {
 
 #approval_modal {
   z-index: 50;
-  
+
   .button_container {
     border-bottom: 1px solid #4a5568;
   }
-  
+
   .main_container {
     iframe {
       width: 100%;
