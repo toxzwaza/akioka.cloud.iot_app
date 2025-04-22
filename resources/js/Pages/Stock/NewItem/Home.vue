@@ -19,7 +19,7 @@ const form = reactive({
   calc_price: null,
   name: null,
   s_name: null,
-  title: '',
+  title: "",
   content: null,
   main_reason: null,
   sub_reason: null,
@@ -28,6 +28,8 @@ const form = reactive({
 const select_users = ref([]);
 const selectedFiles = ref([]);
 const previewUrls = ref([]);
+
+const gpt_msg = ref([]);
 
 const handleProcessId = (val) => {
   console.log(val);
@@ -59,8 +61,9 @@ const removeFile = (index) => {
 };
 
 const submitForm = () => {
-  if(!validateForm()){ //バリデーション
-    return
+  if (!validateForm()) {
+    //バリデーション
+    return;
   }
 
   const formData = new FormData();
@@ -104,74 +107,135 @@ const submitForm = () => {
 const validateForm = () => {
   // 必須項目のチェック
   if (!form.user_id) {
-    alert('起案者を選択してください');
+    alert("起案者を選択してください");
     return false;
   }
 
   if (!form.evaluation_date) {
-    alert('評価予定日を選択してください'); 
+    alert("評価予定日を選択してください");
     return false;
   }
 
   if (!form.desire_delivery_date) {
-    alert('希望納入日を選択してください'); 
+    alert("希望納入日を選択してください");
     return false;
   }
 
   if (!form.supplier_name) {
-    alert('発注先を入力してください。'); 
+    alert("発注先を入力してください。");
     return false;
   }
 
   if (!form.price) {
-    alert('単価入力してください。'); 
+    alert("単価入力してください。");
     return false;
   }
   if (!form.quantity) {
-    alert('数量を入力してください。'); 
+    alert("数量を入力してください。");
     return false;
   }
   if (!form.calc_price) {
-    alert('金額を入力してください。'); 
+    alert("金額を入力してください。");
     return false;
   }
 
   if (!form.name) {
-    alert('品名を入力してください');
+    alert("品名を入力してください");
     return false;
   }
 
   if (!form.title) {
-    alert('タイトルを入力してください');
+    alert("タイトルを入力してください");
     return false;
   }
 
   if (!form.content) {
-    alert('発注内容を入力してください');
+    alert("発注内容を入力してください");
     return false;
   }
   if (!form.main_reason) {
-    alert('申請理由を入力してください');
+    alert("申請理由を入力してください");
     return false;
   }
   if (!form.sub_reason) {
-    alert('選定理由を入力してください');
+    alert("選定理由を入力してください");
     return false;
   }
 
   // ファイルのバリデーション
   if (selectedFiles.value.length === 0) {
-    alert('物品のイメージ画像を添付してください。');
+    alert("物品のイメージ画像を添付してください。");
     return false;
   }
-
 
   return true;
 };
 
+const handleChatGpt = (flg) => {
+  let message = "";
+  let target = "";
+  console.log(flg)
+
+  switch (flg) {
+    case "title":
+      target = "件名";
+      message = `${form.title}`;
+      break;
+    case "content":
+      target = "発注内容";
+      message = `${form.content}`;
+      break;
+    case "main_reason":
+      target = "申請理由";
+      message = `${form.main_reason}`;
+      break;
+    case "sub_reason":
+      target = "選定理由";
+      message = `${form.sub_reason}`;
+      break;
+  }
+
+  if (message) {
+    axios
+      .get(route("chatgpt.api"), {
+        params: {
+          message: `項目名(${target})についてのテキスト → ${message}`,
+        },
+      })
+      .then((res) => {
+        console.log(res.data)
+        push_gpt_msg(nl2br(res.data))
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+};
+
+const nl2br = (text) => {
+  if (!text) return '';
+  const escapedText = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+  return escapedText.replace(/\n/g, '<br>');
+};
+
+const push_gpt_msg = (msg) => {
+  gpt_msg.value.push({
+    time: new Date().toLocaleTimeString("ja-JP", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    text: msg,
+  });
+};
 
 onMounted(() => {
   select_users.value = props.users;
+  push_gpt_msg(nl2br("稟議書作成AIアシスタントです！\n入力頂いた内容についてアドバイスをおこないます。"))
 });
 </script>
 <template>
@@ -384,6 +448,7 @@ onMounted(() => {
                   class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                   v-model="form.title"
                   placeholder="○○における○○の○○（例：備品管理における発注業務の効率化）"
+                  @change="handleChatGpt('title')"
                 />
               </div>
             </div>
@@ -402,6 +467,7 @@ onMounted(() => {
                   rows="10"
                   class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                   v-model="form.content"
+                  @change="handleChatGpt('content')"
                 ></textarea>
               </div>
             </div>
@@ -421,6 +487,7 @@ onMounted(() => {
                   rows="10"
                   class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                   v-model="form.main_reason"
+                  @change="handleChatGpt('main_reason')"
                 ></textarea>
               </div>
             </div>
@@ -440,6 +507,7 @@ onMounted(() => {
                   rows="10"
                   class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                   v-model="form.sub_reason"
+                  @change="handleChatGpt('sub_reason')"
                 ></textarea>
               </div>
             </div>
@@ -544,7 +612,11 @@ onMounted(() => {
             </h2>
 
             <div>
-              <div class="flex items-start gap-2.5 my-8">
+              <div
+                v-for="msg in gpt_msg"
+                :key="msg.id"
+                class="flex items-start gap-2.5 my-8"
+              >
                 <img
                   class="w-8 h-8 rounded-full"
                   src="/images/stocks/ai_asistant.png"
@@ -559,7 +631,7 @@ onMounted(() => {
                     >
                     <span
                       class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2"
-                      >11:46</span
+                      >{{ msg.time }}</span
                     >
                   </div>
                   <div
@@ -567,8 +639,8 @@ onMounted(() => {
                   >
                     <p
                       class="text-sm font-normal text-gray-900 dark:text-white"
+                      v-html="msg.text"
                     >
-                      稟議書作成AIアシスタントです！入力頂いた内容についてアドバイスをおこないます。
                     </p>
                   </div>
                 </div>

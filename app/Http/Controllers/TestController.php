@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Services\ChatGpt;
 use App\Http\Services\Helper;
 use App\Models\InitialOrder;
 use App\Models\LunchOrder;
@@ -14,6 +15,7 @@ use App\Models\User;
 use App\Services\Method;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 
 class TestController extends Controller
@@ -21,6 +23,7 @@ class TestController extends Controller
     //
     public function test()
     {
-
+        $response = ChatGpt::getResponse();
+        dd($response);
     }
 }
