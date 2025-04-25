@@ -87,7 +87,7 @@ class AcceptController extends Controller
 
         try {
             $order_request_approval = OrderRequestApproval::find($order_request_approval_id);
-            $order_request_approval->status = $status;
+            $order_request_approval->status = $flg;
             $order_request_approval->save();
 
             $order_request = OrderRequest::find($order_request_approval->order_request_id);
