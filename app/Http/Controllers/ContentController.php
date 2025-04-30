@@ -70,10 +70,7 @@ class ContentController extends Controller
             ->leftJoin('users', 'users.name', 'initial_orders.order_user')
             ->leftJoin('processes', 'processes.id', 'users.process_id')
             ->leftJoin('places', 'places.id', 'processes.place_id')
-            ->where(function ($query) {
-                $query->where('receive_flg', 1)
-                    ->Where('none_storage_flg', 1);
-            })
+            ->where('receive_flg', 1)
             ->where('receipt_flg', 0)
             ->where('initial_orders.del_flg', 0)
             ->orderby('initial_orders.updated_at', 'desc');

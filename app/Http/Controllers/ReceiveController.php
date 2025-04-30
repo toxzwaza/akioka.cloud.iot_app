@@ -241,12 +241,14 @@ class ReceiveController extends Controller
     // 納品確定済みで受領されていないもののリスト
     public function getReceiptOrders()
     {
-        $initial_orders = InitialOrder::where(function ($query) {
-            $query->where('receive_flg', 1)
-                ->Where('none_storage_flg', 1);
-        })->where('receipt_flg', 0)->where('del_flg', 0)->orderby('updated_at', 'desc')->get();
+        $initial_orders = InitialOrder::where('receive_flg', 1)
+            ->where('receipt_flg', 0)
+            ->where('del_flg', 0)
+            ->orderby('updated_at', 'desc')->get();
+
 
         foreach ($initial_orders as $order) {
+
             $stock = Stock::find($order->stock_id);
 
             if ($stock) {
@@ -332,6 +334,8 @@ class ReceiveController extends Controller
         // 換算値を反映した実際の納入数
         $calc_quantity = $request->calc_quantity;
 
+        $signage = $request->signage;
+
         $stock_storage_id = $request->stock_storage_id;
         $stock_id = $request->stock_id;
         $storage_address_id = $request->storage_address_id;
@@ -358,6 +362,9 @@ class ReceiveController extends Controller
                 if ($order->quantity == ($quantity_sum + $quantity)) {
                     // 注文分をすべて納品した場合、受け取りフラグを立てる
                     $order->receive_flg = 1;
+                    if (!$signage) {
+                        $order->receipt_flg = 1; //サイネージ非表示
+                    }
                     $order->save();
 
 
@@ -444,10 +451,14 @@ class ReceiveController extends Controller
     public function none_storage($order_id, Request $request)
     {
         $none_storage_flg = $request->none_storage_flg;
+        $signage = $request->signage;
 
         $order = InitialOrder::find($order_id);
         $order->receive_flg = 1;
         $order->none_storage_flg = $none_storage_flg;
+        if (!$signage) {
+            $order->receipt_flg = 1; //サイネージ非表示
+        }
         $order->save();
 
         return to_route('stock.receive.archive');
