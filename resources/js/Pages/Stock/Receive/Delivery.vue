@@ -33,6 +33,7 @@ const form = reactive({
   conversion_flg: 0,
   quantity: props.order.quantity - props.order.split_quantity_sum,
   calc_quantity: props.order.quantity - props.order.split_quantity_sum,
+  signage: 1,
 });
 
 // 在庫データ新規登録用フォーム
@@ -87,7 +88,8 @@ const updateDelivery = () => {
       storage_address_id: form.storage_address_id,
       conversion_flg: form.conversion_flg,
       quantity: form.quantity,
-      calc_quantity: form.calc_quantity
+      calc_quantity: form.calc_quantity,
+      signage: form.signage,
     });
   }
 };
@@ -136,20 +138,19 @@ const handleChangeQuantityPerOrg = () => {
 
 // 納入数変更再計算
 const handleChangeQuantity = () => {
-  if(form.quantity > props.order.quantity){
-    alert('発注数より大きい数が入力されています。')
-    form.quantity = props.order.quantity
-  }else{
+  if (form.quantity > props.order.quantity) {
+    alert("発注数より大きい数が入力されています。");
+    form.quantity = props.order.quantity;
+  } else {
     // 小さい場合
-    if(form.conversion_flg){
-      calcConversionQuantity()
-    }else{
-      console.log(storage_quantity.value, form.quantity)
-      form.calc_quantity =  form.quantity
+    if (form.conversion_flg) {
+      calcConversionQuantity();
+    } else {
+      console.log(storage_quantity.value, form.quantity);
+      form.calc_quantity = form.quantity;
     }
   }
-
-}
+};
 onMounted(() => {
   console.log("order", props.order);
   console.log("supplier_id", props.supplier_id);
@@ -263,6 +264,39 @@ onMounted(() => {
                   class="flex flex-wrap -m-2 justify-center mb-4"
                 >
                   <div class="p-2">
+                    <div class="relative mb-4">
+                      <label
+                        for="name"
+                        class="font-bold mb-1leading-7 text-xl text-gray-600"
+                        >デジタルサイネージ</label
+                      >
+                      <div
+                        class="flex justify-between items-center space-x-4 rounded border border-gray-300 text-gray-700 py-1 px-6 leading-8"
+                      >
+                        <label class="flex items-center">
+                          <input
+                            type="radio"
+                            name="skip_option"
+                            :value="1"
+                            class="mr-2"
+                            v-model="form.signage"
+                          />
+                          <span>表示</span>
+                        </label>
+
+                        <label class="flex items-center">
+                          <input
+                            type="radio"
+                            name="skip_option"
+                            :value="0"
+                            class="mr-2"
+                            v-model="form.signage"
+                          />
+                          <span>非表示</span>
+                        </label>
+                      </div>
+                    </div>
+
                     <div class="relative mb-2">
                       <label
                         for="name"
@@ -375,7 +409,7 @@ onMounted(() => {
                 </div>
 
                 <!-- 在庫データ作成フォーム -->
-                <div v-else>
+                <!-- <div v-else>
                   <div class="flex flex-wrap -m-2 justify-center mb-4">
                     <div class="p-2">
                       <div class="mb-8">
@@ -563,7 +597,7 @@ onMounted(() => {
                       </button>
                     </div>
                   </div>
-                </div>
+                </div> -->
 
                 <!-- 格納先が設定されていない場合 -->
                 <div
@@ -584,11 +618,23 @@ onMounted(() => {
                       :href="
                         route('stock.receive.none_storage', {
                           order_id: props.order.id,
+                          signage: 1,
                         })
                       "
                       class="mt-2 bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
                     >
-                      在庫登録をスキップしてサイネージ表示
+                      スキップしてサイネージ表示
+                    </Link>
+                    <Link
+                      :href="
+                        route('stock.receive.none_storage', {
+                          order_id: props.order.id,
+                          signage: 0,
+                        })
+                      "
+                      class="ml-2 mt-2 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                    >
+                      格納先登録とサイネージ表示をスキップ
                     </Link>
                   </div>
 
