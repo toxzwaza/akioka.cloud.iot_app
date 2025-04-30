@@ -114,9 +114,6 @@ const updateUpdateQuantity = (val, stock) => {
 
 const completeStockRequest = (stock) => {
   // return console.log(stock)
-  if (!(stock.updateQuantity > 0)) {
-    return alert("出庫後数量を正確に入力してください。");
-  }
   axios
     .post(route("stock.request.complete"), {
       process_id: target_process.value.id,
