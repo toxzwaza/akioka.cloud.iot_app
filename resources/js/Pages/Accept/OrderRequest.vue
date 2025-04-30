@@ -1,6 +1,6 @@
 <script setup>
 import AcceptLayout from "@/Layouts/AcceptLayout.vue";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, reactive } from "vue";
 import { getImgPath } from "@/Helper/method";
 
 const props = defineProps({
@@ -10,6 +10,26 @@ const props = defineProps({
 
 const approval_modal = ref(false);
 const viewerUrl = ref("/pdfjs/web/main_viewer.html");
+
+const comment = reactive({
+  order_request_id: null,
+  placeholder: "",
+  msg: "",
+});
+
+const save_comment = () => {
+  const order_request = props.order_requests.find(
+    (order_request) => order_request.id === comment.order_request_id
+  );
+  order_request.comment = comment.msg;
+  console.log(props.order_requests);
+};
+const set_comment = (order_request) => {
+  console.log(order_request);
+  comment.order_request_id = order_request.id;
+  comment.msg = order_request.comment || ""
+  comment.placeholder = `${order_request.name} - ${order_request.s_name} のコメントを入力してください。`
+};
 
 const openApproval = (order_request) => {
   console.log(order_request);
@@ -26,6 +46,12 @@ const openApproval = (order_request) => {
 const sendAccept = (order_request_approval_id, action) => {
   let status;
   let msg = "";
+
+  const order_request_approval = props.order_requests.find(
+    (order_request) =>
+      order_request.order_request_approval_id === order_request_approval_id
+  );
+
   if (order_request_approval_id) {
     switch (action) {
       case "accept": //承認
@@ -33,8 +59,13 @@ const sendAccept = (order_request_approval_id, action) => {
         status = 1;
         break;
       case "reject": //非承認
+        if(!order_request_approval.comment){
+          alert('非承認の場合は、コメントを追加してください。')
+          set_comment(order_request_approval)
+          return
+        }
         status = 2;
-        msg = "承認を却下しました。"
+        msg = "承認を却下しました。";
         break;
     }
 
@@ -42,6 +73,7 @@ const sendAccept = (order_request_approval_id, action) => {
       .put(route("accept.order-request.update"), {
         order_request_approval_id: order_request_approval_id,
         status: status,
+        comment: order_request_approval.comment,
       })
       .then((res) => {
         console.log(res.data);
@@ -60,7 +92,7 @@ onMounted(() => {
 <template>
   <AcceptLayout :title="'承認画面'">
     <template #content>
-      <section class="text-gray-600 body-font">
+      <section class="text-gray-600 body-font" style="margin-bottom: 20vh">
         <div class="py-12 mx-auto">
           <div class="flex flex-col text-center w-full mb-20">
             <h1
@@ -73,6 +105,13 @@ onMounted(() => {
             </p>
           </div>
           <div class="w-full mx-auto overflow-auto">
+            <h3 class="mb-4">
+              コメントを送信する場合は、<i
+                class="fa-solid fa-comment text-blue-600 mx-1"
+              >
+              </i>
+              から、追加した後、承認登録を行ってください。
+            </h3>
             <table
               id="order_request_table"
               class="table-auto w-full text-left whitespace-no-wrap"
@@ -126,10 +165,19 @@ onMounted(() => {
                   </th>
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 w-20"
-                  ></th>
+                  >
+                    稟議書確認
+                  </th>
                   <th
                     class="w-10 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tr rounded-br"
-                  ></th>
+                  >
+                    コメント追加
+                  </th>
+                  <th
+                    class="w-10 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tr rounded-br"
+                  >
+                    承認登録
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -137,7 +185,7 @@ onMounted(() => {
                   v-for="order_request in order_requests"
                   :key="order_request.id"
                 >
-                  <td class="img py-8">
+                  <td class="img">
                     <img :src="getImgPath(order_request.img_path)" alt="" />
                   </td>
                   <td class="px-4 py-8">{{ order_request.name }}</td>
@@ -176,7 +224,15 @@ onMounted(() => {
                     >
                       稟議書
                     </button>
-                    <span v-else>稟議書未登録</span>
+                    <span v-else>未登録</span>
+                  </td>
+                  <td class="w-10 text-center px-8">
+                    <button
+                      class="mr-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                      @click="set_comment(order_request)"
+                    >
+                      <i class="fa-solid fa-comment"></i>
+                    </button>
                   </td>
                   <td class="w-20 text-center">
                     <button
@@ -199,7 +255,7 @@ onMounted(() => {
                       "
                       class="ml-2 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
                     >
-                      否認
+                      非承認
                     </button>
                   </td>
                 </tr>
@@ -235,6 +291,22 @@ onMounted(() => {
         ></iframe>
       </div>
     </div>
+  </div>
+
+  <div v-if="comment.order_request_id" id="comment_container">
+    <label
+      for="message"
+      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+      >コメント追加</label
+    >
+    <textarea
+      id="message"
+      rows="4"
+      class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      :placeholder="comment.placeholder"
+      v-model="comment.msg"
+      @change="save_comment"
+    ></textarea>
   </div>
 </template>
 <style scoped lang="scss">
@@ -282,6 +354,20 @@ onMounted(() => {
       width: 100%;
       height: 100%;
     }
+  }
+}
+
+#comment_container {
+  position: fixed;
+  bottom: 5%;
+  right: 5%;
+
+  z-index: 50;
+  width: 90%;
+  height: 16vh;
+
+  & textarea {
+    height: 100%;
   }
 }
 </style>

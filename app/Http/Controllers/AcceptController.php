@@ -80,6 +80,7 @@ class AcceptController extends Controller
         // 承認ID
         $order_request_approval_id = $request->order_request_approval_id;
         $flg = $request->status;
+        $comment = $request->comment;
 
         $status = true;
         $msg = "";
@@ -88,6 +89,7 @@ class AcceptController extends Controller
         try {
             $order_request_approval = OrderRequestApproval::find($order_request_approval_id);
             $order_request_approval->status = $flg;
+            $order_request_approval->comment = $comment;
             $order_request_approval->save();
 
             $order_request = OrderRequest::find($order_request_approval->order_request_id);
