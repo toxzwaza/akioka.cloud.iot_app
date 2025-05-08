@@ -182,13 +182,14 @@ onMounted(() => {
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
                   >
-                    備考
+                    希望納期
                   </th>
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
                   >
-                    希望納期
+                    備考
                   </th>
+
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 w-20"
                   >
@@ -275,9 +276,7 @@ onMounted(() => {
                     }}
                   </td>
                   <td class="px-4 py-8 text-lg text-gray-900">
-                    {{
-                      order_request.description
-                    }}
+                    {{ order_request.description ?? "-" }}
                   </td>
                   <td class="w-10 text-center px-8">
                     <button
