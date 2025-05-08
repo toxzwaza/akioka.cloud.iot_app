@@ -80,10 +80,10 @@ onMounted(() => {
               }}
             </td>
             <td
-              class="w-1/5 font-bold py-8 px-4 border-b border-gray-200 text-left"
+              class="w-1/5 font-bold py-4 px-4 border-b border-gray-200 text-left whitespace-nowrap"
             >
               {{
-                order.s_name.length > 15
+                order.s_name && order.s_name.length > 15
                   ? order.s_name.slice(0, 15) + "..."
                   : order.s_name
               }}
