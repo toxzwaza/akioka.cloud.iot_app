@@ -30,6 +30,10 @@ class OrderController extends Controller
         $stock_storage_id = $request->stock_storage_id;
         $desire_delivery_date = $request->desire_delivery_date;
         $quantity = $request->quantity;
+        $quantity_unit = $request->quantity_unit;
+        $digest_date = $request->digest_date;
+        $now_quantity = $request->now_quantity;
+        $now_quantity_unit = $request->now_quantity_unit;
         $description = $request->description;
 
         $stock = null;
@@ -50,6 +54,10 @@ class OrderController extends Controller
             $order_request->request_user_id = $request_user_id == 0 ? 117 : $request_user_id;
             $order_request->price = $stock->price;
             $order_request->quantity =  $quantity;
+            $order_request->unit = $quantity_unit;
+            $order_request->now_quantity = $now_quantity;
+            $order_request->now_quantity_unit = $now_quantity_unit;
+            $order_request->digest_date = $digest_date;
             $order_request->desire_delivery_date = $desire_delivery_date;
             $order_request->description = $description;
 

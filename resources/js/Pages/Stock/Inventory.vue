@@ -148,11 +148,15 @@ const handleStockRequest = (form) => {
   axios
     .post(route("stock.order.store"), {
       stock_id: props.stock?.id,
-      request_user_id: form?.user_id,
+      request_user_id: form?.user_id, //物品依頼者
       stock_storage_id: stock_storage?.value?.id,
-      desire_delivery_date: form?.desire_delivery_date,
-      quantity: form?.quantity,
-      description: form?.description,
+      desire_delivery_date: form?.desire_delivery_date, //希望納期
+      now_quantity: form?.now_quantity, //現在個数
+      now_quantity_unit: form?.now_quantity_unit, //現在個数単位
+      digest_date:  form?.digest_date, //消化予定日
+      quantity: form?.quantity, //必要数量
+      quantity_unit: form?.quantity_unit, //必要数量単位
+      description: form?.description, //備考
     })
     .then((res) => {
       console.log(res.data);

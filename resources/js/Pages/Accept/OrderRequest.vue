@@ -27,8 +27,8 @@ const save_comment = () => {
 const set_comment = (order_request) => {
   console.log(order_request);
   comment.order_request_id = order_request.id;
-  comment.msg = order_request.comment || ""
-  comment.placeholder = `${order_request.name} - ${order_request.s_name} のコメントを入力してください。`
+  comment.msg = order_request.comment || "";
+  comment.placeholder = `${order_request.name} - ${order_request.s_name} のコメントを入力してください。`;
 };
 
 const openApproval = (order_request) => {
@@ -59,10 +59,10 @@ const sendAccept = (order_request_approval_id, action) => {
         status = 1;
         break;
       case "reject": //非承認
-        if(!order_request_approval.comment){
-          alert('非承認の場合は、コメントを追加してください。')
-          set_comment(order_request_approval)
-          return
+        if (!order_request_approval.comment) {
+          alert("非承認の場合は、コメントを追加してください。");
+          set_comment(order_request_approval);
+          return;
         }
         status = 2;
         msg = "承認を却下しました。";
@@ -136,8 +136,14 @@ onMounted(() => {
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
                   >
-                    数量
+                    必要数量
                   </th>
+                  <th
+                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                  >
+                    現在数量
+                  </th>
+
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
                   >
@@ -156,12 +162,32 @@ onMounted(() => {
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
                   >
+                    発注依頼者
+                  </th>
+                  <th
+                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                  >
+                    発注担当者
+                  </th>
+                  <th
+                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                  >
                     発注依頼日
                   </th>
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
                   >
-                    発注依頼者
+                    消化予定日
+                  </th>
+                  <th
+                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                  >
+                    備考
+                  </th>
+                  <th
+                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                  >
+                    希望納期
                   </th>
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 w-20"
@@ -191,16 +217,29 @@ onMounted(() => {
                   <td class="px-4 py-8">{{ order_request.name }}</td>
                   <td class="px-4 py-8">{{ order_request.s_name }}</td>
                   <td class="px-4 py-8 text-lg text-gray-900">
-                    {{ order_request.quantity }}
+                    {{ `${order_request.quantity}${order_request.unit}` }}
                   </td>
                   <td class="px-4 py-8 text-lg text-gray-900">
-                    {{ order_request.price }}
+                    {{
+                      `${order_request.now_quantity}${order_request.now_quantity_unit}`
+                    }}
+                  </td>
+
+                  <td class="px-4 py-8 text-lg text-gray-900">
+                    {{ order_request.price?.toLocaleString() }}
                   </td>
                   <td class="px-4 py-8 text-lg text-gray-900">
-                    {{ order_request.calc_price }}
+                    {{ order_request.calc_price?.toLocaleString() }}
                   </td>
                   <td class="px-4 py-8 text-lg text-gray-900">
                     {{ order_request.supplier_name }}
+                  </td>
+
+                  <td class="px-4 py-8 text-lg text-gray-900">
+                    {{ order_request.request_user_name }}
+                  </td>
+                  <td class="px-4 py-8 text-lg text-gray-900">
+                    {{ order_request.user_name }}
                   </td>
                   <td class="px-4 py-8 text-lg text-gray-900">
                     {{
@@ -214,7 +253,31 @@ onMounted(() => {
                     }}
                   </td>
                   <td class="px-4 py-8 text-lg text-gray-900">
-                    {{ order_request.request_user_name }}
+                    {{
+                      new Date(order_request.digest_date)
+                        .toLocaleDateString("ja-JP", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        })
+                        .replace(/\//g, "/")
+                    }}
+                  </td>
+                  <td class="px-4 py-8 text-lg text-gray-900">
+                    {{
+                      new Date(order_request.desire_delivery_date)
+                        .toLocaleDateString("ja-JP", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        })
+                        .replace(/\//g, "/")
+                    }}
+                  </td>
+                  <td class="px-4 py-8 text-lg text-gray-900">
+                    {{
+                      order_request.description
+                    }}
                   </td>
                   <td class="w-10 text-center px-8">
                     <button
