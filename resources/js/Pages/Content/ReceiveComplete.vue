@@ -71,7 +71,7 @@ onMounted(() => {
               {{ order.order_user }}
             </td>
             <td
-              class="w-3/5 font-bold py-8 px-4 border-b border-gray-200 text-left"
+              class="w-3/5 font-bold py-8 px-4 border-b border-gray-200 text-left whitespace-nowrap"
             >
               {{
                 order.name.length > 15
