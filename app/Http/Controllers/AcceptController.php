@@ -31,9 +31,16 @@ class AcceptController extends Controller
                 'stocks.s_name',
                 'stocks.price as stock_price',
                 'stocks.url',
-                'order_requests.quantity',
+                'order_requests.quantity', //必要数量
+                'order_requests.unit', //必要数量単位
+                'order_requests.now_quantity', //現在数量
+                'order_requests.now_quantity_unit', //現在数量単位
+                'order_requests.digest_date', //消化予定日
+                'order_requests.desire_delivery_date', //希望納期
+                'order_requests.description', //備考
                 'order_requests.created_at',
-                'users.name as request_user_name',
+                'request_users.name as request_user_name',
+                'users.name as user_name',
                 'order_requests.postage',
                 'order_requests.calc_price',
                 'order_requests.price',
@@ -46,7 +53,8 @@ class AcceptController extends Controller
             ->where('order_request_approvals.status', 0)
             ->join('order_requests', 'order_requests.id', '=', 'order_request_approvals.order_request_id')
             ->join('stocks', 'stocks.id', '=', 'order_requests.stock_id')
-            ->leftJoin('users', 'users.id', '=', 'order_requests.request_user_id')
+            ->leftJoin('users as request_users', 'request_users.id', '=', 'order_requests.request_user_id')
+            ->leftJoin('users as users', 'users.id', '=', 'order_requests.user_id')
             ->join('suppliers', 'suppliers.id', '=', 'order_requests.supplier_id')
             ->where('order_requests.status', '=', 0)
             ->where('order_requests.del_flg', '=', 0)

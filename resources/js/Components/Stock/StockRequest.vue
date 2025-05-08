@@ -19,9 +19,12 @@ const gl_check = ref(null);
 const form = reactive({
   process_id: 0,
   user_id: 0,
+  now_quantity: 0,
+  now_quantity_unit: "",
+  digest_date: new Date().toISOString().split("T")[0],
   quantity: 1,
+  quantity_unit: '',
   desire_delivery_date: null,
-  now_quantity: null,
   description: null,
   price: null,
   calc_price: null,
@@ -107,7 +110,7 @@ onMounted(() => {
               <select
                 name=""
                 id=""
-                class="appearance-none block w-full bg-gray-200 text-gray-700 border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                class="appearance-none block w-full bg-gray-200 text-gray-700 border-transparent rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
                 v-model="form.process_id"
                 @change="handleProcess"
               >
@@ -131,7 +134,7 @@ onMounted(() => {
               <select
                 name=""
                 id=""
-                class="appearance-none block w-full bg-gray-200 text-gray-700 border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                class="appearance-none block w-full bg-gray-200 text-gray-700 border-transparent rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
                 v-model="form.user_id"
                 @change="handleUser"
               >
@@ -146,7 +149,66 @@ onMounted(() => {
             </div>
           </div>
           <div class="flex flex-wrap -mx-3 mb-2">
+            <div class="w-1/4 px-3 mb-6 md:mb-0">
+              <label
+                class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                for="grid-city"
+              >
+                現在個数
+              </label>
+              <input
+                class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                id="grid-city"
+                type="number"
+                v-model="form.now_quantity"
+              />
+            </div>
+            <div class="w-1/4 px-3 mb-6 md:mb-0">
+              <label
+                class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                for="grid-city"
+              >
+                単位
+              </label>
+              <select
+                name=""
+                id=""
+                class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                v-model="form.now_quantity_unit"
+              >
+                <option
+                  v-if="props.stock.solo_unit"
+                  :value="props.stock.solo_unit"
+                >
+                  {{ props.stock.solo_unit }}
+                </option>
+                <option
+                  v-if="props.stock.org_unit"
+                  :value="props.stock.org_unit"
+                >
+                  {{ props.stock.org_unit }}
+                </option>
+              </select>
+            </div>
+
             <div class="w-1/2 px-3 mb-6 md:mb-0">
+              <label
+                class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                for="grid-state"
+              >
+                消化予定日
+              </label>
+              <input
+                class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                id="grid-city"
+                type="date"
+                v-model="form.digest_date"
+              />
+            </div>
+          </div>
+
+          <div class="flex flex-wrap -mx-3 mb-2">
+            <div class="w-1/4 px-3 mb-6 md:mb-0">
               <label
                 class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 for="grid-city"
@@ -160,6 +222,33 @@ onMounted(() => {
                 v-model="form.quantity"
                 @change="form.calc_price = form.price * form.quantity"
               />
+            </div>
+            <div class="w-1/4 px-3 mb-6 md:mb-0">
+              <label
+                class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                for="grid-city"
+              >
+                単位
+              </label>
+              <select
+                name=""
+                id=""
+                class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                v-model="form.quantity_unit"
+              >
+                <option
+                  v-if="props.stock.solo_unit"
+                  :value="props.stock.solo_unit"
+                >
+                  {{ props.stock.solo_unit }}
+                </option>
+                <option
+                  v-if="props.stock.org_unit"
+                  :value="props.stock.org_unit"
+                >
+                  {{ props.stock.org_unit }}
+                </option>
+              </select>
             </div>
 
             <div class="w-1/2 px-3 mb-6 md:mb-0">
@@ -180,7 +269,8 @@ onMounted(() => {
               </p>
             </div>
           </div>
-          <div class="flex flex-wrap -mx-3 mb-2">
+
+          <!-- <div class="flex flex-wrap -mx-3 mb-2">
             <div class="w-1/2 px-3 mb-6 md:mb-0">
               <label
                 class="block uppercase tracking-wide text-gray-500 text-xs font-bold mb-2"
@@ -209,7 +299,7 @@ onMounted(() => {
                 v-model="form.calc_price"
               />
             </div>
-          </div>
+          </div> -->
           <div class="flex flex-wrap -mx-3 mb-2 mt-4">
             <div v-if="gl_check" class="w-full px-3 my-6 md:mb-0">
               <label
@@ -254,7 +344,7 @@ onMounted(() => {
               name=""
               id=""
               cols="30"
-              rows="10"
+              rows="9"
               v-model="form.description"
               class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             ></textarea>
