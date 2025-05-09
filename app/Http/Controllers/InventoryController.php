@@ -46,12 +46,19 @@ class InventoryController extends Controller
             ->leftJoin('users as request_users', 'order_requests.request_user_id', 'request_users.id')
             ->where('stock_id', $stock_id)
             ->where('order_requests.del_flg', 0)
+            // ->where('status', 0)
             ->orderBy('created_at', 'desc')
             ->get();
         $stock->order_requests = $order_requests;
 
         // 発注データ
-        $initial_orders = InitialOrder::where('name', $stock->name)->where('s_name', $stock->s_name)->orderBy('order_date', 'desc')->get();
+        $initial_orders = InitialOrder::
+        select('initial_orders.*', 'users.name as user_name', 'order_users.name as order_user_name')
+        ->leftJoin('users', 'users.id','initial_orders.user_id')
+        ->leftJoin('users as order_users', 'initial_orders.order_user_id', 'order_users.id')
+        ->where('stock_id', $stock->id)
+        ->orderBy('initial_orders.order_date', 'desc')
+        ->get();
         $stock->initial_orders = $initial_orders;
 
         if ($stock_storage_id) {

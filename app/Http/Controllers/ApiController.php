@@ -36,6 +36,7 @@ class ApiController extends Controller
         $stock_id = $request->stock_id;
         $alias = $request->alias;
         $process_id = $request->process_id;
+        $user_id = $request->user_id;
 
 
         try {
@@ -49,31 +50,9 @@ class ApiController extends Controller
                     ->distinct()
                     ->orderBy('locations.id', 'desc')
                     ->orderBy('updated_at', 'desc');
-
-
-
-                if ($stock_name) {
-                    $query->where('stocks.name', 'like', '%' . $stock_name . '%')->orWhere('stocks.s_name', 'like', '%' . $stock_name . '%');
-                }
-
-                if ($alias) {
-                    $query->where('stock_aliases.alias', 'like', '%' . $alias . '%');
-                }
-
-                if ($address_id) {
-                    $query->where('storage_address_id', $request->address_id);
-                }
-
-                // 在庫IDもしくはJANコードから検索
-                if ($stock_id) {
-                    $query->where('stocks.id', $request->stock_id)->orWhere('stocks.jan_code', $stock_id);
-                }
-
-                $stocks = $query->get();
-
             } else {
 
-                $stocks =
+                $query =
                     InitialOrder::select('stocks.*', 'stock_storages.id as stock_storage_id', 'stock_storages.quantity', 'locations.name as location_name', 'storage_addresses.id as storage_address_id', 'storage_addresses.address')
                     ->Join('users', 'users.id', 'initial_orders.order_user_id')
                     ->Join('stocks', 'stocks.id', 'initial_orders.stock_id')
@@ -85,9 +64,32 @@ class ApiController extends Controller
                     ->where('stocks.del_flg', 0)
                     ->distinct()
                     ->orderBy('locations.id', 'desc')
-                    ->orderBy('updated_at', 'desc')
-                    ->get();
+                    ->orderBy('updated_at', 'desc');
+
+                if ($user_id) {
+                    $query->where('initial_orders.order_user_id', $user_id);
+                }
             }
+
+
+            if ($stock_name) {
+                $query->where('stocks.name', 'like', '%' . $stock_name . '%')->orWhere('stocks.s_name', 'like', '%' . $stock_name . '%');
+            }
+
+            if ($alias) {
+                $query->where('stock_aliases.alias', 'like', '%' . $alias . '%');
+            }
+
+            if ($address_id) {
+                $query->where('storage_address_id', $request->address_id);
+            }
+
+            // 在庫IDもしくはJANコードから検索
+            if ($stock_id) {
+                $query->where('stocks.id', $request->stock_id)->orWhere('stocks.jan_code', $stock_id);
+            }
+
+            $stocks = $query->get();
 
 
 

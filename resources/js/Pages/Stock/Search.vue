@@ -6,7 +6,8 @@ import { getImgPath } from "@/Helper/method";
 import { ref } from "vue";
 
 const props = defineProps({
-  processes: Array
+  processes: Array,
+  users: Array,
 })
 
 const stocks = ref([]);
@@ -26,7 +27,7 @@ const search_box = ref(true);
     <template #content>
       <!-- 検索フォームコンポーネント -->
       <div :class="{ 'hide' : !search_box }">
-        <StockForm  @updateStocks="handleUpdateStocks" :processes="props.processes"/>
+        <StockForm  @updateStocks="handleUpdateStocks" :processes="props.processes" :users="props.users"/>
       </div>
       <button
         v-if="!search_box"

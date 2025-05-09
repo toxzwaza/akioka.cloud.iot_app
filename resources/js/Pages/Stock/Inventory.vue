@@ -153,7 +153,7 @@ const handleStockRequest = (form) => {
       desire_delivery_date: form?.desire_delivery_date, //希望納期
       now_quantity: form?.now_quantity, //現在個数
       now_quantity_unit: form?.now_quantity_unit, //現在個数単位
-      digest_date:  form?.digest_date, //消化予定日
+      digest_date: form?.digest_date, //消化予定日
       quantity: form?.quantity, //必要数量
       quantity_unit: form?.quantity_unit, //必要数量単位
       description: form?.description, //備考
@@ -493,10 +493,15 @@ onMounted(() => {
         >
           <div class="container mx-auto mr-2">
             <h2 class="array_title text-green-500">発注依頼</h2>
-            <div class="w-full mx-auto overflow-auto">
+            <div id="archive_container" class="w-full mx-auto overflow-auto">
               <table class="table-auto w-full text-left whitespace-no-wrap">
                 <thead>
                   <tr>
+                    <th
+                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                    >
+                      状況
+                    </th>
                     <th
                       class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
                     >
@@ -505,7 +510,12 @@ onMounted(() => {
                     <th
                       class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
                     >
-                      個数
+                      必要個数
+                    </th>
+                    <th
+                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                    >
+                      現在個数
                     </th>
                     <th
                       class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
@@ -520,8 +530,9 @@ onMounted(() => {
                     <th
                       class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
                     >
-                      ステータス
+                      備考
                     </th>
+
                     <th
                       class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
                     ></th>
@@ -532,6 +543,15 @@ onMounted(() => {
                     v-for="order_request in props.stock.order_requests"
                     :key="order_request.id"
                   >
+                    <td
+                      :class="{
+                        'py-4 font-bold': true,
+                        'text-green-500': order_request.status,
+                        'text-red-500': !order_request.status,
+                      }"
+                    >
+                      {{ order_request.status ? "受理" : "未受理" }}
+                    </td>
                     <td class="py-4">
                       {{
                         new Date(order_request.created_at).toLocaleDateString(
@@ -550,6 +570,9 @@ onMounted(() => {
                       }}
                     </td>
                     <td class="py-4">
+                      {{ order_request.now_quantity ?? "-" }}
+                    </td>
+                    <td class="py-4">
                       {{
                         order_request.request_user_name
                           ? order_request.request_user_name
@@ -561,15 +584,12 @@ onMounted(() => {
                         order_request.user_name ? order_request.user_name : "-"
                       }}
                     </td>
-                    <td
-                      :class="{
-                        'py-4 font-bold': true,
-                        'text-green-500': order_request.status,
-                        'text-red-500': !order_request.status,
-                      }"
-                    >
-                      {{ order_request.status ? "受理" : "未受理" }}
+                    <td class="py-4">
+                      {{
+                        order_request.description ?? '-'
+                      }}
                     </td>
+
                     <td
                       :class="{
                         'py-4 font-bold text-center': true,
@@ -590,10 +610,15 @@ onMounted(() => {
           </div>
           <div class="container mx-auto ml-2">
             <h2 class="array_title text-red-500">発注履歴</h2>
-            <div class="w-full mx-auto overflow-auto">
+            <div id="archive_container" class="w-full mx-auto overflow-auto">
               <table class="table-auto w-full text-left whitespace-no-wrap">
                 <thead>
                   <tr>
+                    <th
+                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                    >
+                      状況
+                    </th>
                     <th
                       class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
                     >
@@ -602,12 +627,17 @@ onMounted(() => {
                     <th
                       class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
                     >
-                      個数
+                      依頼者
                     </th>
                     <th
                       class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
                     >
-                      ステータス
+                      発注者
+                    </th>
+                    <th
+                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                    >
+                      個数
                     </th>
                   </tr>
                 </thead>
@@ -616,16 +646,6 @@ onMounted(() => {
                     v-for="order in props.stock.initial_orders"
                     :key="order.id"
                   >
-                    <td class="py-4">
-                      {{
-                        new Date(order.order_date).toLocaleDateString("ja-JP", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        })
-                      }}
-                    </td>
-                    <td class="py-4">{{ order.quantity }}</td>
                     <td
                       :class="{
                         'py-4 font-bold': true,
@@ -645,6 +665,19 @@ onMounted(() => {
                         }}
                       </button>
                     </td>
+                    <td class="py-4">
+                      {{
+                        new Date(order.order_date).toLocaleDateString("ja-JP", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        })
+                      }}
+                    </td>
+
+                    <td class="py-4">{{ order.user_name ?? "-" }}</td>
+                    <td class="py-4">{{ order.order_user_name ?? "-" }}</td>
+                    <td class="py-4">{{ order.quantity ?? "-" }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -867,6 +900,49 @@ onMounted(() => {
     & .array_title {
       font-size: 1.2rem;
       font-weight: bold;
+    }
+
+    & #archive_container{
+      overflow-x: auto;
+
+      // スクロールバー
+      &::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #4a90e2, #007aff);
+        border-radius: 10px;
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #007aff, #005bb5);
+      }
+
+      ////
+    
+      & table {
+        table-layout: auto;
+        width: 100%;
+        & tr:nth-child(even) {
+          background-color: #f9f9f9;
+        }
+        & tr:nth-child(odd) {
+          background-color: #ffffff;
+        }
+        & td, th {
+          padding: 0.8rem 0.6rem;
+          text-align: left;
+          white-space: nowrap;
+        }
+      }
+      
+
     }
   }
 }
