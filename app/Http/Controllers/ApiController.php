@@ -197,4 +197,55 @@ class ApiController extends Controller
 
         return response()->json($users);
     }
+
+    // 納品書アップロード
+    public function deliFileUpload(Request $request)
+    {
+        $status = true;
+        $msg = '';
+
+        try {
+            if (!$request->hasFile('file')) {
+                throw new Exception('ファイルがアップロードされていません。');
+            }
+
+            $file = $request->file('file');
+            $initial_order_id = $request->initial_order_id;
+
+            if (!$initial_order_id) {
+                throw new Exception('発注IDが指定されていません。');
+            }
+
+            // ファイルの検証
+            $allowedExtensions = ['jpg', 'jpeg', 'png'];
+            $extension = $file->getClientOriginalExtension();
+            if (!in_array(strtolower($extension), $allowedExtensions)) {
+                throw new Exception('許可されていないファイル形式です。');
+            }
+
+            // ファイルサイズの制限（5MB）
+            if ($file->getSize() > 5 * 1024 * 1024) {
+                throw new Exception('ファイルサイズが大きすぎます。5MB以下にしてください。');
+            }
+
+            $order = InitialOrder::find($initial_order_id);
+            if (!$order) {
+                throw new Exception('指定された発注が見つかりません。');
+            }
+
+            $timestamp = time();
+            $filename = $timestamp . '.' . $extension;
+            $file->storeAs('public/deli_file', $filename);
+
+            $order->delifile_path = 'storage/deli_file/' . $filename;
+            $order->save();
+
+            $msg = '納品書のアップロードが完了しました。';
+        } catch (Exception $e) {
+            $status = false;
+            $msg = $e->getMessage();
+        }
+
+        return response()->json(['status' => $status, 'msg' => $msg]);
+    }
 }
