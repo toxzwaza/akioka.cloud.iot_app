@@ -37,7 +37,9 @@ class AcceptController extends Controller
                 'order_requests.now_quantity_unit', //現在数量単位
                 'order_requests.digest_date', //消化予定日
                 'order_requests.desire_delivery_date', //希望納期
-                'order_requests.description', //備考
+                'order_requests.description', //依頼者備考
+                'order_requests.sub_description', //発注者備考
+                'order_requests.new_stock_flg', //備考
                 'order_requests.created_at',
                 'request_users.name as request_user_name',
                 'users.name as user_name',
@@ -48,7 +50,12 @@ class AcceptController extends Controller
                 'suppliers.name as supplier_name',
                 'order_request_approvals.id as order_request_approval_id',
                 'order_request_approvals.final_flg',
-                'order_request_approvals.user_id as approval_user_id'
+                'order_request_approvals.user_id as approval_user_id',
+                DB::raw('(
+                    SELECT MAX(initial_orders.order_date)
+                    FROM initial_orders
+                    WHERE initial_orders.stock_id = order_requests.stock_id
+                ) as last_order_date')
             )
             ->where('order_request_approvals.status', 0)
             ->join('order_requests', 'order_requests.id', '=', 'order_request_approvals.order_request_id')

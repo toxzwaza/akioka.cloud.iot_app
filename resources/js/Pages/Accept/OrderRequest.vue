@@ -126,6 +126,16 @@ onMounted(() => {
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
                   >
+                    分類<i class="ml-1 fa-solid fa-tags"></i>
+                  </th>
+                  <th
+                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                  >
+                    最終発注日<i class="ml-1 fa-solid fa-calendar-alt"></i>
+                  </th>
+                  <th
+                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                  >
                     品名
                   </th>
                   <th
@@ -162,48 +172,53 @@ onMounted(() => {
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
                   >
-                    発注依頼者
+                    発注依頼者<i class="ml-1 fa-solid fa-user"></i>
                   </th>
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
                   >
-                    発注担当者
+                    発注担当者<i class="ml-1 fa-solid fa-user"></i>
                   </th>
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
                   >
-                    発注依頼日
+                    発注依頼日<i class="ml-1 fa-solid fa-calendar-alt"></i>
                   </th>
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
                   >
-                    消化予定日
+                    消化予定日<i class="ml-1 fa-solid fa-calendar-alt"></i>
                   </th>
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
                   >
-                    希望納期
+                    希望納期<i class="ml-1 fa-solid fa-calendar-alt"></i>
                   </th>
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
                   >
-                    備考
+                    依頼者備考<i class="ml-1 fa-solid fa-comment"></i>
+                  </th>
+                  <th
+                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                  >
+                    発注者備考<i class="ml-1 fa-solid fa-comment"></i>
                   </th>
 
                   <th
                     class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 w-20"
                   >
-                    稟議書確認
+                    添付ファイル<i class="ml-1 fa-solid fa-file-alt"></i>
                   </th>
                   <th
                     class="w-10 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tr rounded-br"
                   >
-                    コメント追加
+                    コメント<i class="ml-1 fa-solid fa-comment"></i>
                   </th>
                   <th
                     class="w-10 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tr rounded-br"
                   >
-                    承認登録
+                    承認登録<i class="ml-1 fa-solid fa-stamp"></i>
                   </th>
                 </tr>
               </thead>
@@ -215,14 +230,45 @@ onMounted(() => {
                   <td class="img">
                     <img :src="getImgPath(order_request.img_path)" alt="" />
                   </td>
-                  <td class="px-4 py-8">{{ order_request.name }}</td>
-                  <td class="px-4 py-8">{{ order_request.s_name }}</td>
+                  <td class="px-4 py-8">
+                    <span
+                      v-if="order_request.new_stock_flg"
+                      class="bg-green-100 text-green-800 text-xs font-medium me-2 px-4 py-1 rounded-full dark:bg-green-900 dark:text-green-300"
+                      >新規品</span
+                    >
+                    <span
+                      v-else
+                      class="bg-yellow-100 text-yellow-800 text-xs font-medium me-2 px-4 py-1 rounded-full dark:bg-yellow-900 dark:text-yellow-300"
+                      >既存品</span
+                    >
+                  </td>
+                  <td class="px-4 py-8 text-lg text-gray-900">
+                    {{
+                      order_request.digest_date
+                        ? new Date(order_request.last_order_date)
+                            .toLocaleDateString("ja-JP", {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                            })
+                            .replace(/\//g, "/")
+                        : "-"
+                    }}
+                  </td>
+                  <td class="px-4 py-8 text-lg text-gray-900">
+                    {{ order_request.name }}
+                  </td>
+                  <td class="px-4 py-8 text-lg text-gray-900">
+                    {{ order_request.s_name ?? "-" }}
+                  </td>
                   <td class="px-4 py-8 text-lg text-gray-900">
                     {{ `${order_request.quantity}${order_request.unit}` }}
                   </td>
                   <td class="px-4 py-8 text-lg text-gray-900">
                     {{
-                      `${order_request.now_quantity}${order_request.now_quantity_unit}`
+                      `${order_request.now_quantity ?? "-"}${
+                        order_request.now_quantity_unit ?? "-"
+                      }`
                     }}
                   </td>
 
@@ -255,28 +301,35 @@ onMounted(() => {
                   </td>
                   <td class="px-4 py-8 text-lg text-gray-900">
                     {{
-                      new Date(order_request.digest_date)
-                        .toLocaleDateString("ja-JP", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        })
-                        .replace(/\//g, "/")
+                      order_request.digest_date
+                        ? new Date(order_request.digest_date)
+                            .toLocaleDateString("ja-JP", {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                            })
+                            .replace(/\//g, "/")
+                        : "-"
                     }}
                   </td>
                   <td class="px-4 py-8 text-lg text-gray-900">
                     {{
-                      new Date(order_request.desire_delivery_date)
-                        .toLocaleDateString("ja-JP", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        })
-                        .replace(/\//g, "/")
+                      order_request.desire_delivery_date
+                        ? new Date(order_request.desire_delivery_date)
+                            .toLocaleDateString("ja-JP", {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                            })
+                            .replace(/\//g, "/")
+                        : "-"
                     }}
                   </td>
                   <td class="px-4 py-8 text-lg text-gray-900">
                     {{ order_request.description ?? "-" }}
+                  </td>
+                  <td class="px-4 py-8 text-lg text-gray-900">
+                    {{ order_request.sub_description ?? "-" }}
                   </td>
                   <td class="w-10 text-center px-8">
                     <button
@@ -356,11 +409,20 @@ onMounted(() => {
   </div>
 
   <div v-if="comment.order_request_id" id="comment_container">
-    <label
-      for="message"
-      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-      >コメント追加</label
-    >
+    <div class="flex justify-between items-end mb-2">
+      <label
+        for="message"
+        class="w-1/2 block mb-2 text-sm font-medium text-blue-600 dark:text-white"
+        >コメント追加</label
+      >
+      <button
+        @click="comment.order_request_id = 0"
+        class=" bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
+      >
+        <i class="fa-solid fa-times"></i>
+      </button>
+    </div>
+
     <textarea
       id="message"
       rows="4"
