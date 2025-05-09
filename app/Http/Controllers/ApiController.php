@@ -36,6 +36,7 @@ class ApiController extends Controller
         $stock_id = $request->stock_id;
         $alias = $request->alias;
         $process_id = $request->process_id;
+        $user_id = $request->user_id;
 
 
         try {
@@ -49,31 +50,9 @@ class ApiController extends Controller
                     ->distinct()
                     ->orderBy('locations.id', 'desc')
                     ->orderBy('updated_at', 'desc');
-
-
-
-                if ($stock_name) {
-                    $query->where('stocks.name', 'like', '%' . $stock_name . '%')->orWhere('stocks.s_name', 'like', '%' . $stock_name . '%');
-                }
-
-                if ($alias) {
-                    $query->where('stock_aliases.alias', 'like', '%' . $alias . '%');
-                }
-
-                if ($address_id) {
-                    $query->where('storage_address_id', $request->address_id);
-                }
-
-                // 在庫IDもしくはJANコードから検索
-                if ($stock_id) {
-                    $query->where('stocks.id', $request->stock_id)->orWhere('stocks.jan_code', $stock_id);
-                }
-
-                $stocks = $query->get();
-
             } else {
 
-                $stocks =
+                $query =
                     InitialOrder::select('stocks.*', 'stock_storages.id as stock_storage_id', 'stock_storages.quantity', 'locations.name as location_name', 'storage_addresses.id as storage_address_id', 'storage_addresses.address')
                     ->Join('users', 'users.id', 'initial_orders.order_user_id')
                     ->Join('stocks', 'stocks.id', 'initial_orders.stock_id')
@@ -85,9 +64,32 @@ class ApiController extends Controller
                     ->where('stocks.del_flg', 0)
                     ->distinct()
                     ->orderBy('locations.id', 'desc')
-                    ->orderBy('updated_at', 'desc')
-                    ->get();
+                    ->orderBy('updated_at', 'desc');
+
+                if ($user_id) {
+                    $query->where('initial_orders.order_user_id', $user_id);
+                }
             }
+
+
+            if ($stock_name) {
+                $query->where('stocks.name', 'like', '%' . $stock_name . '%')->orWhere('stocks.s_name', 'like', '%' . $stock_name . '%');
+            }
+
+            if ($alias) {
+                $query->where('stock_aliases.alias', 'like', '%' . $alias . '%');
+            }
+
+            if ($address_id) {
+                $query->where('storage_address_id', $request->address_id);
+            }
+
+            // 在庫IDもしくはJANコードから検索
+            if ($stock_id) {
+                $query->where('stocks.id', $request->stock_id)->orWhere('stocks.jan_code', $stock_id);
+            }
+
+            $stocks = $query->get();
 
 
 
@@ -194,5 +196,56 @@ class ApiController extends Controller
         $users = User::select('users.id', 'users.name', 'users.process_id', 'processes.name as process_name')->leftJoin('processes', 'processes.id', 'users.process_id')->where('del_flg', 0)->get();
 
         return response()->json($users);
+    }
+
+    // 納品書アップロード
+    public function deliFileUpload(Request $request)
+    {
+        $status = true;
+        $msg = '';
+
+        try {
+            if (!$request->hasFile('file')) {
+                throw new Exception('ファイルがアップロードされていません。');
+            }
+
+            $file = $request->file('file');
+            $initial_order_id = $request->initial_order_id;
+
+            if (!$initial_order_id) {
+                throw new Exception('発注IDが指定されていません。');
+            }
+
+            // ファイルの検証
+            $allowedExtensions = ['jpg', 'jpeg', 'png'];
+            $extension = $file->getClientOriginalExtension();
+            if (!in_array(strtolower($extension), $allowedExtensions)) {
+                throw new Exception('許可されていないファイル形式です。');
+            }
+
+            // ファイルサイズの制限（5MB）
+            if ($file->getSize() > 5 * 1024 * 1024) {
+                throw new Exception('ファイルサイズが大きすぎます。5MB以下にしてください。');
+            }
+
+            $order = InitialOrder::find($initial_order_id);
+            if (!$order) {
+                throw new Exception('指定された発注が見つかりません。');
+            }
+
+            $timestamp = time();
+            $filename = $timestamp . '.' . $extension;
+            $file->storeAs('public/deli_file', $filename);
+
+            $order->delifile_path = 'storage/deli_file/' . $filename;
+            $order->save();
+
+            $msg = '納品書のアップロードが完了しました。';
+        } catch (Exception $e) {
+            $status = false;
+            $msg = $e->getMessage();
+        }
+
+        return response()->json(['status' => $status, 'msg' => $msg]);
     }
 }

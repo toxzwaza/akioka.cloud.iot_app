@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 
 // 物品依頼 稟議書アップロードAPI
 Route::post('/order_request/upload_file', [OrderRequestController::class, 'uploadFile']);
+// 納品書 アップロードAPI
+Route::post('/file_upload/deli_file', [ApiController::class, 'deliFileUpload'])->name('deliFileUpload');
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
