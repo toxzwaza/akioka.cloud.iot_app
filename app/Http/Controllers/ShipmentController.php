@@ -47,7 +47,14 @@ class ShipmentController extends Controller
 
         try {
             $stock_storage = StockStorage::find($stock_storage_address_id);
-            $stock = Stock::find($stock_id);
+            $stock = Stock::where(function($query) use ($stock_id) {
+                $query->where('id', $stock_id)
+                      ->orWhere('jan_code', $stock_id);
+            })->where('del_flg', 0)->first();
+            if (!$stock) {
+                throw new Exception('在庫データが見つかりません。');
+            }
+            
             $stock_supplier = StockSupplier::where('stock_id', $stock_id)->first();
 
             // 該当格納先の個数を減算---------------------------------------------------
@@ -66,11 +73,11 @@ class ShipmentController extends Controller
             // ---------------------------------------------------
 
             // 在庫数が発注点をきった場合、かつ、仕掛かり中の発注依頼がない場合、発注依頼を作成
-            if ($stock_storage->quantity <= $stock_storage->reorder_point && !OrderRequest::where('stock_id', $stock_id)->where('status', 0)->first()) {
+            if ($stock_storage->quantity <= $stock_storage->reorder_point && !OrderRequest::where('stock_id', $stock->id)->where('status', 0)->first()) {
 
                 // 発注依頼 ---------------------------------------------------
                 $order_request = new OrderRequest();
-                $order_request->stock_id = $stock_id;
+                $order_request->stock_id = $stock->id;
                 $order_request->request_user_id = 117;
                 $order_request->price = $stock->price;
                 $order_request->quantity = 1;
