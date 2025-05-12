@@ -66,7 +66,7 @@ onMounted(() => {
             class="text-center bg-black"
           >
             <td
-              class="w-1/5 font-bold py-8 px-4 border-b border-gray-200 text-left"
+              class="w-1/5 font-bold py-8 px-4 border-b border-gray-200 text-left whitespace-nowrap"
             >
               {{ order.order_user }}
             </td>
