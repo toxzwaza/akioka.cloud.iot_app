@@ -4,13 +4,14 @@ import { onMounted, ref, reactive } from "vue";
 import axios from "axios";
 
 const props = defineProps({
-    always_orders: Array
-})
+  always_orders: Array,
+});
 
+const popup_dialog = ref(false);
 const users = ref([]);
 const orders = ref([]);
 
-const duty_users = ref([])
+const duty_users = ref([]);
 
 const time_flg = ref(false);
 
@@ -57,7 +58,8 @@ const handleChangeUserId = () => {
       checkOrder(form.user_id);
     }
     if (user.duty_flg) {
-      alert("あなたは本日のポット清掃当番です");
+      // alert("あなたは本日のポット清掃当番です");
+      popup_dialog.value = true;
     }
   } else {
     scan_input_available();
@@ -122,7 +124,7 @@ const clearForm = () => {
   // form.receive_flg = null;
   // form.order_id = null;
   // scan_input_available();
-  window.location.reload()
+  window.location.reload();
 };
 
 const checkTimeFlg = () => {
@@ -143,49 +145,45 @@ const checkTimeFlg = () => {
 
 const checkTimeFlagInterval = () => {
   setInterval(() => {
-    window.location.reload()
+    window.location.reload();
   }, 360000);
 };
 
 const setDutyUsers = (users) => {
+  let count = 0;
+  for (let i = 0; i < users.length; i++) {
+    if (users[i].duty_flg === 1) {
+      duty_users.value.push(users[i]);
+      if (users[i + 1]) {
+        duty_users.value.push(users[i + 1]);
+      } else {
+        duty_users.value.push(users[count]);
+        count++;
+      }
 
-    let count = 0;
-    for (let i = 0; i < users.length; i++) {
-        
-        if (users[i].duty_flg === 1) {
-            duty_users.value.push(users[i]);
-            if(users[i+1]){
-                duty_users.value.push(users[i + 1]);
-            }else{
-                duty_users.value.push(users[count]);
-                count ++
-            }
+      if (users[i + 2]) {
+        duty_users.value.push(users[i + 2]);
+      } else {
+        duty_users.value.push(users[count]);
+        count++;
+      }
 
-            if(users[i+2]){
-                duty_users.value.push(users[i + 2]);
-            }else{
-                duty_users.value.push(users[count]);
-                count ++
-            }
-
-            if(users[i+3]){
-                duty_users.value.push(users[i + 3]);
-            }else{
-                duty_users.value.push(users[count]);
-                count ++
-            }
-
-        }
+      if (users[i + 3]) {
+        duty_users.value.push(users[i + 3]);
+      } else {
+        duty_users.value.push(users[count]);
+        count++;
+      }
     }
-}
+  }
+};
 
 onMounted(() => {
   getUsers();
   getOrders();
 
-  setDutyUsers(props.always_orders)
+  setDutyUsers(props.always_orders);
 
-    
   scan_input_available();
   checkTimeFlg();
 
@@ -272,7 +270,7 @@ onMounted(() => {
           />
           <button
             class="w-1/3 bg-blue-500 hover:bg-blue-700 text-white py-4 px-4 rounded whitespace-nowrap font-bold text-xl"
-            @click.prevent ="clearForm"
+            @click.prevent="clearForm"
           >
             再スキャン
           </button>
@@ -300,22 +298,24 @@ onMounted(() => {
           >
             <button
               v-if="!form.order_flg && time_flg == 'order'"
-              @click.prevent ="sendOrder('order')"
+              @click.prevent="sendOrder('order')"
               class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-12 px-16 rounded text-4xl w-4/5"
             >
               注文
             </button>
             <button
               v-else-if="form.order_flg && time_flg == 'order'"
-              @click.prevent ="sendOrder('cancel')"
+              @click.prevent="sendOrder('cancel')"
               class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-12 px-16 rounded text-4xl w-4/5"
             >
               キャンセル
             </button>
 
             <button
-              v-else-if="form.order_flg && !form.receive_flg && time_flg == 'receive'"
-              @click.prevent ="sendOrder('receive')"
+              v-else-if="
+                form.order_flg && !form.receive_flg && time_flg == 'receive'
+              "
+              @click.prevent="sendOrder('receive')"
               class="bg-green-500 hover:bg-green-700 text-white font-bold py-12 px-16 rounded text-4xl w-4/5"
             >
               受け取り
@@ -326,8 +326,79 @@ onMounted(() => {
         <div id="button_content" class="">
           <h2 class="text-xl font-bold text-red-500">ポット当番</h2>
 
-          <div v-if="duty_users.length > 0" class="duty_container flex justify-between items-center flex-wrap text-gray-700">
-            <span :class="{'py-2 whitespace-nowrap text-3xl font-bold inline-block w-1/2': true, 'text-red-500 text-4xl' : i == 0}" v-for="(user, i) in duty_users" :key="i">{{ `(${i + 1})${user.name}` }}</span>
+          <div
+            v-if="duty_users.length > 0"
+            class="duty_container flex justify-between items-center flex-wrap text-gray-700"
+          >
+            <span
+              :class="{
+                'py-2 whitespace-nowrap text-3xl font-bold inline-block w-1/2': true,
+                'text-red-500 text-4xl': i == 0,
+              }"
+              v-for="(user, i) in duty_users"
+              :key="i"
+              >{{ `(${i + 1})${user.name}` }}</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main modal -->
+    <div
+      v-if="popup_dialog"
+      id="popup-modal"
+      tabindex="-1"
+      aria-hidden="true"
+      class="overflow-y-auto overflow-x-hidden z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+    >
+      <div id="modal_content">
+        <div class="relative p-4 w-full">
+          <!-- Modal content -->
+          <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700 p-4">
+            <!-- Modal header -->
+            <div
+              class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200"
+            >
+              <h3 class="text-3xl font-semibold text-gray-900 dark:text-white">
+                本日のポット清掃当番です。
+              </h3>
+              <button
+                type="button"
+                class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                data-modal-hide="default-modal"
+              >
+
+                <span class="sr-only">Close modal</span>
+              </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-4 md:p-5 space-y-4">
+              <p
+                class="text-xl leading-relaxed text-gray-500 dark:text-gray-400"
+              >
+                出勤時、ポットに水が入っていない場合はお湯を入れてください。
+              </p>
+              <p
+                class="text-xl leading-relaxed text-gray-500 dark:text-gray-400"
+              >
+                退勤時、ポットからコンセントを抜いてください。<br />
+                また、ポットのお湯を流しに捨て、内部を水道で綺麗に清掃してください。
+              </p>
+            </div>
+            <!-- Modal footer -->
+            <div
+              class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600"
+            >
+              <button
+                @click="popup_dialog = false"
+                data-modal-hide="default-modal"
+                type="button"
+                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-lg px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              >
+                確認しました
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -340,6 +411,21 @@ main {
   width: 100vw;
   overflow: hidden;
   background-color: #f8f8f8;
+  position: relative;
+
+  & #popup-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(62, 62, 62, 0.46);
+
+    & #modal_content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
 }
 #left_container {
   & .table_container {
@@ -414,7 +500,7 @@ main {
   }
 }
 
-.duty_container{
-    width: 90%;
+.duty_container {
+  width: 90%;
 }
 </style>
