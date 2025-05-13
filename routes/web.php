@@ -4,6 +4,7 @@ use App\Http\Controllers\AcceptController;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\ContentController;
 use App\Http\Controllers\DataController;
+use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\HeatStrokeController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\LunchController;
@@ -191,5 +192,5 @@ Route::get('/getTempHumiCo2', [DataController::class, 'getTempHumiCo2'])->name('
 
 Route::get('/test', [TestController::class, 'test'])->name('test');
 
-
+Route::post('/device-login', [DeviceController::class, 'store'])->name('device-login');
 

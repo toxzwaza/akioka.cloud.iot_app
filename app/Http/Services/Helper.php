@@ -11,6 +11,8 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Google\Auth\Credentials\ServiceAccountCredentials;
+use GuzzleHttp\Client;
 
 class Helper
 {
@@ -156,5 +158,47 @@ class Helper
         $stock_storage = StockStorage::find($stock_storage_id);
         $stock_storage->reorder_point = $reorder_point_avg;
         $stock_storage->save();
+    }
+
+    public static function getAccessToken()
+    {
+        $keyFilePath = storage_path('app/public/firebase/firebase-credentials.json');
+        $scopes = ['https://www.googleapis.com/auth/firebase.messaging'];
+
+        $credentials = new ServiceAccountCredentials($scopes, $keyFilePath);
+        $accessToken = $credentials->fetchAuthToken()['access_token'];
+
+        return $accessToken;
+    }
+
+    public static function sendNotification($token, $title, $body)
+    {
+        $client = new Client();
+        $accessToken = self::getAccessToken();
+
+        $headers = [
+            'Authorization' => 'Bearer ' . $accessToken,
+            'Content-Type' => 'application/json',
+        ];
+
+        $projectId = 'akioka-cloud-notify-service'; // FirebaseプロジェクトIDを指定
+        $url = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
+
+        $notification = [
+            'message' => [
+                'token' => $token,
+                'notification' => [
+                    'title' => $title,
+                    'body' => $body,
+                ],
+            ],
+        ];
+
+        $response = $client->post($url, [
+            'headers' => $headers,
+            'json' => $notification,
+        ]);
+
+        return $response->getBody()->getContents();
     }
 }

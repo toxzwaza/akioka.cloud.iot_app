@@ -1,11 +1,89 @@
 <script setup>
 import StockLayout from "@/Layouts/StockLayout.vue";
-
 import { Link } from "@inertiajs/vue3";
+import { ref, onMounted } from "vue";
+import axios from "axios";
+import { messaging, getToken } from "@/Firebase/firebase";
+import { onMessage } from "firebase/messaging";
+
+const deviceId = ref(null);
+const inputId = ref("");
+const token = ref("");
+
+// デバイスID・トークン作成用API通信
+const loginAndCreateTokenWithDeviceId = () => {
+  console.log("test");
+
+  try {
+    axios
+      .post(route("device-login"), {
+        name: inputId.value,
+        token: token.value,
+      })
+      .then((res) => {
+        console.log(res.data)
+        if (res.data.status) {
+          localStorage.setItem("device_id", inputId.value);
+          deviceId.value = inputId.value;
+        }
+      });
+  } catch (error) {
+    console.error("ログイン失敗:", error);
+  }
+};
+
+// トークン取得
+const getFCMToken = async () => {
+  try {
+    const currentToken = await getToken(messaging, {
+      vapidKey:
+        "BAFiNQy1EiKe3dMiEdWTWw00FegkQc4uUvoaG8YPCPuAMD86GQPKpZRXkZALHqEsaS7-1R-3xGopdqyflwqGZpg",
+    });
+
+    if (currentToken) {
+      console.log("取得したトークン:", currentToken);
+      return currentToken;
+    } else {
+      console.warn("トークンが取得できませんでした");
+      return null;
+    }
+  } catch (error) {
+    console.error("トークン取得時にエラーが発生:", error);
+    return null;
+  }
+};
+
+// 初期処理：localStorageから読み込み
+onMounted(() => {
+  const savedId = localStorage.getItem("device_id");
+  if (savedId && savedId != "null") {
+    deviceId.value = savedId;
+  } else {
+    inputId.value = prompt("デバイスIDを設定してください。");
+    getFCMToken().then((fetchedToken) => {
+      token.value = fetchedToken;
+
+      if (inputId.value && token.value) {
+        loginAndCreateTokenWithDeviceId();
+      }
+    });
+  }
+
+  getFCMToken();
+});
+
+onMessage(messaging, (payload) => {
+  alert(
+    `📩 フォアグラウンド通知を受信しました: ${payload.notification.title}\n ${payload.notification.body}`
+  );
+});
 </script>
 <template>
   <StockLayout :title="'在庫管理システム'">
     <template #content>
+      <p class="text-gray-700 mb-4 text-left ml-4">
+        device_id : {{ deviceId }}
+      </p>
       <div id="icon_container">
         <!-- 検索画面 -->
         <div class="w-1/2 p-4">

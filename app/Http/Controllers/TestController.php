@@ -17,13 +17,15 @@ use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
+use Google\Auth\Credentials\ServiceAccountCredentials;
 
 class TestController extends Controller
 {
     //
     public function test()
     {
-        $response = ChatGpt::getResponse();
-        dd($response);
+        // $res = Helper::sendNotification('e0YdX65c7qwXcCobPK_kfj:APA91bFrQE-w-R61OhUVpJatZVBFYmbESL83iJ2aYZaO8IFF1AmV1HHOoJdKedhdybiMV71PrNdgT8TH_HjiQFUDDKGWBcDcSNrSjMHx43k4D3wISmr6Nhw', 'test', 'test');
+
+        // return $res;
     }
 }

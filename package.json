@@ -22,6 +22,7 @@
         "vue-chart-3": "^3.1.8"
     },
     "dependencies": {
-        "@lottiefiles/dotlottie-vue": "^0.5.8"
+        "@lottiefiles/dotlottie-vue": "^0.5.8",
+        "firebase": "^11.7.1"
     }
 }
