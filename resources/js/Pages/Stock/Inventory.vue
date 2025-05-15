@@ -22,6 +22,8 @@ const request_user = reactive({
   name: "未設定",
 });
 
+const deviceName = ref(""); //端末ID
+
 const stock_storage = ref(null);
 const initial_orders = ref(null);
 
@@ -157,6 +159,7 @@ const handleStockRequest = (form) => {
       quantity: form?.quantity, //必要数量
       quantity_unit: form?.quantity_unit, //必要数量単位
       description: form?.description, //備考
+      device_name: deviceName.value ?? ''
     })
     .then((res) => {
       console.log(res.data);
@@ -236,6 +239,12 @@ const handleUpdateLocation = (payload) => {
     });
 };
 onMounted(() => {
+  const savedId = localStorage.getItem("device_id");
+  if (savedId && savedId != "null") {
+    deviceName.value = savedId;
+    console.log(deviceName.value);
+  }
+
   console.log(props.stock);
   if (props.request_user) {
     request_user.id = props.request_user.id;
@@ -585,9 +594,7 @@ onMounted(() => {
                       }}
                     </td>
                     <td class="py-4">
-                      {{
-                        order_request.description ?? '-'
-                      }}
+                      {{ order_request.description ?? "-" }}
                     </td>
 
                     <td
@@ -902,7 +909,7 @@ onMounted(() => {
       font-weight: bold;
     }
 
-    & #archive_container{
+    & #archive_container {
       overflow-x: auto;
 
       // スクロールバー
@@ -925,7 +932,7 @@ onMounted(() => {
       }
 
       ////
-    
+
       & table {
         table-layout: auto;
         width: 100%;
@@ -935,14 +942,13 @@ onMounted(() => {
         & tr:nth-child(odd) {
           background-color: #ffffff;
         }
-        & td, th {
+        & td,
+        th {
           padding: 0.8rem 0.6rem;
           text-align: left;
           white-space: nowrap;
         }
       }
-      
-
     }
   }
 }

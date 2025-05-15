@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Services\Helper;
+use App\Models\Device;
 use App\Models\OrderRequest;
 use App\Models\OrderRequestApproval;
 use App\Models\Stock;
@@ -115,12 +116,17 @@ class AcceptController extends Controller
 
 
                 case 1: //承認
-                    if ($order_request_approval->final_flg) 
-                    {
+                    if ($order_request_approval->final_flg) {
                         $order_request->accept_flg = 2;
                         $order_request->save();
 
                         Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}が承認されました。", "", [$order_request->user_id]);
+
+                        // 端末への通知
+                        if ($order_request->device_id) {
+                            $device = Device::find($order_request->device_id);
+                            Helper::sendNotification($device->token, "在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}が承認されました。");
+                        }
                     } else { //次の承認を有効化
                         $new_order_request_approval = OrderRequestApproval::where('order_request_id', $order_request_approval->order_request_id)
                             ->where('id', '>', $order_request_approval->id)
@@ -141,6 +147,12 @@ class AcceptController extends Controller
                     //  コメントを取得してコメントも送信
                     Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。", "", [$order_request->user_id]);
                     Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。", "", [$order_request->request_user_id]);
+
+                    // 端末への通知
+                    if ($order_request->device_id) {
+                        $device = Device::find($order_request->device_id);
+                        Helper::sendNotification($device->token, "在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。");
+                    }
 
                     break;
             }

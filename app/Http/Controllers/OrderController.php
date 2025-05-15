@@ -6,6 +6,7 @@ use App\Models\OrderRequest;
 use Exception;
 use Illuminate\Http\Request;
 use App\Http\Services\Helper;
+use App\Models\Device;
 use App\Models\InventoryOperationRecord;
 use App\Models\NotifyGroup;
 use App\Models\NotifyGroupUser;
@@ -35,6 +36,8 @@ class OrderController extends Controller
         $now_quantity = $request->now_quantity;
         $now_quantity_unit = $request->now_quantity_unit;
         $description = $request->description;
+        $device_name = $request->device_name;
+        $device_id = null;
 
         $stock = null;
 
@@ -48,6 +51,14 @@ class OrderController extends Controller
             $stock = Stock::find($stock_id);
             $stock_supplier = StockSupplier::where('stock_id', $stock_id)->first();
 
+
+            if ($device_name) {
+                $device = Device::where('name', $device_name)->first();
+                if ($device) {
+                    $device_id = $device->id;
+                }
+            }
+
             // 発注依頼 ---------------------------------------------------
             $order_request = new OrderRequest();
             $order_request->stock_id = $stock_id;
@@ -60,6 +71,7 @@ class OrderController extends Controller
             $order_request->digest_date = $digest_date;
             $order_request->desire_delivery_date = $desire_delivery_date;
             $order_request->description = $description;
+            $order_request->device_id = $device_id;
 
             if ($stock->price !== null) {
                 $order_request->calc_price = $stock->price * $quantity;
