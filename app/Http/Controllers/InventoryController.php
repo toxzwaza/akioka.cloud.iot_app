@@ -9,6 +9,7 @@ use App\Models\OrderRequest;
 use App\Models\Process;
 use App\Models\Stock;
 use App\Models\StockAlias;
+use App\Models\StockImage;
 use App\Models\StockStorage;
 use App\Models\StockSupplier;
 use App\Models\StorageAddress;
@@ -52,14 +53,17 @@ class InventoryController extends Controller
         $stock->order_requests = $order_requests;
 
         // 発注データ
-        $initial_orders = InitialOrder::
-        select('initial_orders.*', 'users.name as user_name', 'order_users.name as order_user_name')
-        ->leftJoin('users', 'users.id','initial_orders.user_id')
-        ->leftJoin('users as order_users', 'initial_orders.order_user_id', 'order_users.id')
-        ->where('stock_id', $stock->id)
-        ->orderBy('initial_orders.order_date', 'desc')
-        ->get();
+        $initial_orders = InitialOrder::select('initial_orders.*', 'users.name as user_name', 'order_users.name as order_user_name')
+            ->leftJoin('users', 'users.id', 'initial_orders.user_id')
+            ->leftJoin('users as order_users', 'initial_orders.order_user_id', 'order_users.id')
+            ->where('stock_id', $stock->id)
+            ->orderBy('initial_orders.order_date', 'desc')
+            ->get();
         $stock->initial_orders = $initial_orders;
+
+        // サムネイル以外の画像取得
+        $stock_images = StockImage::select('id', 'img_path')->where('stock_id', $stock_id)->where('del_flg', 0)->get();
+        $stock->stock_images = $stock_images;
 
         if ($stock_storage_id) {
             $stock_storage = StockStorage::select('stock_storages.*', 'locations.name as location_name', 'storage_addresses.address')->join('storage_addresses', 'stock_storages.storage_address_id', 'storage_addresses.id')
@@ -130,20 +134,38 @@ class InventoryController extends Controller
         $status = true;
         $msg = '';
 
+
+
         try {
-            if ($request->hasFile('file')) {
+            if ($request->hasFile('files')) {
                 $stock_id = $request->stock_id;
-                $file = $request->file('file');
+                $image_type = $request->image_type;
+                $files = $request->file('files');
 
-                // 画像を保存する
-                $timestamp = now()->timestamp;
-                $filename = $timestamp . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('public/stock', $filename);
+                if ($image_type == 'thumbnail') {
+                    // 画像を保存する
+                    $timestamp = now()->timestamp;
+                    $filename = $timestamp . '.' . $files[0]->getClientOriginalExtension();
+                    $files[0]->storeAs('public/stock', $filename);
 
-                // 保存した画像のパスに更新
-                $stock = Stock::find($stock_id);
-                $stock->img_path = 'storage/stock/' . $filename;
-                $stock->save();
+                    // 保存した画像のパスに更新
+                    $stock = Stock::find($stock_id);
+                    $stock->img_path = 'storage/stock/' . $filename;
+                    $stock->save();
+                } else {
+                    foreach ($files as $file) {
+                        // 画像を保存する
+                        $timestamp = now()->timestamp;
+                        $filename = $timestamp . '.' . $file->getClientOriginalExtension();
+                        $file->storeAs('public/stock', $filename);
+
+                        $stock_image = new StockImage();
+                        $stock_image->stock_id = $stock_id;
+                        $stock_image->img_path = 'storage/stock/' . $filename;
+                        $stock_image->del_flg = 0;
+                        $stock_image->save();
+                    }
+                }
 
                 $msg = "ファイルアップロードが完了しました";
             }

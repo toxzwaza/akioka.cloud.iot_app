@@ -9,6 +9,12 @@ import PickStorageAddress from "@/Components/Stock/Inventory/PickStorageAddress.
 import EditAlias from "@/Components/Stock/Inventory/EditAlias.vue";
 import StockRequest from "@/Components/Stock/StockRequest.vue";
 import _ from "lodash";
+import Swiper from "swiper";
+import { Navigation, Pagination, Thumbs } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/thumbs";
 
 const props = defineProps({
   stock: Object,
@@ -44,11 +50,23 @@ const selectedFile = ref(null);
 
 const change_quantity = ref(null);
 
+// 画像の配列を作成（正しく画像パスを取得）
+const images = ref([props.stock.img_path, ...props.stock.stock_images.map(image => image.img_path)]);
+
 // 入庫月平均
 const receive_average = ref(0);
 
 // 出庫月平均
 const shipment_average = ref(0);
+
+// サムネイル用のSwiperインスタンスを保持するref
+const thumbsSwiper = ref(null);
+
+// アクティブなスライドのインデックスを保持するref
+const activeSlideIndex = ref(0);
+
+// 画像タイプを保持するref
+const selectedFileType = ref("");
 
 // 数量変更
 const changeQuantity = () => {
@@ -79,14 +97,15 @@ const changeQuantity = () => {
 };
 
 // 画像プレビュー
-const handleFileChange = (event) => {
-  const file = event.target.files[0];
-  if (file) {
+const handleFileChange = (event, type) => {
+  const files = event.target.files;
+  if (files && files.length > 0) {
     console.log("file変更");
-    selectedFile.value = file; // ファイルを保存
+    selectedFile.value = files; // ファイルを保存
+    selectedFileType.value = type; // 画像タイプを保存
     // プレビュー用のURLを作成
-    previewImage.img_path = URL.createObjectURL(file);
-    previewImage.msg = "こちらの画像で更新します。よろしいですか？";
+    previewImage.img_path = URL.createObjectURL(files[0]);
+    previewImage.msg = `${files.length}枚の画像をアップロードします。よろしいですか？`;
     previewImage.update_button = true;
   }
 };
@@ -99,14 +118,18 @@ const checkDeliFile = (deli_file) => {
 
 // 画像アップロード
 const uploadFile = () => {
-  if (!selectedFile.value) {
-    console.error("No file selected");
+  if (!selectedFile.value || selectedFile.value.length === 0) {
+    console.error("No files selected");
     return;
   }
 
   const formData = new FormData();
-  formData.append("file", selectedFile.value);
+  // 複数ファイルを追加
+  for (let i = 0; i < selectedFile.value.length; i++) {
+    formData.append(`files[${i}]`, selectedFile.value[i]);
+  }
   formData.append("stock_id", props.stock.id);
+  formData.append("image_type", selectedFileType.value); // 画像タイプを追加
 
   axios
     .post(route("stock.updateFile"), formData, {
@@ -115,7 +138,7 @@ const uploadFile = () => {
       },
     })
     .then((res) => {
-      console.log("File uploaded successfully:", res.data);
+      console.log("Files uploaded successfully:", res.data);
       if (res.data.status) {
         if (confirm("ファイルのアップロードが完了しました。")) {
           window.location.reload();
@@ -125,7 +148,7 @@ const uploadFile = () => {
       }
     })
     .catch((error) => {
-      console.error("Error uploading file:", error);
+      console.error("Error uploading files:", error);
     });
 };
 
@@ -159,7 +182,7 @@ const handleStockRequest = (form) => {
       quantity: form?.quantity, //必要数量
       quantity_unit: form?.quantity_unit, //必要数量単位
       description: form?.description, //備考
-      device_name: deviceName.value ?? ''
+      device_name: deviceName.value ?? "",
     })
     .then((res) => {
       console.log(res.data);
@@ -238,6 +261,14 @@ const handleUpdateLocation = (payload) => {
       console.log(error);
     });
 };
+
+const deleteImage = (index) => {
+  if(index){
+    const image_path = images.value[index]
+    console.log(image_path)
+  }
+};
+
 onMounted(() => {
   const savedId = localStorage.getItem("device_id");
   if (savedId && savedId != "null") {
@@ -280,6 +311,38 @@ onMounted(() => {
       retention.retention_flg = 1;
     }
   }
+
+  // サムネイル用のスライドショーを先に初期化
+  thumbsSwiper.value = new Swiper(".swiper-thumbs", {
+    modules: [Navigation],
+    spaceBetween: 10,
+    slidesPerView: 4,
+    freeMode: true,
+    watchSlidesProgress: true,
+  });
+
+  // メインのスライドショー
+  const mainSwiper = new Swiper(".swiper", {
+    modules: [Navigation, Pagination, Thumbs],
+    loop: images.value.length > 1,
+    pagination: {
+      el: ".swiper-pagination",
+      clickable: true,
+    },
+    navigation: {
+      nextEl: ".swiper-button-next",
+      prevEl: ".swiper-button-prev",
+    },
+    thumbs: {
+      swiper: thumbsSwiper.value,
+      slideThumbActiveClass: "swiper-slide-active",
+    },
+    on: {
+      slideChange: function () {
+        activeSlideIndex.value = this.realIndex;
+      },
+    },
+  });
 });
 </script>
 <template>
@@ -345,16 +408,79 @@ onMounted(() => {
 
           <!-- 画像変更ボタン -->
           <div class="file_container flex flex-col mt-6 mb-2">
-            <div class="open_camera_button">
-              <img src="/images/stocks/open_camera_button.png" alt="" />
-              <input type="file" capture="camera" @change="handleFileChange" />
+            <div id="setting_img" class="flex justify-between items-center">
+              <div class="open_camera_button">
+                <img src="/images/stocks/open_camera_button.png" alt="" />
+                <input
+                  type="file"
+                  capture="camera"
+                  @change="(e) => handleFileChange(e, 'thumbnail')"
+                  accept="image/*"
+                />
+              </div>
+
+              <div class="open_camera_button">
+                <img src="/images/stocks/create_etc_button.png" alt="" />
+                <input
+                  type="file"
+                  capture="camera"
+                  @change="(e) => handleFileChange(e, 'etc')"
+                  accept="image/*"
+                />
+              </div>
             </div>
 
-            <img
-              class="stock_img w-2/3 mt-2"
-              :src="getImgPath(props.stock.img_path)"
-              alt=""
-            />
+            <!-- スライドショー -->
+            <div class="swiper-container">
+              <div class="swiper">
+                <div class="swiper-wrapper">
+                  <div
+                    class="swiper-slide"
+                    v-for="(image, index) in images"
+                    :key="index"
+                  >
+                    <img
+                      class="stock_img w-2/3 mt-2"
+                      :src="getImgPath(image)"
+                      :alt="'スライド' + (index + 1)"
+                    />
+                  </div>
+                </div>
+
+                <!-- ナビゲーションボタン -->
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
+
+                <!-- ページネーション -->
+                <div class="swiper-pagination"></div>
+              </div>
+
+              <!-- サムネイルスライドショー -->
+              <div class="swiper-thumbs mt-4">
+                <div class="swiper-wrapper">
+                  <div
+                    class="swiper-slide"
+                    v-for="(image, index) in images"
+                    :key="'thumb-' + index"
+                  >
+                    <div class="thumb-container">
+                      <img
+                        class="thumb-img"
+                        :src="getImgPath(image)"
+                        :alt="'サムネイル' + (index + 1)"
+                      />
+                      <button
+                        class="delete-btn"
+                        v-if="index === activeSlideIndex"
+                        @click="deleteImage(index)"
+                      >
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div id="right_container" class="w-1/2">
@@ -776,10 +902,10 @@ onMounted(() => {
     color: gray;
   }
   & .file_container {
-    width: 80%;
+    width: 95%;
     & .open_camera_button {
       height: 5vh;
-      width: 50%;
+      width: 45%;
       position: relative;
 
       & img {
@@ -803,12 +929,6 @@ onMounted(() => {
         opacity: 0;
         z-index: 2;
       }
-    }
-    & .stock_img {
-      width: 100%;
-      object-fit: contain;
-
-      box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     }
   }
 }
@@ -971,5 +1091,79 @@ onMounted(() => {
       object-fit: cover;
     }
   }
+}
+
+.swiper-container {
+  width: 100%;
+}
+
+.swiper {
+  width: 100%;
+  height: 400px;
+}
+
+.swiper-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.swiper-thumbs {
+  height: 100px;
+  box-sizing: border-box;
+  padding: 10px 0;
+
+  & .swiper-slide {
+    width: 25%;
+    height: 100%;
+    opacity: 0.4;
+    cursor: pointer;
+
+    .thumb-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .delete-btn {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      background: #ff4444;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 10;
+
+      &:hover {
+        background: #cc0000;
+        transform: scale(1.1);
+      }
+
+      i {
+        font-size: 12px;
+      }
+    }
+  }
+
+  & .swiper-slide-active {
+    opacity: 1;
+    border: 3px solid #109ff3;
+    border-radius: 6px;
+  }
+}
+
+.thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
 }
 </style>

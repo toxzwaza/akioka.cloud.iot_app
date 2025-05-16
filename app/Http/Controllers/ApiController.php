@@ -32,6 +32,7 @@ class ApiController extends Controller
     public function getStocks(Request $request)
     {
         $stock_name = $request->stock_name;
+        $stock_s_name = $request->stock_s_name;
         $address_id = $request->address_id;
         $stock_id = $request->stock_id;
         $alias = $request->alias;
@@ -73,7 +74,11 @@ class ApiController extends Controller
 
 
             if ($stock_name) {
-                $query->where('stocks.name', 'like', '%' . $stock_name . '%')->orWhere('stocks.s_name', 'like', '%' . $stock_name . '%');
+                $query->where('stocks.name', 'like', '%' . $stock_name . '%');
+            }
+
+            if ($stock_s_name) {
+                $query->where('stocks.s_name', 'like', '%' . $stock_s_name . '%');
             }
 
             if ($alias) {

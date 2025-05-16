@@ -1,6 +1,11 @@
 import './bootstrap';
 import '../css/app.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import Swiper from 'swiper';
+import { Navigation, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
@@ -21,4 +26,20 @@ createInertiaApp({
     progress: {
         color: '#4B5563',
     },
+});
+
+// Swiperの初期化
+document.addEventListener('DOMContentLoaded', function() {
+    const swiper = new Swiper('.swiper', {
+        modules: [Navigation, Pagination],
+        loop: true,
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+    });
 });
