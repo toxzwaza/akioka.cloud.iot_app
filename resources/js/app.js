@@ -12,6 +12,11 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy/dist/vue.m';
 import '@fortawesome/fontawesome-free/css/all.css';
+
+// Ar
+import 'aframe';
+import 'mind-ar/dist/mindar-image-aframe.prod.js'; // mind-arにはA-Frame用ビルドあり
+
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 
 createInertiaApp({

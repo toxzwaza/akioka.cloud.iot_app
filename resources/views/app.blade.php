@@ -16,12 +16,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
 
 
-    <!-- AR用 -->
-    <!-- これを Blade テンプレートの head または body の上部に追加 -->
-    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.4/dist/mindar-image-aframe.prod.js"></script>
-
-
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
 
