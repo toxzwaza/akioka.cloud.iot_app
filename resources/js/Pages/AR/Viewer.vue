@@ -37,6 +37,17 @@ onMounted(() => {
     clearInterval(messageInterval);
     isLoading.status = false;
   }, 5000);
+
+  // ARターゲット検知時のイベントリスナー
+  const scene = document.querySelector('a-scene');
+  if (scene) {
+    scene.addEventListener('targetFound', () => {
+      console.log('🎯 ターゲットを検知しました！');
+    });
+    scene.addEventListener('targetLost', () => {
+      console.log('❌ ターゲットを見失いました');
+    });
+  }
 });
 </script>
 
@@ -51,7 +62,7 @@ onMounted(() => {
       device-orientation-permission-ui="enabled: false"
     >
       <a-assets>
-        <a-asset-item id="3dmodel" src="/assets/haniwa.glb"></a-asset-item>
+        <!-- <a-asset-item id="3dmodel" src="/assets/haniwa.glb"></a-asset-item> -->
         <img id="my-image" src="/assets/haniwa.png" />
       </a-assets>
 
@@ -66,7 +77,7 @@ onMounted(() => {
         ></a-gltf-model> -->
         <a-image
           src="#my-image"
-          position="0 0 0"
+          position="0 0.5 0"
           rotation="0 0 0"
           width="1"
           height="1"
@@ -82,7 +93,6 @@ onMounted(() => {
       </a-entity>
     </a-scene>
   </div>
-
   <!-- ローディング表示 -->
   <div class="loading-overlay" :class="{ 'fade-out': !isLoading.status }">
     <div class="loading-content">
