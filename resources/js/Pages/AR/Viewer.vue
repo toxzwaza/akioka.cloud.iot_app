@@ -41,11 +41,17 @@ onMounted(() => {
   // ARターゲット検知時のイベントリスナー
   const scene = document.querySelector('a-scene');
   if (scene) {
-    scene.addEventListener('targetFound', () => {
-      console.log('🎯 ターゲットを検知しました！');
+    scene.addEventListener('targetFound', (event) => {
+      console.log('🎯 ターゲットを検知しました！', event);
+      // 検知時の位置情報を出力
+      const target = event.target;
+      console.log('ターゲットの位置:', target.object3D.position);
     });
-    scene.addEventListener('targetLost', () => {
-      console.log('❌ ターゲットを見失いました');
+    scene.addEventListener('targetLost', (event) => {
+      console.log('❌ ターゲットを見失いました', event);
+    });
+    scene.addEventListener('arError', (error) => {
+      console.error('ARエラーが発生しました:', error);
     });
   }
 });
@@ -63,7 +69,7 @@ onMounted(() => {
     >
       <a-assets>
         <!-- <a-asset-item id="3dmodel" src="/assets/haniwa.glb"></a-asset-item> -->
-        <img id="my-image" src="/assets/haniwa.png" />
+        <img id="my-image" src="/assets/haniwa.png" crossorigin="anonymous" />
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"> </a-camera>
@@ -77,10 +83,11 @@ onMounted(() => {
         ></a-gltf-model> -->
         <a-image
           src="#my-image"
-          position="0 0.5 0"
+          position="0 0 0"
           rotation="0 0 0"
           width="1"
           height="1"
+          scale="0.5 0.5 0.5"
         ></a-image>
         <!-- テキスト -->
         <a-text
@@ -117,6 +124,9 @@ onMounted(() => {
 body {
   background-image: url("/ar_bg.png");
 }
+.inner {
+  transform: translateY(-44%) scale(0.6);
+}
 .mindar-ui-loading {
   display: none !important;
   & .loader {
@@ -133,8 +143,9 @@ body {
 }
 
 video {
-//   height: 80vh !important;
-//   object-fit: cover;
+  height: 80vh !important;
+  object-fit: cover;
+  width: 100% !important;
 }
 
 #left_up_ar_icon {
