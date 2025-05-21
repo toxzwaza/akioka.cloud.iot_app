@@ -2,9 +2,8 @@
 import { onMounted, ref, reactive } from "vue";
 
 const isLoading = reactive({
-    status: true,
-    msg: '準備中...'
-
+  status: true,
+  msg: "準備中...",
 });
 
 onMounted(() => {
@@ -26,7 +25,7 @@ onMounted(() => {
   }, 4000);
 
   // 2秒ごとにisLoading.msgを変更
-  const messages = ['準備中...', 'まもなく完了します...'];
+  const messages = ["準備中...", "まもなく完了します..."];
   let messageIndex = 0;
   const messageInterval = setInterval(() => {
     isLoading.msg = messages[messageIndex];
@@ -44,7 +43,7 @@ onMounted(() => {
 <template>
   <div v-once>
     <a-scene
-      mindar-image="imageTargetSrc: /marker.mind"
+      mindar-image="imageTargetSrc: /targets/targets.mind"
       color-space="sRGB"
       embedded
       renderer="colorManagement: true, physicallyCorrectLights"
@@ -52,18 +51,34 @@ onMounted(() => {
       device-orientation-permission-ui="enabled: false"
     >
       <a-assets>
-        <a-asset-item id="3dmodel" src="/model.glb"></a-asset-item>
+        <a-asset-item id="3dmodel" src="/assets/haniwa.glb"></a-asset-item>
+        <img id="my-image" src="/assets/haniwa.png" />
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"> </a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model
+        <!-- <a-gltf-model
           src="#3dmodel"
           position="0 0 0"
           rotation="0 0 0"
           scale="0.1 0.1 0.1"
-        ></a-gltf-model>
+        ></a-gltf-model> -->
+        <a-image
+          src="#my-image"
+          position="0 0 0"
+          rotation="0 0 0"
+          width="1"
+          height="1"
+        ></a-image>
+        <!-- テキスト -->
+        <a-text
+          value="これは埴輪です"
+          position="0 0.8 0"
+          align="center"
+          color="#FF0000"
+          width="2"
+        ></a-text>
       </a-entity>
     </a-scene>
   </div>
@@ -201,7 +216,11 @@ video {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>
