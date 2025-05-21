@@ -1,5 +1,11 @@
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, ref, reactive } from "vue";
+
+const isLoading = reactive({
+    status: true,
+    msg: '準備中...'
+
+});
 
 onMounted(() => {
   setTimeout(() => {
@@ -8,16 +14,30 @@ onMounted(() => {
       const videoHeight = videoElement.getBoundingClientRect().height;
       const screenHeight = window.innerHeight;
       const descriptionHeight = screenHeight - videoHeight;
-      document.getElementById(
-        "description"
-      ).style.height = `${descriptionHeight}px`;
+      document.getElementById("description").style.height = `${
+        200 + descriptionHeight
+      }px`;
       console.log("Actual video height:", videoHeight);
       console.log("all inner height:", window.innerHeight);
       console.log("Description height:", descriptionHeight);
     } else {
       console.log("Video element not found.");
     }
-  }, 3000);
+  }, 4000);
+
+  // 2秒ごとにisLoading.msgを変更
+  const messages = ['準備中...', 'まもなく完了します...'];
+  let messageIndex = 0;
+  const messageInterval = setInterval(() => {
+    isLoading.msg = messages[messageIndex];
+    messageIndex = (messageIndex + 1) % messages.length;
+  }, 2000);
+
+  // 5秒後にローディングを非表示
+  setTimeout(() => {
+    clearInterval(messageInterval);
+    isLoading.status = false;
+  }, 5000);
 });
 </script>
 
@@ -47,9 +67,20 @@ onMounted(() => {
       </a-entity>
     </a-scene>
   </div>
+
+  <!-- ローディング表示 -->
+  <div class="loading-overlay" :class="{ 'fade-out': !isLoading.status }">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">{{ isLoading.msg }}</p>
+    </div>
+  </div>
+
   <span id="left_up_ar_icon">AR</span>
 
-  <img id="bn_1" src="/bn_1.png" alt="" />
+  <a href="https://akioka1966.co.jp/"
+    ><img id="bn_1" src="/bn_1.png" alt=""
+  /></a>
 
   <div id="description">
     <p class="text-gray-400 p-2">製品の説明や会社HPへのリンクを表示。</p>
@@ -59,7 +90,7 @@ onMounted(() => {
 
 <style lang="scss" >
 body {
-  background-image: url("ar_bg.png");
+  background-image: url("/ar_bg.png");
 }
 .mindar-ui-loading {
   display: none !important;
@@ -67,7 +98,12 @@ body {
     display: none !important;
   }
 }
+
 .a-enter-vr-button {
+  display: none !important;
+}
+
+.a-loader-title {
   display: none !important;
 }
 
@@ -88,6 +124,17 @@ video {
   border-radius: 3px;
   opacity: 0.8;
   font-size: 0.7rem;
+  animation: blink 3s infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.2;
+  }
 }
 
 #description {
@@ -107,10 +154,54 @@ video {
 }
 
 #bn_1 {
-  width: 30vw;
+  width: 20vw;
   position: fixed;
   right: 2%;
   top: 2%;
   box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 1s ease-in-out;
+
+  &.fade-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .loading-content {
+    text-align: center;
+  }
+
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+  }
+
+  .loading-text {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>
