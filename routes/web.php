@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AcceptController;
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\ARController;
 use App\Http\Controllers\ContentController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\DeviceController;
@@ -193,3 +194,5 @@ Route::get('/test', [TestController::class, 'test'])->name('test');
 
 Route::post('/device-login', [DeviceController::class, 'store'])->name('device-login');
 
+// OTEX AR用サンプル
+Route::get('/ar', [ARController::class, 'index'])->name('ar.index');

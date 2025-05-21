@@ -30,7 +30,7 @@ class StockRequestController extends Controller
             StockRequest::select('stock_requests.id as stock_request_id', 'stock_requests.alias', 'stock_requests.alias', 'stocks.id as stock_id', 'stocks.name', 'stocks.img_path', 'stocks.solo_unit', 'stock_storages.id as stock_storage_id', 'stock_storages.quantity as stock_storage_quantity', 'storage_addresses.address')
             ->join('stocks', 'stocks.id', 'stock_requests.stock_id')
             ->leftJoin('stock_storages', 'stock_storages.stock_id', 'stock_requests.stock_id')
-            ->join('storage_addresses', 'storage_addresses.id', 'stock_storages.storage_address_id')
+            ->leftJoin('storage_addresses', 'storage_addresses.id', 'stock_storages.storage_address_id')
             ->orderBy('stock_requests.orderNumber', 'asc')->get();
 
 
@@ -38,7 +38,7 @@ class StockRequestController extends Controller
 
         // 物品依頼を取得
         $stock_request_orders = StockRequestOrder::select('stock_request_orders.id', 'stock_request_orders.process_id', 'stock_request_orders.stock_id', 'stock_request_orders.status', 'stock_request_orders.quantity', 'stock_request_orders.order_flg', 'stock_request_orders.created_at', 'users.name as user_name')->join('users', 'users.id', 'stock_request_orders.user_id')
-        ->where('stock_request_orders.status', 0)
+            ->where('stock_request_orders.status', 0)
             ->orderBy('stock_request_orders.created_at', 'desc')->get();
 
         return Inertia::render('Stock/Request/Home', ['processes' => $processes, 'stock_requests' => $stock_requests, 'users' => $users, 'stock_request_orders' => $stock_request_orders]);
@@ -85,22 +85,24 @@ class StockRequestController extends Controller
         $updateQuantity = $request->updateQuantity;
 
         try {
-            $stock_storage = StockStorage::find($stock_storage_id);
-            $stock_storage->quantity = $updateQuantity;
-            $stock_storage->save();
+            if ($stock_storage_id) {
+                $stock_storage = StockStorage::find($stock_storage_id);
+                $stock_storage->quantity = $updateQuantity;
+                $stock_storage->save();
 
-            $stock_request_order = StockRequestOrder::where('process_id', $process_id)->where('stock_id', $stock_id)->where('status', 0)->first();
-            $stock_request_order->status = 1;
-            $stock_request_order->save();
+                $stock_request_order = StockRequestOrder::where('process_id', $process_id)->where('stock_id', $stock_id)->where('status', 0)->first();
+                $stock_request_order->status = 1;
+                $stock_request_order->save();
 
-            // 出庫を記録
-            $inventory_operation_record = new InventoryOperationRecord();
-            $inventory_operation_record->inventory_operation_id = 2;
-            $inventory_operation_record->stock_id = $stock_id;
-            $inventory_operation_record->stock_storage_id = $stock_storage_id;
-            $inventory_operation_record->quantity = $stock_request_order->quantity;
-            $inventory_operation_record->user_id = 81; //三谷
-            $inventory_operation_record->save();
+                // 出庫を記録
+                $inventory_operation_record = new InventoryOperationRecord();
+                $inventory_operation_record->inventory_operation_id = 2;
+                $inventory_operation_record->stock_id = $stock_id;
+                $inventory_operation_record->stock_storage_id = $stock_storage_id;
+                $inventory_operation_record->quantity = $stock_request_order->quantity;
+                $inventory_operation_record->user_id = 81; //三谷
+                $inventory_operation_record->save();
+            }
         } catch (Exception $e) {
             $status = false;
         }
@@ -159,9 +161,9 @@ class StockRequestController extends Controller
 
             // 完了しておらず、stock_idが一致する全てのorder_flgを1にする
             $stock_request_orders = StockRequestOrder::where('stock_id', $stock_id)
-            ->where('status', 0)
-            ->get();
-            foreach($stock_request_orders as $stock_request_order){
+                ->where('status', 0)
+                ->get();
+            foreach ($stock_request_orders as $stock_request_order) {
                 $stock_request_order->order_flg = 1;
                 $stock_request_order->save();
             }
