@@ -133,8 +133,8 @@ body {
 }
 
 video {
-  height: 80vh !important;
-  object-fit: cover;
+//   height: 80vh !important;
+//   object-fit: cover;
 }
 
 #left_up_ar_icon {
