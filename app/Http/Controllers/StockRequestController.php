@@ -34,7 +34,7 @@ class StockRequestController extends Controller
             ->orderBy('stock_requests.orderNumber', 'asc')->get();
 
 
-        $users = User::select('id', 'name', 'process_id')->where('process_id', '!=', 0)->get();
+        $users = User::select('id', 'name', 'process_id', 'password', 'is_admin')->where('process_id', '!=', 0)->get();
 
         // 物品依頼を取得
         $stock_request_orders = StockRequestOrder::select('stock_request_orders.id', 'stock_request_orders.process_id', 'stock_request_orders.stock_id', 'stock_request_orders.status', 'stock_request_orders.quantity', 'stock_request_orders.order_flg', 'stock_request_orders.created_at', 'users.name as user_name')->join('users', 'users.id', 'stock_request_orders.user_id')

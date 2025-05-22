@@ -13,10 +13,11 @@ const props = defineProps({
   stock_request_orders: Array,
 });
 
-const stock_requests = ref([])
-const left_stock_requests = ref([])
-const right_stock_requests = ref([])
-const users = ref([])
+const stock_requests = ref([]);
+const left_stock_requests = ref([]);
+const right_stock_requests = ref([]);
+const users = ref([]);
+const admin_users = ref([]);
 
 const already_flg = reactive({
   status: false,
@@ -37,8 +38,8 @@ const handleCloseModal = () => {
 
 const handleProcessId = (process_id) => {
   console.log(process_id);
-  form.user_id = null
-  
+  form.user_id = null;
+
   users.value = props.users.filter((user) => user.process_id == process_id);
   checkAlreadyStockRequest();
 };
@@ -58,10 +59,17 @@ const form = reactive({
 });
 
 const loginAdmin = () => {
-  if (form.pwd == "pwd") {
-    is_login.value = true;
+  console.log(props.users);
+
+  if (form.pwd) {
+    is_login.value = admin_users.value.find(
+      (user) => user.password === form.pwd
+    );
+    if (!is_login.value) {
+      alert("パスワードが違います。");
+    }
   } else {
-    alert("パスワードが違います。");
+    alert("パスワードを入力してください。");
   }
 };
 
@@ -97,7 +105,9 @@ const checkAlreadyStockRequest = () => {
     )
   ) {
     if (
-      confirm("物品依頼が完了しています。確認及び変更を依頼しますか？\nキャンセルした場合新規物品依頼を行います。")
+      confirm(
+        "物品依頼が完了しています。確認及び変更を依頼しますか？\nキャンセルした場合新規物品依頼を行います。"
+      )
     ) {
       stock_requests.value = props.stock_request_orders
         .filter(
@@ -117,13 +127,12 @@ const checkAlreadyStockRequest = () => {
         .filter((stock_request) => stock_request !== undefined);
 
       already_flg.status = true;
-    }else{
-      stock_requests.value = props.stock_requests
+    } else {
+      stock_requests.value = props.stock_requests;
       already_flg.status = false;
-
     }
   } else {
-    stock_requests.value = props.stock_requests
+    stock_requests.value = props.stock_requests;
     stock_requests.value.forEach((stock_request) => {
       stock_request.quantity = "";
     });
@@ -141,13 +150,21 @@ const isWeekdayMonToWed = () => {
 };
 
 const setUpAlreadyFlg = () => {
-  if(isWeekdayMonToWed()){
+  if (isWeekdayMonToWed()) {
     const today = new Date();
-    const nextMonday = new Date(today.setDate(today.getDate() + ((1 + 7 - today.getDay()) % 7 || 7)));
-    const days = ['日', '月', '火', '水', '木', '金', '土'];
-    already_flg.delivery_date = `${nextMonday.getFullYear()}/${(nextMonday.getMonth() + 1).toString().padStart(2, '0')}/${nextMonday.getDate().toString().padStart(2, '0')}(${days[nextMonday.getDay()]})`;
+    const nextMonday = new Date(
+      today.setDate(today.getDate() + ((1 + 7 - today.getDay()) % 7 || 7))
+    );
+    const days = ["日", "月", "火", "水", "木", "金", "土"];
+    already_flg.delivery_date = `${nextMonday.getFullYear()}/${(
+      nextMonday.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, "0")}/${nextMonday.getDate().toString().padStart(2, "0")}(${
+      days[nextMonday.getDay()]
+    })`;
   }
-}
+};
 
 const sliceStockRequests = (stock_requests) => {
   left_stock_requests.value = stock_requests.slice(
@@ -162,20 +179,26 @@ const sliceStockRequests = (stock_requests) => {
 };
 
 onMounted(() => {
-  stock_requests.value = props.stock_requests
+  stock_requests.value = props.stock_requests;
   sliceStockRequests(stock_requests.value);
 
   users.value = props.users;
 
-   
-  setUpAlreadyFlg() //現在の日付からお渡し日を算出
+  setUpAlreadyFlg(); //現在の日付からお渡し日を算出
+
+  admin_users.value = props.users.filter((user) => user.is_admin);
+  console.log(admin_users.value);
 });
 </script>
 <template>
   <StockLayout :title="'在庫管理システム'">
     <template #content>
       <!-- 管理者ログイン -->
-      <div class="flex justify-end mb-12">
+      <div class="flex items-center justify-between mb-12">
+        <p class="py-2 text-lg font-bold text-gray-700">
+          <span v-if="is_login">{{ is_login.name }}さん、ようこそ！</span>
+        </p>
+
         <form class="w-full max-w-sm">
           <div class="flex items-center border-b border-blue-500 py-2">
             <input
@@ -341,7 +364,12 @@ onMounted(() => {
             "
             class="mt-12"
           >
-          <h3 v-if="already_flg.delivery_date" class="text-center text-4xl mb-8 text-gray-700 font-bold">お渡し予定日：{{ already_flg.delivery_date }}</h3>
+            <h3
+              v-if="already_flg.delivery_date"
+              class="text-center text-4xl mb-8 text-gray-700 font-bold"
+            >
+              お渡し予定日：{{ already_flg.delivery_date }}
+            </h3>
             <!-- 物品依頼ボタン -->
             <button
               @click="orderStockRequest"

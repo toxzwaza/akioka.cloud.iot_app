@@ -134,6 +134,16 @@ const completeStockRequest = (stock) => {
 };
 const deleteStockRequest = (stock) => {
   console.log(stock.stock_id, target_process.value);
+  if (
+    !confirm(
+      `品名: ${stock.name}\n品番: ${
+        stock.s_name ?? ""
+      }\nの発注削除を行います。よろしいですか？`
+    )
+  ) {
+    alert('発注削除を取消しました。')
+    return
+  }
   const deleteStockRequestOrder = props.stock_request_orders.find(
     (stock_request_order) =>
       stock_request_order.stock_id === stock.stock_id &&
@@ -145,14 +155,14 @@ const deleteStockRequest = (stock) => {
     axios
       .delete(route("stock.request.delete"), {
         params: {
-          stock_request_order_id: deleteStockRequestOrder.id
+          stock_request_order_id: deleteStockRequestOrder.id,
         },
       })
       .then((res) => {
         console.log(res.data);
-        if(res.data.status){
-          alert('注文依頼を削除しました。')
-          window.location.reload()
+        if (res.data.status) {
+          alert("注文依頼を削除しました。");
+          window.location.reload();
         }
       })
       .catch((error) => {
