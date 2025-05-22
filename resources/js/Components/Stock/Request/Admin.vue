@@ -85,7 +85,7 @@ const orderRequestByStockRequestOrder = (stock) => {
     )
   ) {
     axios
-      .post(route('stock.request.order'), {
+      .post(route("stock.request.order"), {
         stock_id: stock.stock_id,
         request_user_id: 81, //現状三谷さん固定
       })
@@ -93,7 +93,7 @@ const orderRequestByStockRequestOrder = (stock) => {
         console.log(res.data);
         if (res.data.status) {
           stock.order_flg = true;
-          alert("発注依頼が完了しました。")
+          alert("発注依頼が完了しました。");
         }
       })
       .catch((error) => {
@@ -112,6 +112,7 @@ const updateUpdateQuantity = (val, stock) => {
   stock.updateQuantity = val;
 };
 
+// 完了処理
 const completeStockRequest = (stock) => {
   // return console.log(stock)
   axios
@@ -131,9 +132,39 @@ const completeStockRequest = (stock) => {
       console.log(error);
     });
 };
+const deleteStockRequest = (stock) => {
+  console.log(stock.stock_id, target_process.value);
+  const deleteStockRequestOrder = props.stock_request_orders.find(
+    (stock_request_order) =>
+      stock_request_order.stock_id === stock.stock_id &&
+      stock_request_order.process_id === target_process.value.id
+  );
+
+  // 削除対象の注文が見つかった場合
+  if (deleteStockRequestOrder) {
+    axios
+      .delete(route("stock.request.delete"), {
+        params: {
+          stock_request_order_id: deleteStockRequestOrder.id
+        },
+      })
+      .then((res) => {
+        console.log(res.data);
+        if(res.data.status){
+          alert('注文依頼を削除しました。')
+          window.location.reload()
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
+  console.log(deleteStockRequestOrder);
+};
 
 onMounted(() => {
-  console.log(props.stock_request_orders);
+  console.log("stock_request_orders:", props.stock_request_orders);
   setProcess();
   //   stock_requests.value = props.stock_requests
 });
@@ -188,6 +219,7 @@ onMounted(() => {
               <th>単位</th>
               <th>アドレス</th>
               <th></th>
+              <th v-if="target_process"></th>
             </tr>
             <tr v-for="stock in stock_requests" :key="stock.id">
               <td class="img">
@@ -249,6 +281,14 @@ onMounted(() => {
                   class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
                 >
                   済
+                </button>
+              </td>
+              <td v-if="target_process" class="comp_button text-lg">
+                <button
+                  @click="deleteStockRequest(stock)"
+                  class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  削除
                 </button>
               </td>
             </tr>

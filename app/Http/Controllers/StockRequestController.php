@@ -110,6 +110,26 @@ class StockRequestController extends Controller
         return response()->json(['status' => $status]);
     }
 
+    public function delete(Request $request)
+    {
+        $status = true;
+        $stock_request_order_id = $request->stock_request_order_id;
+
+        try {
+            if (!$stock_request_order_id) {
+                $status = false;
+                throw new Exception('Stock request order ID is missing.');
+            }
+
+            $stock_request_order = StockRequestOrder::find($stock_request_order_id);
+            $stock_request_order->delete();
+        } catch (Exception $e) {
+            $status = false;
+        }
+
+        return response()->json(['status' => $status]);
+    }
+
     public function order(Request $request)
     {
         $status = true;

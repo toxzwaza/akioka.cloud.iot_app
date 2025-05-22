@@ -39,19 +39,61 @@ onMounted(() => {
   }, 5000);
 
   // ARターゲット検知時のイベントリスナー
-  const scene = document.querySelector('a-scene');
+  const scene = document.querySelector("a-scene");
   if (scene) {
-    scene.addEventListener('targetFound', (event) => {
-      console.log('🎯 ターゲットを検知しました！', event);
+    scene.addEventListener("targetFound", (event) => {
+      console.log("🎯 ターゲットを検知しました！", event);
       // 検知時の位置情報を出力
       const target = event.target;
-      console.log('ターゲットの位置:', target.object3D.position);
+      console.log("ターゲットの位置:", target.object3D.position);
+      console.log("ターゲットの回転:", target.object3D.rotation);
+      console.log("ターゲットのスケール:", target.object3D.scale);
+
+      // 画像要素の確認
+      const image = target.querySelector("a-image");
+      if (image) {
+        console.log("画像の位置:", image.object3D.position);
+        console.log("画像の回転:", image.object3D.rotation);
+        console.log("画像のスケール:", image.object3D.scale);
+        console.log("画像のソース:", image.getAttribute("src"));
+        console.log("画像の要素:", image);
+        console.log("画像のマテリアル:", image.getAttribute("material"));
+
+        // テキスト要素の確認
+        const text = target.querySelector("a-text");
+        if (text) {
+          console.log("テキストの位置:", text.object3D.position);
+          console.log("テキストの回転:", text.object3D.rotation);
+          console.log("テキストのスケール:", text.object3D.scale);
+          console.log("テキストの内容:", text.getAttribute("value"));
+          console.log("テキストの要素:", text);
+          console.log("テキストのマテリアル:", text.getAttribute("material"));
+        } else {
+          console.log("テキスト要素が見つかりません");
+        }
+
+        // 画像の実際のサイズを確認
+        const imgElement = document.querySelector("#my-image");
+        if (imgElement) {
+          console.log("画像の実際のサイズ:", {
+            width: imgElement.naturalWidth,
+            height: imgElement.naturalHeight,
+          });
+          console.log(
+            "画像の読み込み状態:",
+            imgElement.complete ? "完了" : "読み込み中"
+          );
+          console.log("画像のURL:", imgElement.src);
+        }
+      } else {
+        console.log("画像要素が見つかりません");
+      }
     });
-    scene.addEventListener('targetLost', (event) => {
-      console.log('❌ ターゲットを見失いました', event);
+    scene.addEventListener("targetLost", (event) => {
+      console.log("❌ ターゲットを見失いました", event);
     });
-    scene.addEventListener('arError', (error) => {
-      console.error('ARエラーが発生しました:', error);
+    scene.addEventListener("arError", (error) => {
+      console.error("ARエラーが発生しました:", error);
     });
   }
 });
@@ -75,6 +117,16 @@ onMounted(() => {
       <a-camera position="0 0 0" look-controls="enabled: false"> </a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0">
+        <!-- デバッグ用の座標軸表示 -->
+        <a-entity position="0 0 0">
+          <!-- X軸（赤） -->
+          <a-box position="0.5 0 0" scale="1 0.1 0.1" color="red"></a-box>
+          <!-- Y軸（緑） -->
+          <a-box position="0 0.5 0" scale="0.1 1 0.1" color="green"></a-box>
+          <!-- Z軸（青） -->
+          <a-box position="0 0 0.5" scale="0.1 0.1 1" color="blue"></a-box>
+        </a-entity>
+
         <!-- <a-gltf-model
           src="#3dmodel"
           position="0 0 0"
@@ -85,17 +137,21 @@ onMounted(() => {
           src="#my-image"
           position="0 0 0"
           rotation="0 0 0"
-          width="1"
-          height="1"
-          scale="0.5 0.5 0.5"
+          width="2"
+          height="2"
+          scale="1 1 1"
+          material="shader: flat; transparent: true; opacity: 1"
         ></a-image>
+
         <!-- テキスト -->
         <a-text
           value="これは埴輪です"
-          position="0 0.8 0"
+          position="0 1.5 0.1"
           align="center"
           color="#FF0000"
-          width="2"
+          width="4"
+          scale="1 1 1"
+          material="shader: flat; transparent: true; opacity: 1"
         ></a-text>
       </a-entity>
     </a-scene>
