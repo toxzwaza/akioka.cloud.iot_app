@@ -42,16 +42,16 @@ const handleUser = () => {
   const user = props.users.find((user) => user.id === form.user_id);
 
   // 製造部所属勝、一般社員の場合GLユーザーを取得
-  if (user && user.position_id == 9 && user.process_id <= 9) {
-    gl_check.value = props.users.find(
-      (user) => user.process_id === form.process_id && user.position_id == 8
-    );
-    console.log(gl_check.value);
-    form.check = false;
-  } else {
-    gl_check.value = null;
-    form.check = true;
-  }
+  // if (user && user.position_id == 9 && user.process_id <= 9) {
+  //   gl_check.value = props.users.find(
+  //     (user) => user.process_id === form.process_id && user.position_id == 8
+  //   );
+  //   console.log(gl_check.value);
+  //   form.check = false;
+  // } else {
+  //   gl_check.value = null;
+  //   form.check = true;
+  // }
 };
 
 const handleCheck = (event) => {
@@ -59,7 +59,9 @@ const handleCheck = (event) => {
 };
 
 const handleSubmit = () => {
-  emit("submit", form);
+  if(confirm('上位役職者の確認は完了していますか？')){
+    emit("submit", form)
+  } 
 };
 
 onMounted(() => {
@@ -136,7 +138,6 @@ onMounted(() => {
                 id=""
                 class="appearance-none block w-full bg-gray-200 text-gray-700 border-transparent rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
                 v-model="form.user_id"
-                @change="handleUser"
               >
                 <option
                   v-for="user in process_users"
@@ -300,20 +301,17 @@ onMounted(() => {
               />
             </div>
           </div> -->
-          <div class="flex flex-wrap -mx-3 mb-2 mt-4">
-            <div v-if="gl_check" class="w-full px-3 my-6 md:mb-0">
+          <!-- <div class="flex flex-wrap -mx-3 mb-2 mt-4">
+            <div class="w-full px-3 my-6 md:mb-0">
               <label
                 class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 for="grid-state"
               >
-                GL確認
+                上位役職者確認
               </label>
 
               <p>
-                <span class="font-bold text-green-500 inline-block mr-2">{{
-                  gl_check.name
-                }}</span
-                >さんの確認を頂いた後、以下のボタンを押してください。
+                上位役職者の確認を頂いた後、以下のボタンを押してください。
               </p>
               <label class="inline-flex items-center cursor-pointer">
                 <input
@@ -329,7 +327,7 @@ onMounted(() => {
                 ></span>
               </label>
             </div>
-          </div>
+          </div> -->
         </div>
 
         <div class="w-1/2 pl-4">
@@ -353,12 +351,7 @@ onMounted(() => {
       </div>
 
       <button
-        v-if="
-          form.user_id &&
-          form.quantity &&
-          form.desire_delivery_date &&
-          form.check
-        "
+        v-if="form.user_id && form.quantity && form.desire_delivery_date"
         class="mt-4 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-6 px-4 rounded"
         @click.prevent="handleSubmit"
       >
