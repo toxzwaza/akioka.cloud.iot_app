@@ -121,6 +121,8 @@ class NewItemController extends Controller
                 // 既存品
                 // 発注依頼 ---------------------------------------------------
                 $order_request = new OrderRequest();
+                $order_request->name = $name;
+                $order_request->s_name = $s_name;
                 $order_request->request_user_id = $user_id;
                 $order_request->quantity =  $quantity; //必要個数
                 $order_request->unit = $quantity_unit; //必要個数単位
