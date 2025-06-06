@@ -266,6 +266,21 @@ const deleteImage = (index) => {
   if(index){
     const image_path = images.value[index]
     console.log(image_path)
+
+    axios.delete(route('stock.deleteImage'), {
+      params: {
+        image_path: image_path
+      }
+    })
+    .then(res => {
+      console.log(res.data)
+      if(res.data.status){
+        window.location.reload()
+      }
+    })
+    .catch(error => {
+      console.log(error)
+    })
   }
 };
 
@@ -471,7 +486,7 @@ onMounted(() => {
                       />
                       <button
                         class="delete-btn"
-                        v-if="index === activeSlideIndex"
+                        v-if="index === activeSlideIndex && index"
                         @click="deleteImage(index)"
                       >
                         <i class="fas fa-trash-alt"></i>

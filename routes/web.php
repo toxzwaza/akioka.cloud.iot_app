@@ -75,6 +75,8 @@ Route::post('/stock/deleteAlias', [StockAliasController::class, 'delete'])->name
 Route::get('/stock/create', [InventoryController::class, 'create'])->name('stock.inventory.create');
 // 在庫追加
 Route::post('/stock', [InventoryController::class, 'store'])->name('stock.inventory.store');
+// 画像削除
+Route::delete('/stock/deleteImage', [InventoryController::class, 'deleteImage'])->name('stock.deleteImage');
 
 // 発注依頼
 Route::get('/order/create', [OrderController::class, 'create'])->name('stock.order.create');

@@ -269,4 +269,24 @@ class InventoryController extends Controller
         $storage_addresses = StorageAddress::where('location_id', $location_id)->orderBy('address', 'asc')->get();
         return response()->json($storage_addresses);
     }
+
+    // 画像削除
+    public function deleteImage(Request $request)
+    {
+        $status = true;
+        $msg = '';
+
+        $image_path = $request->image_path;
+
+        try {
+            $stock_image = StockImage::where('img_path', $image_path)->first();
+            $stock_image->del_flg = 1;
+            $stock_image->save();
+        } catch (Exception $e) {
+            $status = false;
+            $msg = $e->getMessage();
+        }
+
+        return response()->json(['status' => $status, 'msg' => $msg]);
+    }
 }
