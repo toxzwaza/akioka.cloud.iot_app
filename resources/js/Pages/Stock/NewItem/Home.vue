@@ -197,7 +197,7 @@ const validateForm = () => {
     return false;
   }
 
-  if (!form.now_quantity) {
+  if (form.now_quantity === null || form.now_quantity === undefined) {
     alert("現在個数を入力してください");
     return false;
   }
