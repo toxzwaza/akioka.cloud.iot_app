@@ -450,7 +450,7 @@ onMounted(() => {
           class="w-full h-full"
           frameborder="0"
         ></iframe>
-        <div v-else class="">
+        <div v-else-if="approval_document.document_id" class="">
           <ApprovalDocument :approval_document="approval_document" />
         </div>
       </div>
