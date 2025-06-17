@@ -2,6 +2,7 @@
 import AcceptLayout from "@/Layouts/AcceptLayout.vue";
 import { onMounted, ref, reactive } from "vue";
 import { getImgPath } from "@/Helper/method";
+import ApprovalDocument from "@/Components/Accept/ApprovalDocument.vue";
 
 const props = defineProps({
   user: Object,
@@ -9,7 +10,25 @@ const props = defineProps({
 });
 
 const approval_modal = ref(false);
-const viewerUrl = ref("/pdfjs/web/main_viewer.html");
+const viewerUrl = ref("");
+// 稟議書OBJ
+const approval_document = reactive({
+  document_id: null,
+  user_name: null,
+  evalution_date: null, //評価日
+  desire_delivery_date: null, //希望日
+  supplier_name: null,
+  price: null,
+  quantity: null,
+  calc_price: null,
+  name: null,
+  s_name: null,
+  document_id: null,
+  title: null,
+  content: null,
+  main_reason: null,
+  sub_reason: null,
+});
 
 const comment = reactive({
   order_request_id: null,
@@ -40,6 +59,24 @@ const openApproval = (order_request) => {
       : `/storage/${order_request.file_path}`;
 
     viewerUrl.value = `/pdfjs/web/main_viewer.html?file=${filePath}`;
+    approval_modal.value = true;
+  } else if (order_request.document_id) {
+    approval_document.document_id = order_request.document_id;
+    approval_document.user_name = order_request.user_name;
+    approval_document.evalution_date = order_request.evalution_date;
+    approval_document.desire_delivery_date = order_request.desire_delivery_date
+    approval_document.supplier_name = order_request.supplier_name;
+    approval_document.price = order_request.price;
+    approval_document.quantity = order_request.quantity
+    approval_document.calc_price = order_request.calc_price
+    approval_document.name = order_request.name
+    approval_document.s_name = order_request.s_name
+    approval_document.title = order_request.title;
+    approval_document.content = order_request.content;
+    approval_document.main_reason = order_request.main_reason;
+    approval_document.sub_reason = order_request.sub_reason;
+
+
     approval_modal.value = true;
   }
 };
@@ -255,14 +292,19 @@ onMounted(() => {
                         : "-"
                     }}
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900">
-                    {{ order_request.name }}
+                  <td class="px-4 py-8 text-lg text-gray-900 ">
+                    <span v-if="order_request.name.length > 20">
+                      {{ order_request.name.substring(0, 20) + '...' }}
+                    </span>
+                    <span v-else>
+                      {{ order_request.name }}
+                    </span>
                   </td>
                   <td class="px-4 py-8 text-lg text-gray-900">
                     {{ order_request.s_name ?? "-" }}
                   </td>
                   <td class="px-4 py-8 text-lg text-gray-900">
-                    {{ `${order_request.quantity}${order_request.unit}` }}
+                    {{ `${order_request.quantity ?? ''}${order_request.unit ?? ''}` }}
                   </td>
                   <td class="px-4 py-8 text-lg text-gray-900">
                     {{
@@ -333,12 +375,15 @@ onMounted(() => {
                   </td>
                   <td class="w-10 text-center px-8">
                     <button
-                      v-if="order_request.file_path"
+                      v-if="
+                        order_request.file_path || order_request.document_id
+                      "
                       @click.prevent="openApproval(order_request)"
                       class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
                     >
                       稟議書
                     </button>
+
                     <span v-else>未登録</span>
                   </td>
                   <td class="w-10 text-center px-8">
@@ -399,11 +444,15 @@ onMounted(() => {
       </div>
       <div class="flex-1 bg-white">
         <iframe
+          v-if="viewerUrl"
           ref="pdfViewer"
           :src="viewerUrl"
           class="w-full h-full"
           frameborder="0"
         ></iframe>
+        <div v-else class="">
+          <ApprovalDocument :approval_document="approval_document" />
+        </div>
       </div>
     </div>
   </div>
@@ -417,7 +466,7 @@ onMounted(() => {
       >
       <button
         @click="comment.order_request_id = 0"
-        class=" bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
+        class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
       >
         <i class="fa-solid fa-times"></i>
       </button>

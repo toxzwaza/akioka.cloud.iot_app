@@ -117,7 +117,7 @@ const submitForm = () => {
         previewUrls.value = [];
       } else {
         alert("失敗しました。");
-        console.log(res.data.msg)
+        console.log(res.data.msg);
       }
     })
     .catch((error) => {
@@ -175,6 +175,23 @@ const validateForm = () => {
       alert("物品のイメージ画像を添付してください。");
       return false;
     }
+  } else {
+    if (form.now_quantity === null || form.now_quantity === undefined) {
+      alert("現在個数を入力してください");
+      return false;
+    }
+    if (!form.now_quantity_unit) {
+      alert("現在個数単位を入力してください");
+      return false;
+    }
+    if (!form.digest_date) {
+      alert("消化予定日を入力してください");
+      return false;
+    }
+    if (!form.quantity_unit) {
+      alert("必要個数単位を入力してください");
+      return false;
+    }
   }
 
   if (!form.user_id) {
@@ -194,23 +211,6 @@ const validateForm = () => {
 
   if (!form.s_name) {
     alert("品番を入力してください");
-    return false;
-  }
-
-  if (form.now_quantity === null || form.now_quantity === undefined) {
-    alert("現在個数を入力してください");
-    return false;
-  }
-  if (!form.now_quantity_unit) {
-    alert("現在個数単位を入力してください");
-    return false;
-  }
-  if (!form.digest_date) {
-    alert("消化予定日を入力してください");
-    return false;
-  }
-  if (!form.quantity_unit) {
-    alert("必要個数単位を入力してください");
     return false;
   }
 
@@ -323,13 +323,13 @@ onMounted(() => {
           {{ form.new_approval ? "新規品稟議書" : "既存品依頼" }}
         </h1>
         <div v-if="form.new_approval">
-          <h1 class="text-4xl font-bold text-red-500 mt-8 text-center">
+          <!-- <h1 class="text-4xl font-bold text-red-500 mt-8 text-center">
             準備中...
           </h1>
           <p class="text-center mt-4">
             実装完了まで、もうしばらくお待ちください。
-          </p>
-          <div v-if="false" class="flex justify-between items-start">
+          </p> -->
+          <div class="flex justify-between items-start">
             <div class="w-2/3">
               <div class="flex flex-wrap -mx-3 mb-8">
                 <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
@@ -941,9 +941,8 @@ onMounted(() => {
         </div>
       </form>
 
-      <hr class="mt-8 mb-4">
+      <hr class="mt-8 mb-4" />
       <h1 class="font-bold text-gray-700 text-xl text-center">物品依頼状況</h1>
-
     </template>
   </StockLayout>
 </template>

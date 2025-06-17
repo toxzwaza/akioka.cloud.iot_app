@@ -47,6 +47,12 @@ class AcceptController extends Controller
                 'order_requests.postage',
                 'order_requests.calc_price',
                 'order_requests.price',
+                'order_requests.document_id',
+                'documents.evalution_date',
+                'documents.title',
+                'documents.content',
+                'documents.main_reason',
+                'documents.sub_reason',
                 DB::raw('CONCAT("/storage/", SUBSTRING_INDEX(order_requests.file_path, "storage/", -1)) as file_path'),
                 'suppliers.name as supplier_name',
                 'order_request_approvals.id as order_request_approval_id',
@@ -64,6 +70,7 @@ class AcceptController extends Controller
             ->leftJoin('users as request_users', 'request_users.id', '=', 'order_requests.request_user_id')
             ->leftJoin('users as users', 'users.id', '=', 'order_requests.user_id')
             ->join('suppliers', 'suppliers.id', '=', 'order_requests.supplier_id')
+            ->leftJoin('documents', 'documents.id', '=', 'order_requests.document_id')
             ->where('order_requests.status', '=', 0)
             ->where('order_requests.del_flg', '=', 0)
             ->where('order_requests.accept_flg', '=', 1);
@@ -84,7 +91,16 @@ class AcceptController extends Controller
 
         $order_requests = $query->get();
 
-
+        // documents_imagesを配列として取得
+        foreach ($order_requests as $order_request) {
+            $document_images = DB::table('document_images')
+                ->select(DB::raw('CONCAT("/storage/", SUBSTRING_INDEX(image_path, "storage/", -1)) as image_path'))
+                ->where('document_id', $order_request->document_id)
+                ->pluck('image_path')
+                ->toArray();
+            
+            $order_request->document_images = $document_images;
+        }
 
         $user = User::select('id', 'name')->find($user_id);
 
