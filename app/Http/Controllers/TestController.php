@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Services\ChatGpt;
-use App\Http\Services\Helper;
 use App\Models\InitialOrder;
 use App\Models\LunchOrder;
 use App\Models\OrderRequest;
@@ -12,6 +11,7 @@ use App\Models\StockPriceArchive;
 use App\Models\StockSupplier;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Services\Helper as ServicesHelper;
 use App\Services\Method;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
@@ -24,8 +24,9 @@ class TestController extends Controller
     //
     public function test()
     {
-        $res = Helper::sendNotification('e0YdX65c7qwXcCobPK_kfj:APA91bFrQE-w-R61OhUVpJatZVBFYmbESL83iJ2aYZaO8IFF1AmV1HHOoJdKedhdybiMV71PrNdgT8TH_HjiQFUDDKGWBcDcSNrSjMHx43k4D3wISmr6Nhw', 'test', 'test');
 
-        return $res;
+        // $res = Helper::sendNotification('e0YdX65c7qwXcCobPK_kfj:APA91bFrQE-w-R61OhUVpJatZVBFYmbESL83iJ2aYZaO8IFF1AmV1HHOoJdKedhdybiMV71PrNdgT8TH_HjiQFUDDKGWBcDcSNrSjMHx43k4D3wISmr6Nhw', 'test', 'test');
+
+        // return $res;
     }
 }

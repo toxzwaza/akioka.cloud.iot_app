@@ -314,7 +314,7 @@ onMounted(() => {
                         v-model="stock.quantity"
                       />
                     </td>
-                    <td class="unit text-2xl">{{ stock.solo_unit }}</td>
+                    <td class="unit text-2xl">{{ stock.orderUnit ?? stock.solo_unit }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -349,7 +349,7 @@ onMounted(() => {
                         id=""
                       />
                     </td>
-                    <td class="unit text-2xl">{{ stock.solo_unit }}</td>
+                    <td class="unit text-2xl">{{ stock.orderUnit ?? stock.solo_unit }}</td>
                   </tr>
                 </tbody>
               </table>

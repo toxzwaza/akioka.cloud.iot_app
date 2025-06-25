@@ -27,7 +27,7 @@ class StockRequestController extends Controller
 
         // 現場依頼対象物品を取得
         $stock_requests =
-            StockRequest::select('stock_requests.id as stock_request_id', 'stock_requests.alias', 'stock_requests.alias', 'stocks.id as stock_id', 'stocks.name', 'stocks.img_path', 'stocks.solo_unit', 'stock_storages.id as stock_storage_id', 'stock_storages.quantity as stock_storage_quantity', 'storage_addresses.address')
+            StockRequest::select('stock_requests.id as stock_request_id', 'stock_requests.alias', 'stock_requests.unit as orderUnit', 'stock_requests.alias', 'stocks.id as stock_id', 'stocks.name', 'stocks.img_path', 'stocks.solo_unit', 'stock_storages.id as stock_storage_id', 'stock_storages.quantity as stock_storage_quantity', 'storage_addresses.address')
             ->join('stocks', 'stocks.id', 'stock_requests.stock_id')
             ->leftJoin('stock_storages', 'stock_storages.stock_id', 'stock_requests.stock_id')
             ->leftJoin('storage_addresses', 'storage_addresses.id', 'stock_storages.storage_address_id')
@@ -37,7 +37,8 @@ class StockRequestController extends Controller
         $users = User::select('id', 'name', 'process_id', 'password', 'is_admin')->where('process_id', '!=', 0)->get();
 
         // 物品依頼を取得
-        $stock_request_orders = StockRequestOrder::select('stock_request_orders.id', 'stock_request_orders.process_id', 'stock_request_orders.stock_id', 'stock_request_orders.status', 'stock_request_orders.quantity', 'stock_request_orders.order_flg', 'stock_request_orders.created_at', 'users.name as user_name')->join('users', 'users.id', 'stock_request_orders.user_id')
+        $stock_request_orders = StockRequestOrder::select('stock_request_orders.id', 'stock_request_orders.process_id', 'stock_request_orders.stock_id', 'stock_request_orders.status', 'stock_request_orders.quantity', 'stock_request_orders.order_flg', 'stock_request_orders.created_at', 'users.name as user_name')
+        ->join('users', 'users.id', 'stock_request_orders.user_id')
             ->where('stock_request_orders.status', 0)
             ->orderBy('stock_request_orders.created_at', 'desc')->get();
 

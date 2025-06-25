@@ -682,12 +682,14 @@ onMounted(() => {
                 </div>
               </div>
 
-              <button
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold mt-12 px-4 rounded w-full py-4"
-                @click.prevent="submitForm"
-              >
-                確定
-              </button>
+              <div>
+                <button
+                  class="bg-blue-500 hover:bg-blue-700 text-white font-bold mt-12 px-4 rounded w-full py-4"
+                  @click.prevent="submitForm"
+                >
+                  確定
+                </button>
+              </div>
             </div>
 
             <div class="w-1/3 p-4 ml-4" id="right_container">
