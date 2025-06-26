@@ -14,12 +14,15 @@ const form = reactive({
   user_id: 0,
   evaluation_date: null,
   desire_delivery_date: null,
+  calc_price: null, //稟議合計金額
+
+  name: null,
+  s_name: null,
   supplier_name: null,
   price: null,
   quantity: null,
-  calc_price: null,
-  name: null,
-  s_name: null,
+  approval_stocks: [], // 新規品依頼用物品配列
+
   title: "",
   content: null,
   main_reason: null,
@@ -43,6 +46,31 @@ const selectedFiles = ref([]);
 const previewUrls = ref([]);
 
 const gpt_msg = ref([]);
+
+const createApprovalStocks = () => {
+  if (
+    form.name &&
+    form.s_name &&
+    form.supplier_name &&
+    form.price &&
+    form.quantity
+  ) {
+    form.approval_stocks.push({
+      name: form.name,
+      s_name: form.s_name,
+      supplier_name: form.supplier_name,
+      price: form.price,
+      quantity: form.quantity,
+      calc_price: form.calc_price,
+    });
+
+    form.name = null;
+    form.s_name = null;
+    form.supplier_name = null;
+    form.price = null;
+    form.quantity = null;
+  }
+};
 
 const handleProcessId = (val) => {
   console.log(val);
@@ -88,7 +116,12 @@ const submitForm = () => {
   // 通常のフォームデータを追加
   Object.keys(form).forEach((key) => {
     if (form[key] !== null) {
-      formData.append(key, form[key]);
+      if (key === 'approval_stocks' && Array.isArray(form[key])) {
+        // 配列の場合はJSON文字列として送信
+        formData.append(key, JSON.stringify(form[key]));
+      } else {
+        formData.append(key, form[key]);
+      }
     }
   });
 
@@ -129,23 +162,23 @@ const submitForm = () => {
 
 const validateForm = () => {
   if (form.new_approval) {
-    if (!form.supplier_name) {
-      alert("発注先を入力してください。");
-      return false;
-    }
+    // if (!form.supplier_name) {
+    //   alert("発注先を入力してください。");
+    //   return false;
+    // }
 
-    if (!form.price) {
-      alert("単価入力してください。");
-      return false;
-    }
-    if (!form.quantity) {
-      alert("数量を入力してください。");
-      return false;
-    }
-    if (!form.calc_price) {
-      alert("金額を入力してください。");
-      return false;
-    }
+    // if (!form.price) {
+    //   alert("単価入力してください。");
+    //   return false;
+    // }
+    // if (!form.quantity) {
+    //   alert("数量を入力してください。");
+    //   return false;
+    // }
+    // if (!form.calc_price) {
+    //   alert("金額を入力してください。");
+    //   return false;
+    // }
 
     if (!form.title) {
       alert("タイトルを入力してください");
@@ -165,17 +198,27 @@ const validateForm = () => {
       return false;
     }
 
-    if (!form.evaluation_date) {
-      alert("評価予定日を選択してください");
+    // if (!form.evaluation_date) {
+    //   alert("評価予定日を選択してください");
+    //   return false;
+    // }
+
+    // ファイルのバリデーション
+    // if (selectedFiles.value.length === 0) {
+    //   alert("物品のイメージ画像を添付してください。");
+    //   return false;
+    // }
+  } else {
+    if (!form.name) {
+      alert("品名を入力してください");
       return false;
     }
 
-    // ファイルのバリデーション
-    if (selectedFiles.value.length === 0) {
-      alert("物品のイメージ画像を添付してください。");
+    if (!form.s_name) {
+      alert("品番を入力してください");
       return false;
     }
-  } else {
+
     if (form.now_quantity === null || form.now_quantity === undefined) {
       alert("現在個数を入力してください");
       return false;
@@ -201,16 +244,6 @@ const validateForm = () => {
 
   if (!form.desire_delivery_date) {
     alert("希望納入日を選択してください");
-    return false;
-  }
-
-  if (!form.name) {
-    alert("品名を入力してください");
-    return false;
-  }
-
-  if (!form.s_name) {
-    alert("品番を入力してください");
     return false;
   }
 
@@ -381,7 +414,7 @@ onMounted(() => {
               </div>
 
               <div class="flex flex-wrap -mx-3 mb-8">
-                <div class="w-1/3 px-3 mb-6 md:mb-0">
+                <!-- <div class="w-1/3 px-3 mb-6 md:mb-0">
                   <label
                     class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                     for="grid-city"
@@ -395,8 +428,8 @@ onMounted(() => {
                     type="date"
                     v-model="form.evaluation_date"
                   />
-                </div>
-                <div class="w-1/3 px-3 mb-6 md:mb-0">
+                </div> -->
+                <div class="w-1/2 px-3 mb-6 md:mb-0">
                   <label
                     class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                     for="grid-city"
@@ -410,72 +443,12 @@ onMounted(() => {
                     v-model="form.desire_delivery_date"
                   />
                 </div>
-                <div class="w-1/3 px-3 mb-6 md:mb-0">
+                <div class="w-1/2 px-3 mb-6 md:mb-0">
                   <label
                     class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                     for="grid-state"
                   >
-                    発注先
-                  </label>
-                  <div class="relative">
-                    <input
-                      class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                      id="grid-zip"
-                      type="text"
-                      list="supplier-list"
-                      v-model="form.supplier_name"
-                    />
-                    <datalist id="supplier-list">
-                      <option
-                        v-for="supplier in suppliers"
-                        :key="supplier.id"
-                        :value="supplier.name"
-                      >
-                        {{ supplier.name }}
-                      </option>
-                    </datalist>
-                  </div>
-                </div>
-              </div>
-
-              <div class="flex flex-wrap -mx-3 mb-8">
-                <div class="w-1/3 px-3 mb-6 md:mb-0">
-                  <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                    for="grid-city"
-                  >
-                    単価
-                  </label>
-                  <input
-                    class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    id="grid-city"
-                    type="number"
-                    v-model="form.price"
-                  />
-                </div>
-                <div class="w-1/3 px-3 mb-6 md:mb-0">
-                  <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                    for="grid-state"
-                  >
-                    数量
-                  </label>
-                  <div class="relative">
-                    <input
-                      class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                      id="grid-zip"
-                      type="number"
-                      v-model="form.quantity"
-                      @change="form.calc_price = form.price * form.quantity"
-                    />
-                  </div>
-                </div>
-                <div class="w-1/3 px-3 mb-6 md:mb-0">
-                  <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                    for="grid-state"
-                  >
-                    金額
+                    稟議合計金額
                   </label>
                   <div class="relative">
                     <input
@@ -487,6 +460,10 @@ onMounted(() => {
                   </div>
                 </div>
               </div>
+
+              <hr class="my-8" />
+              <h2 class="font-bold text-gray-700 mb-4">購入物品</h2>
+
               <div class="flex flex-wrap -mx-3 mb-8">
                 <div class="w-1/2 px-3 mb-6 md:mb-0">
                   <label
@@ -520,6 +497,153 @@ onMounted(() => {
                 </div>
               </div>
               <div class="flex flex-wrap -mx-3 mb-8">
+                <div class="w-1/3 px-3 mb-6 md:mb-0">
+                  <label
+                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                    for="grid-state"
+                  >
+                    発注先
+                  </label>
+                  <div class="relative">
+                    <input
+                      class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                      id="grid-zip"
+                      type="text"
+                      list="supplier-list"
+                      v-model="form.supplier_name"
+                    />
+                    <datalist id="supplier-list">
+                      <option
+                        v-for="supplier in suppliers"
+                        :key="supplier.id"
+                        :value="supplier.name"
+                      >
+                        {{ supplier.name }}
+                      </option>
+                    </datalist>
+                  </div>
+                </div>
+                <div class="w-1/3 px-3 mb-6 md:mb-0">
+                  <label
+                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                    for="grid-city"
+                  >
+                    単価
+                  </label>
+                  <input
+                    class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    id="grid-city"
+                    type="number"
+                    v-model="form.price"
+                  />
+                </div>
+                <div class="w-1/3 px-3 mb-6 md:mb-0">
+                  <label
+                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                    for="grid-state"
+                  >
+                    数量
+                  </label>
+                  <div class="relative">
+                    <input
+                      class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                      id="grid-zip"
+                      type="number"
+                      v-model="form.quantity"
+                    />
+                  </div>
+                </div>
+              </div>
+              <button
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-8"
+                @click.prevent="createApprovalStocks"
+              >
+                追加
+              </button>
+
+              <div v-if="form.approval_stocks.length > 0">
+                <div class="overflow-x-auto">
+                  <table class="min-w-full bg-white border border-gray-200">
+                    <thead>
+                      <tr>
+                        <th
+                          class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                        >
+                          品名
+                        </th>
+                        <th
+                          class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                        >
+                          品番
+                        </th>
+                        <th
+                          class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                        >
+                          発注先
+                        </th>
+                        <th
+                          class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                        >
+                          単価
+                        </th>
+                        <th
+                          class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                        >
+                          数量
+                        </th>
+                        <th
+                          class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                        >
+                          金額
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        v-for="approval_stock in form.approval_stocks"
+                        :key="approval_stock.id"
+                      >
+                        <td
+                          class="py-2 px-4 border-b border-gray-200 text-sm text-gray-700"
+                        >
+                          {{ approval_stock.name }}
+                        </td>
+                        <td
+                          class="py-2 px-4 border-b border-gray-200 text-sm text-gray-700"
+                        >
+                          {{ approval_stock.s_name }}
+                        </td>
+                        <td
+                          class="py-2 px-4 border-b border-gray-200 text-sm text-gray-700"
+                        >
+                          {{ approval_stock.supplier_name }}
+                        </td>
+                        <td
+                          class="py-2 px-4 border-b border-gray-200 text-sm text-gray-700"
+                        >
+                          @ {{ approval_stock.price }}
+                        </td>
+                        <td
+                          class="py-2 px-4 border-b border-gray-200 text-sm text-gray-700"
+                        >
+                          {{ approval_stock.quantity }}
+                        </td>
+                        <td
+                          class="py-2 px-4 border-b border-gray-200 text-sm text-gray-700"
+                        >
+                          {{
+                            approval_stock.price * approval_stock.quantity
+                          }}
+                          円
+                        </td>
+                      </tr>
+                      <!-- 他の行を追加する場合はここに -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <hr class="my-8" />
+              <div class="flex flex-wrap -mx-3 mb-8">
                 <div class="w-full px-3 mb-6 md:mb-0">
                   <label
                     class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
@@ -532,7 +656,6 @@ onMounted(() => {
                     class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                     v-model="form.title"
                     placeholder="○○における○○の○○（例：備品管理における発注業務の効率化）"
-                    @change="handleChatGpt('title')"
                   />
                 </div>
               </div>
@@ -551,7 +674,6 @@ onMounted(() => {
                     rows="10"
                     class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                     v-model="form.content"
-                    @change="handleChatGpt('content')"
                   ></textarea>
                 </div>
               </div>
@@ -571,7 +693,6 @@ onMounted(() => {
                     rows="10"
                     class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                     v-model="form.main_reason"
-                    @change="handleChatGpt('main_reason')"
                   ></textarea>
                 </div>
               </div>
@@ -591,7 +712,6 @@ onMounted(() => {
                     rows="10"
                     class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                     v-model="form.sub_reason"
-                    @change="handleChatGpt('sub_reason')"
                   ></textarea>
                 </div>
               </div>
@@ -682,9 +802,14 @@ onMounted(() => {
                 </div>
               </div>
 
-              <div>
+              <div class="flex justify-between">
                 <button
-                  class="bg-blue-500 hover:bg-blue-700 text-white font-bold mt-12 px-4 rounded w-full py-4"
+                  class="mr-4 w-1/2 bg-green-500 hover:bg-green-700 text-white font-bold mt-12 px-4 rounded py-4"
+                >
+                  AI添削
+                </button>
+                <button
+                  class="ml-4 w-1/2 bg-blue-500 hover:bg-blue-700 text-white font-bold mt-12 px-4 rounded py-4"
                   @click.prevent="submitForm"
                 >
                   確定

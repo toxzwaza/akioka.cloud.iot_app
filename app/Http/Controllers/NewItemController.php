@@ -49,6 +49,12 @@ class NewItemController extends Controller
         $sub_reason = $request->sub_reason;
         $name = $request->name;
         $s_name = $request->s_name;
+        $approval_stocks = $request->input('approval_stocks', []);
+
+        // JSON文字列の場合は配列に戻す
+        if (is_string($approval_stocks)) {
+            $approval_stocks = json_decode($approval_stocks, true) ?: [];
+        }
 
         // 既存品
         $now_quantity = $request->now_quantity; //現在個数
@@ -60,20 +66,12 @@ class NewItemController extends Controller
 
         try {
             if ($new_approval) {
-                // 物品データを作成
-                $stock = new Stock();
-                $stock->name = $name;
-                $stock->s_name = $s_name;
-                $stock->price = $price;
-                $stock->save();
-
-
                 // ここでデータベースに保存する処理を追加
                 $document = new Document();
                 $document->user_id = $user_id;
                 $document->evalution_date = $evaluation_date;
                 $document->supplier_name = $supplier_name;
-                $document->price = $price;
+                $document->price = $calc_price; //稟議合計金額
                 $document->title = $title;
                 $document->content = $content;
                 $document->main_reason = $main_reason;
@@ -97,24 +95,33 @@ class NewItemController extends Controller
                     $documentImage->save();
 
                     // 最初のファイルが画像の場合、stock->img_pathに設定
-                    if ($key === 0 && $documentImage->extension !== 'pdf') {
-                        $stock->img_path = $filePath;
-                        $stock->save();
-                    }
+                    // if ($key === 0 && $documentImage->extension !== 'pdf') {
+                    //     $stock->img_path = $filePath;
+                    //     $stock->save();
+                    // }
                 }
 
+                foreach ($approval_stocks as $approval_stock) {
+                    // 物品データを作成
+                    $stock = new Stock();
+                    $stock->name = $approval_stock['name'];
+                    $stock->s_name = $approval_stock['s_name'];
+                    $stock->price = $approval_stock['price'];
+                    $stock->approval_supplier_name = $approval_stock['supplier_name'];
+                    $stock->save();
 
-                // 物品依頼データ作成
-                $order_request = new OrderRequest();
-                $order_request->stock_id = $stock->id;
-                $order_request->request_user_id = $user_id;
-                $order_request->quantity = $quantity;
-                $order_request->price = $price;
-                $order_request->calc_price = $calc_price;
-                $order_request->new_stock_flg = 1;
-                $order_request->document_id = $document->id;
-                $order_request->desire_delivery_date = $desire_delivery_date;
-                $order_request->save();
+                    // 物品依頼データ作成
+                    $order_request = new OrderRequest();
+                    $order_request->stock_id = $stock->id;
+                    $order_request->request_user_id = $user_id;
+                    $order_request->price = $stock->price;
+                    $order_request->quantity = $approval_stock['quantity'];
+                    $order_request->calc_price = $stock->price * $approval_stock['quantity'];
+                    $order_request->new_stock_flg = 1;
+                    $order_request->document_id = $document->id;
+                    $order_request->desire_delivery_date = $desire_delivery_date;
+                    $order_request->save();
+                }
 
                 $msg = '稟議書が正常に保存されました';
             } else {
