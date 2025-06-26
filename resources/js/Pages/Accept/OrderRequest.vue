@@ -114,7 +114,7 @@ const sendAccept = (order_request_approval_id, action) => {
       })
       .then((res) => {
         console.log(res.data);
-        if (res.data.status && confirm(msg)) {
+        if (confirm(msg)) {
           window.location.reload();
         }
       })
