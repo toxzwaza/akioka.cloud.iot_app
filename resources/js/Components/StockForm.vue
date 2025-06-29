@@ -9,15 +9,17 @@ const props = defineProps({
   title: String,
   stock_storage: Object,
   processes: Array,
-  users: Array
+  users: Array,
 });
 
-const process_users = ref([])
+const process_users = ref([]);
 const changeProcess = () => {
-  console.log(form.search.process_id)
+  console.log(form.search.process_id);
 
-  process_users.value = props.users.filter( user => user.process_id === form.search.process_id )
-}
+  process_users.value = props.users.filter(
+    (user) => user.process_id === form.search.process_id
+  );
+};
 
 // 出庫時のGIF・出庫音再生用
 const success = ref(false);
@@ -113,7 +115,7 @@ const clickedButton = (button_name) => {
             address_id: form.search.address_id,
             stock_id: form.search.stock_id,
             process_id: form.search.process_id,
-            user_id: form.search.user_id
+            user_id: form.search.user_id,
           },
         })
         .then((res) => {
@@ -135,15 +137,11 @@ const clickedButton = (button_name) => {
           if (res.data.status) {
             success.value = true;
             playAudio();
-            alert(
-              "出庫登録が完了しました。"
-            );
+            if(confirm("出庫登録が完了しました。")){
+              location.href = route("stock.home")
+            }
           }
-          // else {
-          //   alert(
-          //     "出庫登録が失敗しました。再度お試し頂くか、管理者に問い合わせてください。"
-          //   );
-          // }
+
         })
         .catch((error) => {
           console.log(error);
@@ -258,9 +256,7 @@ onMounted(() => {
           }"
         >
           {{
-            form.shipment.address_id
-              ? "詳細画面へ進む"
-              : "格納先アドレスを登録"
+            form.shipment.address_id ? "詳細画面へ進む" : "格納先アドレスを登録"
           }}
           <svg
             class="rtl:rotate-180 w-3.5 h-3.5 ms-2"
@@ -522,9 +518,7 @@ onMounted(() => {
             </select>
           </div>
           <div class="w-1/2 px-3" v-if="form.search.process_id">
-            <label for="" class="text-red-500 font-bold"
-              ></label
-            >
+            <label for="" class="text-red-500 font-bold"></label>
             <select
               name=""
               id=""

@@ -1,111 +1,204 @@
 <script setup>
 import StockLayout from "@/Layouts/StockLayout.vue";
 import StockForm from "@/Components/StockForm.vue";
-import { Link } from "@inertiajs/vue3";
+import { Link, router } from "@inertiajs/vue3";
 import { getImgPath } from "@/Helper/method";
-import { ref } from "vue";
+import { reactive, ref, onMounted } from "vue";
 
 const props = defineProps({
   processes: Array,
   users: Array,
-})
+  search: Array,
+});
+const form = reactive({
+  search: {
+    stock_name: "",
+    stock_s_name: "",
+    alias: "",
+    address_id: null,
+    stock_id: null,
+    process_id: 0,
+    user_id: 0,
+  },
+});
+const process_users = ref([]);
+const changeProcess = () => {
+  console.log(form.search.process_id);
 
-const stocks = ref([]);
-const handleUpdateStocks = (data) => {
-  stocks.value = data;
-  search_box.value = false;
-  console.log('search',stocks.value)
+  process_users.value = props.users.filter(
+    (user) => user.process_id === form.search.process_id
+  );
+};
+
+const clickButton = () => {
+  console.log(form.search);
+
+  router.get(route("stock.search.result"), {
+    stock_name: form.search.stock_name,
+    stock_s_name: form.search.stock_s_name,
+    alias: form.search.alias,
+    address_id: form.search.address_id,
+    stock_id: form.search.stock_id,
+    process_id: form.search.process_id,
+    user_id: form.search.user_id,
+  });
 };
 const clearStocks = () => {
   stocks.value = [];
 };
 
 const search_box = ref(true);
+
+onMounted(() => {
+  console.log(props.search);
+
+  form.search.stock_name = props.search?.stock_name ?? "";
+  form.search.stock_s_name = props.search?.stock_s_name ?? "";
+  form.search.alias = props.search?.alias ?? "";
+  form.search.address_id = props.search?.address_id ?? "";
+  form.search.stock_id = props.search?.stock_id ?? "";
+  if (props.search?.process_id) {
+    form.search.process_id = props.search?.process_id;
+    changeProcess();
+  }
+  form.search.user_id = props.search?.user_id ?? "";
+});
 </script>
 <template>
   <StockLayout :title="'検索'">
     <template #content>
       <!-- 検索フォームコンポーネント -->
-      <div :class="{ 'hide' : !search_box }">
-        <StockForm  @updateStocks="handleUpdateStocks" :processes="props.processes" :users="props.users"/>
+      <div :class="{ hide: !search_box }">
+        <div class="w-full p-2">
+          <!-- 検索用フォーム -->
+          <form>
+            <!-- 工程選択 -->
+            <div class="flex flex-wrap -mx-3 mb-10 items-end bg-white pt-2">
+              <div class="w-1/2 px-3">
+                <label for="" class="text-red-500 font-bold"
+                  >過去の発注履歴から検索</label
+                >
+                <select
+                  name=""
+                  id=""
+                  v-model="form.search.process_id"
+                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 mt-2"
+                  @change="changeProcess"
+                >
+                  <option value="0">工程を選択</option>
+                  <option
+                    v-for="process in props.processes"
+                    :key="process.id"
+                    :value="process.id"
+                  >
+                    {{ process.name }}
+                  </option>
+                </select>
+              </div>
+              <div class="w-1/2 px-3" v-if="form.search.process_id">
+                <label for="" class="text-red-500 font-bold"></label>
+                <select
+                  name=""
+                  id=""
+                  v-model="form.search.user_id"
+                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 mt-2"
+                >
+                  <option value="0">依頼者でさらに絞り込み</option>
+                  <option
+                    v-for="user in process_users"
+                    :key="user.id"
+                    :value="user.id"
+                  >
+                    {{ user.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap -mx-3 mb-6">
+              <div class="w-full px-3">
+                <input
+                  name="search_name"
+                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  id="grid-password"
+                  type="text"
+                  placeholder="品名"
+                  v-model="form.search.stock_name"
+                />
+              </div>
+            </div>
+            <div class="flex flex-wrap -mx-3 mb-6">
+              <div class="w-full px-3">
+                <input
+                  name="search_name"
+                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  id="grid-password"
+                  type="text"
+                  placeholder="品番"
+                  v-model="form.search.stock_s_name"
+                />
+              </div>
+            </div>
+            <div class="flex flex-wrap -mx-3 mb-6">
+              <div class="w-full px-3">
+                <input
+                  name="alias"
+                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  id="grid-password"
+                  type="text"
+                  placeholder="略名"
+                  v-model="form.search.alias"
+                />
+              </div>
+            </div>
+            <div class="flex flex-wrap -mx-3 mb-6">
+              <div class="w-full px-3">
+                <input
+                  name="address_id"
+                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  id="grid-password"
+                  type="number"
+                  placeholder="棚アドレス"
+                  v-model="form.search.address_id"
+                />
+              </div>
+            </div>
+            <div class="flex flex-wrap -mx-3 mb-6">
+              <div class="w-full px-3">
+                <input
+                  name="stock_id"
+                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  id="grid-password"
+                  type="number"
+                  placeholder="製品ID or JANコード"
+                  v-model="form.search.stock_id"
+                />
+              </div>
+            </div>
+
+            <button
+              @click.prevent="clickButton"
+              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded"
+            >
+              検索
+            </button>
+          </form>
+        </div>
       </div>
       <button
         v-if="!search_box"
-        :class="{'ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded' : true}"
+        :class="{
+          'ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded': true,
+        }"
         @click="search_box = true"
       >
         検索画面を表示
       </button>
-
-      <!-- 検索結果表示用コンポーネント -->
-      <div>
-        <div v-if="stocks.length > 0" class="">
-          <button
-            v-if="search_box"
-            @click="search_box = false"
-            :class="{'ml-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded' : true }"
-          >
-            検索画面を非表示
-          </button>
-
-          <hr class="my-8" />
-          <div class="mt-4 flex flex-wrap justify-between">
-            <div
-              v-for="stock in stocks"
-              :key="stock.id"
-              class="stock_card bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 m-4"
-            >
-              <div class="stock_img">
-                <img class="rounded-t-lg" :src="getImgPath(stock.img_path)" alt="" />
-              </div>
-              <div class="p-5">
-                <a href="#">
-                  <h5
-                    class="whitespace-nowrap text-ellipsis overflow-hidden mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-                  >
-                    {{ stock.name }}
-                  </h5>
-                  <h6>品番:{{ stock.s_name }}</h6>
-                </a>
-                <p class="font-normal text-gray-700 dark:text-gray-400">
-                  格納先:{{ stock.location_name }}
-                  <span class="font-bold">{{ stock.address }}</span>
-                </p>
-                <p class="font-normal text-gray-700 dark:text-gray-400">
-                  格納数:{{ stock.quantity }}
-                </p>
-
-                <Link
-                  :href="route('stock.inventory.show', {stock_id: stock.id,  stock_storage_id: stock.stock_storage_id ?? 0 })"
-                  :class="{ 'mt-4 inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white  rounded-lg  focus:ring-4 focus:outline-none dark:focus:ring-blue-800 focus:ring-blue-300' : true , 'bg-blue-500 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500' : stock.stock_storage_id, 'bg-gray-500 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500' : !stock.stock_storage_id}"
-                >
-                  {{ stock.stock_storage_id ? '詳細画面へ進む' : '詳細画面へ進む' }}
-                  <svg
-                    class="rtl:rotate-180 w-3.5 h-3.5 ms-2"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 14 10"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M1 5h12m0 0L9 1m4 4L9 9"
-                    />
-                  </svg>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </template>
   </StockLayout>
 </template>
 <style scoped lang="scss">
-.hide{
+.hide {
   height: 0;
   overflow: hidden;
   opacity: 0;

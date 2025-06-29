@@ -51,6 +51,8 @@ Route::post('/shipment', [ShipmentController::class, 'store'])->name('stock.ship
 
 // 検索画面
 Route::get('/search', [SearchController::class, 'index'])->name('stock.search');
+// 検索結果表示画面
+Route::get('/search/result', [SearchController::class, 'result'])->name('stock.search.result');
 
 // 格納先・アドレス編集
 Route::get('/stock/getLocations', [InventoryController::class, 'getLocations'])->name('stock.getLocations');
