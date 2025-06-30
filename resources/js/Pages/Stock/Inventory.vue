@@ -402,7 +402,7 @@ onMounted(() => {
           <h1 class="stock_name font-mono">
             {{ `${props.stock.name}` }}
             <a
-              :href="`http://monokanri-manage.local/stock/edit/stocks/${props.stock.id}`"
+              :href="`http://monokanri-manage.local/stock/stocks/show/${props.stock.id}`"
               target="blank"
               ><i class="fas fa-edit ml-2 cursor-pointer"></i
             ></a>

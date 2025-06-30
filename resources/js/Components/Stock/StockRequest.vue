@@ -23,7 +23,7 @@ const form = reactive({
   now_quantity_unit: "",
   digest_date: new Date().toISOString().split("T")[0],
   quantity: 1,
-  quantity_unit: '',
+  quantity_unit: "",
   desire_delivery_date: null,
   description: null,
   price: null,
@@ -59,9 +59,9 @@ const handleCheck = (event) => {
 };
 
 const handleSubmit = () => {
-  if(confirm('上位役職者の確認は完了していますか？')){
-    emit("submit", form)
-  } 
+  if (confirm("上位役職者の確認は完了していますか？")) {
+    emit("submit", form);
+  }
 };
 
 onMounted(() => {
@@ -128,7 +128,11 @@ onMounted(() => {
             </div>
             <div class="w-full md:w-1/2 px-3">
               <label
-                class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                :class="{
+                  'block uppercase tracking-wide text-xs font-bold mb-2': true,
+                  'text-gray-700': form.user_id,
+                  'text-red-500': !form.user_id,
+                }"
                 for="grid-last-name"
               >
                 依頼者選択
@@ -152,7 +156,11 @@ onMounted(() => {
           <div class="flex flex-wrap -mx-3 mb-2">
             <div class="w-1/4 px-3 mb-6 md:mb-0">
               <label
-                class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                :class="{
+                  'block uppercase tracking-wide text-xs font-bold mb-2': true,
+                  'text-gray-700': form.now_quantity !== null && form.now_quantity !== undefined,
+                  'text-red-500': form.now_quantity === null || form.now_quantity === undefined,
+                }"
                 for="grid-city"
               >
                 現在個数
@@ -166,7 +174,11 @@ onMounted(() => {
             </div>
             <div class="w-1/4 px-3 mb-6 md:mb-0">
               <label
-                class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                :class="{
+                  'block uppercase tracking-wide text-xs font-bold mb-2': true,
+                  'text-gray-700': form.now_quantity_unit,
+                  'text-red-500': !form.now_quantity_unit,
+                }"
                 for="grid-city"
               >
                 単位
@@ -194,7 +206,11 @@ onMounted(() => {
 
             <div class="w-1/2 px-3 mb-6 md:mb-0">
               <label
-                class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                :class="{
+                  'block uppercase tracking-wide text-xs font-bold mb-2': true,
+                  'text-gray-700': form.digest_date,
+                  'text-red-500': !form.digest_date,
+                }"
                 for="grid-state"
               >
                 消化予定日
@@ -211,7 +227,11 @@ onMounted(() => {
           <div class="flex flex-wrap -mx-3 mb-2">
             <div class="w-1/4 px-3 mb-6 md:mb-0">
               <label
-                class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                :class="{
+                  'block uppercase tracking-wide text-xs font-bold mb-2': true,
+                  'text-gray-700': form.quantity,
+                  'text-red-500': !form.quantity,
+                }"
                 for="grid-city"
               >
                 必要数量
@@ -226,7 +246,11 @@ onMounted(() => {
             </div>
             <div class="w-1/4 px-3 mb-6 md:mb-0">
               <label
-                class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                :class="{
+                  'block uppercase tracking-wide text-xs font-bold mb-2': true,
+                  'text-gray-700': form.quantity_unit,
+                  'text-red-500': !form.quantity_unit,
+                }"
                 for="grid-city"
               >
                 単位
@@ -254,7 +278,11 @@ onMounted(() => {
 
             <div class="w-1/2 px-3 mb-6 md:mb-0">
               <label
-                class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                :class="{
+                  'block uppercase tracking-wide text-xs font-bold mb-2': true,
+                  'text-gray-700': form.desire_delivery_date,
+                  'text-red-500': !form.desire_delivery_date,
+                }"
                 for="grid-state"
               >
                 希望納期
@@ -333,8 +361,12 @@ onMounted(() => {
         <div class="w-1/2 pl-4">
           <div class="w-full">
             <label
-              class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
               for="grid-password"
+              :class="{
+                'block uppercase tracking-wide text-xs font-bold mb-2': true,
+                'text-gray-700': form.description,
+                'text-red-500': !form.description,
+              }"
             >
               備考（使用用途を記載）
             </label>
@@ -351,7 +383,12 @@ onMounted(() => {
       </div>
 
       <button
-        v-if="form.user_id && form.quantity && form.desire_delivery_date"
+        v-if="
+          form.user_id &&
+          form.quantity &&
+          form.desire_delivery_date &&
+          form.description
+        "
         class="mt-4 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-6 px-4 rounded"
         @click.prevent="handleSubmit"
       >
