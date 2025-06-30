@@ -528,7 +528,7 @@ onMounted(() => {
                   </div>
                   <button
                     @click="changeQuantity"
-                    v-if="change_quantity"
+                    v-if="change_quantity || change_quantity == '0'"
                     class="text-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                   >
                     確定
