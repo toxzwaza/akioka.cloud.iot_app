@@ -13,6 +13,10 @@ const forwardButton = () => {
 const beforeButton = () => {
   window.history.back();
 };
+
+const reloadPage = () => {
+  window.location.reload()
+}
 </script>
 
 <template>
@@ -74,6 +78,12 @@ const beforeButton = () => {
             class="arrow-icon btn ml-2 inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
           >
             <i class="fas fa-arrow-right"></i>
+          </button>
+          <button
+            @click="reloadPage"
+            class="ml-6 arrow-icon btn inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
+          >
+            <i class="fas fa-sync-alt"></i>
           </button>
         </div>
       </div>
