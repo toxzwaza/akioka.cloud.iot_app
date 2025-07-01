@@ -63,6 +63,9 @@ class OrderController extends Controller
             $order_request = new OrderRequest();
             $order_request->stock_id = $stock_id;
             $order_request->request_user_id = $request_user_id == 0 ? 117 : $request_user_id;
+            if ($stock->classification_id == 34) {
+                $order_request->user_id = 39;
+            }
             $order_request->price = $stock->price;
             $order_request->quantity =  $quantity;
             $order_request->unit = $quantity_unit;
