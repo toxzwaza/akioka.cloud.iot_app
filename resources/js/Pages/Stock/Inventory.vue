@@ -188,7 +188,7 @@ const handleStockRequest = (form) => {
       console.log(res.data);
       if (res.data.status) {
         if (confirm("発注依頼が完了しました。")) {
-          window.location.reload();
+          // window.location.reload();
         }
       }
     })
