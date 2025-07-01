@@ -181,6 +181,8 @@ Route::get('/receive/complete/back', [ContentController::class, 'receiveComplete
 // 現場モニター
 Route::get('/receive/complete', [ContentController::class, 'receiveComplete'])->name('stock.receive.complete');
 
+// 物品依頼データ表示モニター
+Route::get('/order-request/complete', [ContentController::class, 'orderRequestComplete'])->name('order-request.complete');
 
 
 ////////// データ登録API //////////

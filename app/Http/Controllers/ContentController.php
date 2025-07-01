@@ -6,6 +6,7 @@ use App\Models\Data;
 use App\Models\FacilitySchedule;
 use App\Models\FacilityScheduleParticipant;
 use App\Models\InitialOrder;
+use App\Models\OrderRequest;
 use App\Models\Place;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -119,6 +120,35 @@ class ContentController extends Controller
         $initial_orders = $query->get();
 
         return Inertia::render('Content/ReceiveCompleteBack', ['initial_orders' => $initial_orders, 'place_name' => $place_name]);
+    }
+    public function orderRequestComplete()
+    {
+        $query = OrderRequest::select(
+            'stocks.name',
+            'stocks.s_name',
+            'order_requests.quantity',
+            'order_requests.unit',
+            'stocks.img_path',
+            'order_requests.status',
+            'order_requests.accept_flg',
+            'users.name as request_user_name',
+            'order_requests.created_at',
+            
+        )
+            ->leftJoin('stocks', 'stocks.id', 'order_requests.stock_id')
+            ->leftJoin('users', 'users.id', 'order_requests.request_user_id')
+            ->whereNotIn('users.group_id', [ 7 ])
+            ->where('order_requests.del_flg', 0)
+            ->where(function($query) {
+                $query->whereDate('order_requests.created_at', now()->toDateString())
+                      ->orWhere('order_requests.status', 0);
+            })
+            ->orderby('order_requests.created_at', 'asc');
+
+
+        $order_requests = $query->get();
+
+        return Inertia::render('Content/OrderRequestComplete', [ 'order_requests' => $order_requests ]);
     }
 
     public function factoryEnvMonitor($place_id)
