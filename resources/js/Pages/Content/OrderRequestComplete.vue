@@ -7,7 +7,7 @@ const props = defineProps({
 
 const active_orders = ref([]);
 const pageNumber = ref(1);
-const ordersPerPage = 6;
+const ordersPerPage = 9;
 const updateActiveOrders = () => {
   const start = (pageNumber.value - 1) * ordersPerPage;
   const end = start + ordersPerPage;
