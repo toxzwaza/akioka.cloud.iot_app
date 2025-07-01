@@ -7,7 +7,7 @@ const props = defineProps({
 
 const active_orders = ref([]);
 const pageNumber = ref(1);
-const ordersPerPage = 9;
+const ordersPerPage = 11;
 const updateActiveOrders = () => {
   const start = (pageNumber.value - 1) * ordersPerPage;
   const end = start + ordersPerPage;
@@ -83,18 +83,18 @@ onMounted(() => {
               class="w-2/5 font-bold py-4 px-4 border-b border-gray-200 text-center whitespace-nowrap"
             >
               {{
-                order.name.length > 20
+                order.name && order.name.length > 20
                   ? order.name.slice(0, 20) + "..."
-                  : order.name
+                  : order.name || ''
               }}
             </td>
             <td
               class="w-2/5 font-bold py-4 px-4 border-b border-gray-200 text-center whitespace-nowrap"
             >
               {{
-                order.s_name && order.s_name.length > 20
+                order.s_name && typeof order.s_name === 'string' && order.s_name.length > 20
                   ? order.s_name.slice(0, 20) + "..."
-                  : order.s_name
+                  : order.s_name || ''
               }}
             </td>
             <td
