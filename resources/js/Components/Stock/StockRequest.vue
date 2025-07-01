@@ -386,8 +386,7 @@ onMounted(() => {
         v-if="
           form.user_id &&
           form.quantity &&
-          form.desire_delivery_date &&
-          form.description
+          form.desire_delivery_date
         "
         class="mt-4 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-6 px-4 rounded"
         @click.prevent="handleSubmit"
