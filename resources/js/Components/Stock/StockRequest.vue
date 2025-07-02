@@ -25,10 +25,29 @@ const form = reactive({
   quantity: 1,
   quantity_unit: "",
   desire_delivery_date: null,
-  description: null,
+  description: "",
   price: null,
   calc_price: null,
   check: null,
+});
+
+// 特殊フォーム用
+const special_area = reactive({
+  cd_1: {
+    text_1: 0,
+    text_2: null,
+    add_description() {
+      if (form.description) {
+        form.description =
+          form.description +
+          `\n${special_area.cd_1.text_1} - ${special_area.cd_1.text_2}`;
+      } else {
+        form.description =
+          form.description +
+          `${special_area.cd_1.text_1} - ${special_area.cd_1.text_2}`;
+      }
+    },
+  },
 });
 
 const handleProcess = () => {
@@ -101,7 +120,7 @@ onMounted(() => {
     <form class="w-ful">
       <div class="flex justify-between items-start">
         <div class="w-1/2 pr-4">
-          <div class="flex flex-wrap -mx-3 mb-2">
+          <div class="flex flex-wrap -mx-3 mb-4">
             <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
               <label
                 class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
@@ -153,13 +172,17 @@ onMounted(() => {
               </select>
             </div>
           </div>
-          <div class="flex flex-wrap -mx-3 mb-2">
+          <div class="flex flex-wrap -mx-3 mb-4">
             <div class="w-1/4 px-3 mb-6 md:mb-0">
               <label
                 :class="{
                   'block uppercase tracking-wide text-xs font-bold mb-2': true,
-                  'text-gray-700': form.now_quantity !== null && form.now_quantity !== undefined,
-                  'text-red-500': form.now_quantity === null || form.now_quantity === undefined,
+                  'text-gray-700':
+                    form.now_quantity !== null &&
+                    form.now_quantity !== undefined,
+                  'text-red-500':
+                    form.now_quantity === null ||
+                    form.now_quantity === undefined,
                 }"
                 for="grid-city"
               >
@@ -359,6 +382,61 @@ onMounted(() => {
         </div>
 
         <div class="w-1/2 pl-4">
+          <div v-if="props.stock.special_area_cd == 1" class="">
+
+            <div class="flex items-end mb-4">
+              <div class="w-1/6 mr-4">
+                <label
+                  class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                  for="grid-first-name"
+                >
+                  文字
+                </label>
+                <select
+                  name=""
+                  id=""
+                  class="appearance-none block w-full bg-gray-200 text-gray-700 border-transparent rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
+                  v-model="special_area.cd_1.text_1"
+                >
+                  <option value="0">未選択</option>
+                  <option
+                    v-for="char in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ012345678'"
+                    :key="char"
+                    :value="char"
+                  >
+                    {{ char }}
+                  </option>
+                </select>
+              </div>
+              <div class="w-1/6 mr-4">
+                <label
+                  class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                  for="grid-first-name"
+                >
+                  数量
+                </label>
+                <input
+                  type="number"
+                  name=""
+                  id=""
+                  v-model="special_area.cd_1.text_2"
+                  class="ppearance-none block w-full bg-gray-200 text-gray-700 border-transparent rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
+                />
+              </div>
+
+              <div class="w-1/6 mr-4 flex items-end">
+                <button
+                  v-if="special_area.cd_1.text_1 && special_area.cd_1.text_2"
+                  @click="special_area.cd_1.add_description"
+                  type="button"
+                  class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  追加
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div class="w-full">
             <label
               for="grid-password"
@@ -374,7 +452,7 @@ onMounted(() => {
               name=""
               id=""
               cols="30"
-              rows="9"
+              rows="8"
               v-model="form.description"
               class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             ></textarea>
@@ -383,11 +461,7 @@ onMounted(() => {
       </div>
 
       <button
-        v-if="
-          form.user_id &&
-          form.quantity &&
-          form.desire_delivery_date
-        "
+        v-if="form.user_id && form.quantity && form.desire_delivery_date"
         class="mt-4 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-6 px-4 rounded"
         @click.prevent="handleSubmit"
       >
