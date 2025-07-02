@@ -2,6 +2,7 @@
 
 namespace App\Http\Services;
 
+use App\Models\DeviceMessage;
 use App\Models\InventoryOperation;
 use App\Models\InventoryOperationRecord;
 use App\Models\NotifyQueue;
@@ -200,5 +201,18 @@ class Helper
         ]);
 
         return $response->getBody()->getContents();
+    }
+
+    public static function createDeviceMessage($priority, $to_device_id, $from_device_id = null, $to_user_id, $from_user_id, $msg)
+    {
+        $message = new DeviceMessage();
+        $message->priority = $priority;
+        $message->to_device_id = $to_device_id;
+        $message->from_device_id = $from_device_id;
+        $message->to_user_id = $to_user_id;
+        $message->from_user_id = $from_user_id;
+        $message->del_flg = 0;
+        $message->message = $msg;
+        $message->save();
     }
 }

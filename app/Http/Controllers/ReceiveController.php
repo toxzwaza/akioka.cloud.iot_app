@@ -87,6 +87,7 @@ class ReceiveController extends Controller
                     $order->save();
 
                     Method::setDeliveryDateAndUpdateLeadTime($order->id);
+
                 }
 
                 // 品名・品番が一致する在庫データを取得
@@ -404,6 +405,8 @@ class ReceiveController extends Controller
                     }
 
                     $stock_storage->save();
+
+                    // 納品完了を通知
 
 
 

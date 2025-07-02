@@ -6,6 +6,7 @@ use App\Http\Controllers\ARController;
 use App\Http\Controllers\ContentController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\DeviceMessageController;
 use App\Http\Controllers\HeatStrokeController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\LunchController;
@@ -45,6 +46,11 @@ Route::get('/sw.js', function () {
 //////////在庫管理システム （タブレット） //////////
 // メイン画面
 Route::get('/', [MainController::class, 'index'])->name('stock.home');
+// デバイスメッセージ取得
+Route::get('/device-message', [DeviceMessageController::class, 'getDeviceMessages'])->name('device-message.getDeviceMessages');
+Route::post('/device-message', [DeviceMessageController::class, 'confirm_message'])->name('device-message.confirm_message');
+Route::post('/device-message/send-answer', [DeviceMessageController::class, 'send_answer'])->name('device-message.send_answer');
+
 // 出庫画面
 Route::get('/shipment', [ShipmentController::class, 'index'])->name('stock.shipment');
 Route::post('/shipment', [ShipmentController::class, 'store'])->name('stock.shipment.store');
