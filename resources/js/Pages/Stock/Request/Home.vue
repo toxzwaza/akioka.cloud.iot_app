@@ -81,11 +81,13 @@ const updateQuantity = (stock_id, quantity) => {
 const orderStockRequest = () => {
   axios
     .post(route("stock.request.store"), {
+      already_flg : already_flg.status,
       process_id: form.process_id,
       user_id: form.user_id,
       data: orderData.value,
     })
     .then((res) => {
+      console.log(res.data)
       if (res.data.status) {
         if (confirm("物品依頼が完了しました。")) {
           window.location.reload();
@@ -106,29 +108,25 @@ const checkAlreadyStockRequest = () => {
   ) {
     if (
       confirm(
-        "物品依頼が完了しています。確認及び変更を依頼しますか？\nキャンセルした場合新規物品依頼を行います。"
+        "物品依頼が完了しています。確認及び変更を依頼しますか？\n(キャンセルすると新規依頼となります。)"
       )
     ) {
-      stock_requests.value = props.stock_request_orders
-        .filter(
+      stock_requests.value.forEach((stock_request) => {
+        const matchingOrder = props.stock_request_orders.find(
           (stock_request_order) =>
-            stock_request_order.process_id == form.process_id
-        )
-        .map((stock_request_order) => {
-          const stock_request = stock_requests.value.find(
-            (stock_request) =>
-              stock_request.stock_id == stock_request_order.stock_id
-          );
-          if (stock_request) {
-            stock_request.quantity = stock_request_order.quantity;
-            return stock_request;
-          }
-        })
-        .filter((stock_request) => stock_request !== undefined);
+            stock_request_order.process_id == form.process_id &&
+            stock_request_order.stock_id == stock_request.stock_id
+        );
+        if (matchingOrder) {
+          stock_request.quantity = matchingOrder.quantity;
+        } else {
+          stock_request.quantity = '';
+        }
+      });
 
       already_flg.status = true;
     } else {
-      stock_requests.value = props.stock_requests;
+      stock_requests.value = props.stock_requests.map(stock_request => ({ ...stock_request, quantity: '' }));
       already_flg.status = false;
     }
   } else {
@@ -175,10 +173,12 @@ const sliceStockRequests = (stock_requests) => {
     Math.floor(stock_requests.length / 2)
   );
 
-  console.log(left_stock_requests.value, right_stock_requests.value);
+  // console.log(left_stock_requests.value, right_stock_requests.value);
 };
 
 onMounted(() => {
+  console.log('stock_requests:', props.stock_requests)
+  console.log('stock_request_orders:', props.stock_request_orders)
   stock_requests.value = props.stock_requests;
   sliceStockRequests(stock_requests.value);
 
@@ -187,7 +187,6 @@ onMounted(() => {
   setUpAlreadyFlg(); //現在の日付からお渡し日を算出
 
   admin_users.value = props.users.filter((user) => user.is_admin);
-  console.log(admin_users.value);
 });
 </script>
 <template>
@@ -283,6 +282,8 @@ onMounted(() => {
 
         <!-- 注文依頼用紙 -->
         <div v-if="form.process_id && form.user_id" class="mt-12">
+          <h1 v-if="already_flg.status" class="rounded mx-auto w-1/2 px-4 py-2 text-xl font-bold text-center mb-8 bg-red-500 text-white">--- 依頼確認・修正 ---</h1>
+          <h1 v-else class="rounded mx-auto w-1/2 px-4 py-2 text-xl font-bold text-center mb-8 bg-green-500 text-white">--- 新規依頼 ---</h1>
           <div class="table-container">
             <div class="left_table_container">
               <table>
@@ -359,8 +360,7 @@ onMounted(() => {
           <div
             v-if="
               Object.keys(orderData).length > 0 &&
-              isWeekdayMonToWed &&
-              !already_flg.status
+              isWeekdayMonToWed
             "
             class="mt-12"
           >

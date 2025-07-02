@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Services\ChatGpt;
+use App\Http\Services\Helper;
 use App\Models\InitialOrder;
 use App\Models\LunchOrder;
 use App\Models\OrderRequest;
@@ -24,52 +25,54 @@ class TestController extends Controller
     //
     public function test()
     {
-        $stocks = Stock::select(
-            'stocks.id', 
-            'suppliers.name as supplier_name', 
-            'stocks.name', 
-            'stocks.s_name', 
-            'stocks.memo', 
-            'stocks.price', 
-            'stocks.solo_unit', 
-            'stocks.org_unit', 
-            'stocks.quantity_per_org',
-            'stocks.updated_at'
-        )
-        ->join('stock_suppliers', 'stock_suppliers.stock_id', '=', 'stocks.id')
-        ->join('suppliers', 'suppliers.id', '=', 'stock_suppliers.supplier_id')
-        ->where('stocks.del_flg', '=', 0)
-        ->whereNotNull('stocks.price')
-        ->get();
 
-        $csvData = $stocks->map(function($stock) {
-            return [
-                $stock->supplier_name,
-                $stock->name,
-                $stock->s_name,
-                $stock->memo,
-                $stock->price,
-                $stock->solo_unit,
-                $stock->org_unit,
-                $stock->quantity_per_org,
-                $stock->updated_at
-            ];
-        });
+        $res = Helper::sendNotification('ePV0Lrqp-hld0Szo9Sopc3:APA91bHU_fEgOB_9YV4iGxHT86jh1WeV9Oj5KL_hRugg2yJryR7KnDDLIukouqW5ze7ec-NQYBiyiAo9WNqkEAG7daGo23_cSny0z8iqLKvWo-6hSx4N5LM', 'test', 'test');
 
-        $fileName = 'stocks.csv';
-        $file = fopen($fileName, 'w');
-        fputcsv($file, ['発注先名', '品名', '品番', 'メモ', '価格', '単位１', '単位２', '換算値', '更新日時']);
+        return $res;
 
-        foreach ($csvData as $line) {
-            fputcsv($file, $line);
-        }
+        // $stocks = Stock::select(
+        //     'stocks.id', 
+        //     'suppliers.name as supplier_name', 
+        //     'stocks.name', 
+        //     'stocks.s_name', 
+        //     'stocks.memo', 
+        //     'stocks.price', 
+        //     'stocks.solo_unit', 
+        //     'stocks.org_unit', 
+        //     'stocks.quantity_per_org',
+        //     'stocks.updated_at'
+        // )
+        // ->join('stock_suppliers', 'stock_suppliers.stock_id', '=', 'stocks.id')
+        // ->join('suppliers', 'suppliers.id', '=', 'stock_suppliers.supplier_id')
+        // ->where('stocks.del_flg', '=', 0)
+        // ->whereNotNull('stocks.price')
+        // ->get();
 
-        fclose($file);
+        // $csvData = $stocks->map(function($stock) {
+        //     return [
+        //         $stock->supplier_name,
+        //         $stock->name,
+        //         $stock->s_name,
+        //         $stock->memo,
+        //         $stock->price,
+        //         $stock->solo_unit,
+        //         $stock->org_unit,
+        //         $stock->quantity_per_org,
+        //         $stock->updated_at
+        //     ];
+        // });
 
-        return response()->download($fileName)->deleteFileAfterSend(true);
+        // $fileName = 'stocks.csv';
+        // $file = fopen($fileName, 'w');
+        // fputcsv($file, ['発注先名', '品名', '品番', 'メモ', '価格', '単位１', '単位２', '換算値', '更新日時']);
 
-        // $res = Helper::sendNotification('e0YdX65c7qwXcCobPK_kfj:APA91bFrQE-w-R61OhUVpJatZVBFYmbESL83iJ2aYZaO8IFF1AmV1HHOoJdKedhdybiMV71PrNdgT8TH_HjiQFUDDKGWBcDcSNrSjMHx43k4D3wISmr6Nhw', 'test', 'test');
+        // foreach ($csvData as $line) {
+        //     fputcsv($file, $line);
+        // }
 
-        // return $res;
+        // fclose($file);
+
+        // return response()->download($fileName)->deleteFileAfterSend(true);
+
     }
 }

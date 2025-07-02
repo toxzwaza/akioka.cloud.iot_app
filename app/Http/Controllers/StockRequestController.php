@@ -49,11 +49,14 @@ class StockRequestController extends Controller
     {
         $status = true;
 
+        $already_flg = $request->already_flg;
         $process_id = $request->process_id;
         $user_id = $request->user_id;
         $data = $request->data;
 
+        // return response()->json(['already_flg' => $already_flg]);
         try {
+
             foreach ($data as $stock_id => $quantity) {
                 $stock_request_order = StockRequestOrder::where('process_id', $process_id)->where('stock_id', $stock_id)->where('status', 0)->first();
                 if ($stock_request_order) {
