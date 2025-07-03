@@ -153,9 +153,10 @@ onMounted(() => {
 });
 
 onMessage(messaging, (payload) => {
-  alert(
-    `📩 フォアグラウンド通知を受信しました: ${payload.notification.title}\n ${payload.notification.body}`
-  );
+  // alert(
+  //   `📩 フォアグラウンド通知を受信しました: ${payload.notification.title}\n ${payload.notification.body}`
+  // );
+  window.location.reload()
 });
 </script>
 <template>
