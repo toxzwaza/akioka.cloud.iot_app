@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Services\Helper;
 use App\Models\Classification;
 use App\Models\InitialOrder;
 use App\Models\InventoryOperationRecord;
@@ -66,7 +67,8 @@ class ReceiveController extends Controller
     // 納品書アプロード
     public function uploadFile(Request $request)
     {
-        $is_success = true;
+        $status = true;
+        $msg = '';
 
         // $id = $request->id;
         // idのリストを取得
@@ -81,13 +83,16 @@ class ReceiveController extends Controller
                     $filename = $timestamp . '.' . $file->getClientOriginalExtension();
                     $file->storeAs('public/deli_file', $filename);
                 }
-                $order = InitialOrder::find($id);
+                $order = InitialOrder::select('initial_orders.*', 'order_requests.device_id as from_device_id')
+                    ->join('order_requests', 'order_requests.id', '=', 'initial_orders.order_request_id')
+                    ->where('initial_orders.id', $id)
+                    ->first();
+
                 if ($order) {
                     $order->delifile_path = '/deli_file/' . $filename;
                     $order->save();
 
                     Method::setDeliveryDateAndUpdateLeadTime($order->id);
-
                 }
 
                 // 品名・品番が一致する在庫データを取得
@@ -99,13 +104,12 @@ class ReceiveController extends Controller
                     $order->save();
                 }
             } catch (Exception $e) {
-                $is_success = false;
+                $status = false;
+                $msg = $e->getMessage();
             }
         }
 
-        if ($is_success) {
-            return response()->json(['status' => $is_success]);
-        }
+        return response()->json(['status' => $status, 'msg' => $msg]);
     }
     public function deleteInitialOrder($order_id)
     {
@@ -327,116 +331,126 @@ class ReceiveController extends Controller
     // 納品数量登録
     public function updateDelivery(Request $request)
     {
+        $status = true;
+        $msg = '';
+        $route = '';
+
         $id = $request->id;
-        // 発注数量分の納入数
-        $quantity = $request->quantity;
-        // 換算フラグ
-        $conversion_flg = $request->conversion_flg;
-        // 換算値を反映した実際の納入数
-        $calc_quantity = $request->calc_quantity;
-
+        $quantity = $request->quantity; // 発注数量分の納入数
+        $conversion_flg = $request->conversion_flg; // 換算フラグ
+        $calc_quantity = $request->calc_quantity; // 換算値を反映した実際の納入数
         $signage = $request->signage;
-
         $stock_storage_id = $request->stock_storage_id;
         $stock_id = $request->stock_id;
         $storage_address_id = $request->storage_address_id;
 
-        $order = InitialOrder::find($id);
+        try {
+            $order = InitialOrder::select('initial_orders.*', 'order_requests.device_id as to_device_id')
+                ->join('order_requests', 'order_requests.id', '=', 'initial_orders.order_request_id')
+                ->where('initial_orders.id', $id)
+                ->first();
 
-        // 既にアドレス登録されている場合
-        if ($stock_storage_id) {
-            // 在庫数量を加算する処理を追加する
-            $stock_storage = StockStorage::find($stock_storage_id);
-            if ($stock_storage) {
+            // 既にアドレス登録されている場合
+            if ($stock_storage_id) {
+                // 在庫数量を加算する処理を追加する
+                $stock_storage = StockStorage::find($stock_storage_id);
+                if ($stock_storage) {
 
-                $quantity_sum = 0;
+                    $quantity_sum = 0;
 
-                // 分納データが存在するかチェック
-                $split_order_quantities = SplitOrderQuantity::where('initial_order_id', $id)->get();
-                // 存在する場合、合計を取得
-                if (!$split_order_quantities->isEmpty()) {
-                    $quantity_sum = $split_order_quantities->sum('quantity');
-                }
-
-
-
-                if ($order->quantity == ($quantity_sum + $quantity)) {
-                    // 注文分をすべて納品した場合、受け取りフラグを立てる
-                    $order->receive_flg = 1;
-                    if (!$signage) {
-                        $order->receipt_flg = 1; //サイネージ非表示
+                    // 分納データが存在するかチェック
+                    $split_order_quantities = SplitOrderQuantity::where('initial_order_id', $id)->get();
+                    // 存在する場合、合計を取得
+                    if (!$split_order_quantities->isEmpty()) {
+                        $quantity_sum = $split_order_quantities->sum('quantity');
                     }
-                    $order->save();
+
+                    if ($order->quantity == ($quantity_sum + $quantity)) {
+                        // 注文分をすべて納品した場合、受け取りフラグを立てる
+                        $order->receive_flg = 1;
+                        if (!$signage) {
+                            $order->receipt_flg = 1; //サイネージ非表示
+                        }
+                        $order->save();
 
 
-                    if ($stock_id) {
-                        // 納品記録
-                        $inventory_operation_records = new InventoryOperationRecord();
-                        $inventory_operation_records->stock_id = $stock_id;
-                        $inventory_operation_records->stock_storage_id = $stock_storage_id;
-                        $inventory_operation_records->inventory_operation_id = 8;
+                        if ($stock_id) {
+                            // 納品記録
+                            $inventory_operation_records = new InventoryOperationRecord();
+                            $inventory_operation_records->stock_id = $stock_id;
+                            $inventory_operation_records->stock_storage_id = $stock_storage_id;
+                            $inventory_operation_records->inventory_operation_id = 8;
+                            if ($conversion_flg) {
+                                $inventory_operation_records->quantity = $calc_quantity;
+                            } else {
+                                $inventory_operation_records->quantity = $order->quantity;
+                            }
+                            $inventory_operation_records->save();
+
+                            // 単価の変更
+                            $stock = Stock::find($stock_id);
+                            if ($stock->price != $order->price) {
+                                // 単価が異なる場合単価設定を変更
+                                $stock->price = $order->price;
+                                $stock->save();
+
+                                // 変更履歴作成
+                                $stock_price_archive = new StockPriceArchive();
+                                $stock_price_archive->stock_id = $stock_id;
+                                $stock_price_archive->price = $order->price;
+                                $stock_price_archive->save();
+                            }
+                        }
+
+                        // 納品した分を格納先に追加
                         if ($conversion_flg) {
-                            $inventory_operation_records->quantity = $calc_quantity;
+                            $stock_storage->quantity += $calc_quantity;
                         } else {
-                            $inventory_operation_records->quantity = $order->quantity;
+                            $stock_storage->quantity += $quantity;
                         }
-                        $inventory_operation_records->save();
 
-                        // 単価の変更
-                        $stock = Stock::find($stock_id);
-                        if ($stock->price != $order->price) {
-                            // 単価が異なる場合単価設定を変更
-                            $stock->price = $order->price;
-                            $stock->save();
-
-                            // 変更履歴作成
-                            $stock_price_archive = new StockPriceArchive();
-                            $stock_price_archive->stock_id = $stock_id;
-                            $stock_price_archive->price = $order->price;
-                            $stock_price_archive->save();
-                        }
-                    }
-
-                    // 納品した分を格納先に追加
-                    if ($conversion_flg) {
-                        $stock_storage->quantity += $calc_quantity;
+                        $stock_storage->save();
                     } else {
+                        // 分納の場合、split_order_quantitiesテーブルを作成
+                        $split_order_quantity = new SplitOrderQuantity();
+                        $split_order_quantity->initial_order_id = $order->id;
+                        $split_order_quantity->quantity = $quantity;
+                        $split_order_quantity->save();
+
+                        // 分納した分を格納先に追加
                         $stock_storage->quantity += $quantity;
+                        $stock_storage->save();
                     }
+                    
+                    // 納品完了を通知 分納の場合は二回に分けて通知する
+                    $msg = "以下の物品が納品されました。\n依頼者: $order->order_user\n品名: $order->name\n品番: $order->s_name\n納品先: $order->deli_location\n";
 
-                    $stock_storage->save();
-
-                    // 納品完了を通知
-
-
-
-                    // 一覧へリダイレクト
-                    return to_route('stock.receive.archive');
-                } else {
-                    // 分納の場合、split_order_quantitiesテーブルを作成
-                    $split_order_quantity = new SplitOrderQuantity();
-                    $split_order_quantity->initial_order_id = $order->id;
-                    $split_order_quantity->quantity = $quantity;
-                    $split_order_quantity->save();
-
-                    // 分納した分を格納先に追加
-                    $stock_storage->quantity += $quantity;
-                    $stock_storage->save();
+                    // 送信元端末へ通知
+                    Helper::createDeviceMessage(
+                        1,
+                        $order->to_device_id, //依頼元端末
+                        null,
+                        $order->order_user_id, //発注依頼者
+                        $order->user_id, //発注担当者
+                        $msg
+                    );
                 }
-            }
-        } else {
-            // 新たに作成して、個数を登録
-            $stock_storage = new StockStorage();
-            $stock_storage->stock_id = $stock_id;
-            $stock_storage->storage_address_id = $storage_address_id;
-            $stock_storage->quantity = 0;
-            $stock_storage->save();
+            } else {
+                // 新たに作成して、個数を登録
+                $stock_storage = new StockStorage();
+                $stock_storage->stock_id = $stock_id;
+                $stock_storage->storage_address_id = $storage_address_id;
+                $stock_storage->quantity = 0;
+                $stock_storage->save();
 
-            return redirect()->back();
+                $route = 'reload';
+            }
+        } catch (Exception $e) {
+            $status = false;
+            $msg = $e->getMessage();
         }
 
-
-        return redirect()->back();
+        return response()->json(['status' => $status, 'msg' => $msg, 'route' => $route]);
     }
 
     public function getClassifications()
@@ -456,13 +470,28 @@ class ReceiveController extends Controller
         $none_storage_flg = $request->none_storage_flg;
         $signage = $request->signage;
 
-        $order = InitialOrder::find($order_id);
+        $order = InitialOrder::select('initial_orders.*', 'order_requests.device_id as to_device_id')
+            ->join('order_requests', 'order_requests.id', '=', 'initial_orders.order_request_id')
+            ->where('initial_orders.id', $order_id)
+            ->first();
         $order->receive_flg = 1;
         $order->none_storage_flg = $none_storage_flg;
         if (!$signage) {
             $order->receipt_flg = 1; //サイネージ非表示
         }
         $order->save();
+
+        $msg = "以下の物品が納品されました。\n依頼者: $order->order_user\n品名: $order->name\n品番: $order->s_name\n納品先: $order->deli_location\n";
+
+        // 送信元端末へ通知
+        Helper::createDeviceMessage(
+            1,
+            $order->to_device_id, //依頼元端末
+            null,
+            $order->order_user_id, //発注依頼者
+            $order->user_id, //発注担当者
+            $msg
+        );
 
         return to_route('stock.receive.archive');
     }

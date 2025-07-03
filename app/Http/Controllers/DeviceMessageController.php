@@ -29,7 +29,7 @@ class DeviceMessageController extends Controller
                 ->join('users as to_users', 'to_users.id', '=', 'device_messages.to_user_id')
                 ->join('users as from_users', 'from_users.id', '=', 'device_messages.from_user_id')
                 ->join('devices as to_devices', 'to_devices.id', '=', 'device_messages.to_device_id')
-                ->join('devices as from_devices', 'from_devices.id', '=', 'device_messages.from_device_id')
+                ->leftJoin('devices as from_devices', 'from_devices.id', '=', 'device_messages.from_device_id')
                 ->where('to_devices.name', '=', $device_name) //自端末宛て
                 ->where('device_messages.read_flg', '=', 0) //未読
                 ->where('device_messages.del_flg', '=', 0) //未削除
@@ -54,10 +54,25 @@ class DeviceMessageController extends Controller
         try {
             if (!empty($device_message_ids)) {
                 foreach ($device_message_ids as $device_message_id) {
-                    $device_message = DeviceMessage::find($device_message_id);
+                    $device_message = DeviceMessage::select('device_messages.*', 'to_users.name as to_user_name', 'from_users.name as from_user_name')
+                    ->join('users as to_users', 'to_users.id', '=', 'device_messages.to_user_id')
+                    ->join('users as from_users', 'from_users.id', '=', 'device_messages.from_user_id')
+                    ->where('device_messages.id', '=', $device_message_id)
+                    ->first();
                     if ($device_message) {
                         $device_message->read_flg = 1;
                         $device_message->save();
+
+                        $title = "{$device_message->to_user_name}が確認されました。";
+                        $msg = "送信メッセージ: {$device_message->message}\n\n\n確認者: {$device_message->to_user_name}\n\n";
+
+                        // 送信元へ通知
+                        Helper::createNotifyQueue(
+                            $title,
+                            $msg, // msg
+                            "", // url
+                            [$device_message->from_user_id]
+                        );
                     }
                 }
             }
@@ -105,6 +120,6 @@ class DeviceMessageController extends Controller
             $status = false;
         }
 
-        return response()->json(['status' => $status ]);
+        return response()->json(['status' => $status]);
     }
 }

@@ -16,7 +16,7 @@ const handleCloseModal = () => {
 
 // 検索用取引先リスト
 const initial_order_suppliers = ref([]);
-const searchText = ref("")
+const searchText = ref("");
 const handleChangeSupplier = (comName) => {
   if (comName) {
     initial_orders.value = base_initial_orders.value.filter(
@@ -28,11 +28,12 @@ const handleChangeSupplier = (comName) => {
 };
 // 品名・品番検索
 const searchOrders = () => {
-
   if (searchText.value) {
     initial_orders.value = initial_orders.value.map((initial_order) => {
-      const nameMatch = initial_order.name && initial_order.name.includes(searchText.value);
-      const sNameMatch = initial_order.s_name && initial_order.s_name.includes(searchText.value);
+      const nameMatch =
+        initial_order.name && initial_order.name.includes(searchText.value);
+      const sNameMatch =
+        initial_order.s_name && initial_order.s_name.includes(searchText.value);
       return {
         ...initial_order,
         nameMatch,
@@ -45,7 +46,10 @@ const searchOrders = () => {
 const highlightMatch = (text, isMatch) => {
   if (!isMatch) return `${text}`;
   const regex = new RegExp(`(${searchText.value})`, "gi");
-  return text.replace(regex, '<span class="font-bold bg-yellow-400 text-lg">$1</span>');
+  return text.replace(
+    regex,
+    '<span class="font-bold bg-yellow-400 text-lg">$1</span>'
+  );
 };
 
 const base_initial_orders = ref([]);
@@ -99,20 +103,19 @@ const uploadFile = async (id) => {
     });
 
     try {
-      const response = await axios.post(
-        route("stock.receive.uploadFile"),
-        formData,
-        {
+      axios
+        .post(route("stock.receive.uploadFile"), formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
-      );
-      console.log(response.data);
-      if (confirm("再読み込みしますか？")) {
-        getInitialOrders();
-        alert("納品書を登録しました。");
-      }
+        })
+        .then((res) => {
+          console.log(res.data);
+          if (res.data.status) {
+            alert("納品書を登録しました。");
+            window.location.reload()
+          }
+        });
     } catch (error) {
       console.log(error);
     }
@@ -296,11 +299,12 @@ onMounted(() => {
                     <span
                       v-html="highlightMatch(order.name, order.nameMatch)"
                     ></span>
-
                   </td>
                   <td class="px-4 py-6">
                     <span
-                      v-html="highlightMatch(order.s_name ?? '', order.sNameMatch)"
+                      v-html="
+                        highlightMatch(order.s_name ?? '', order.sNameMatch)
+                      "
                     ></span>
                   </td>
                   <td class="px-4 py-6">
@@ -338,5 +342,4 @@ onMounted(() => {
   </ReceiveLayout>
 </template>
 <style scoped lang="scss">
-
 </style>

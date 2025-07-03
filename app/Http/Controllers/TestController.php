@@ -26,17 +26,17 @@ class TestController extends Controller
     //
     public function test()
     {
+        // $res = Helper::sendNotification('ePV0Lrqp-hld0Szo9Sopc3:APA91bHU_fEgOB_9YV4iGxHT86jh1WeV9Oj5KL_hRugg2yJryR7KnDDLIukouqW5ze7ec-NQYBiyiAo9WNqkEAG7daGo23_cSny0z8iqLKvWo-6hSx4N5LM', 'test', 'test');
 
-        $initial_orders = InitialOrder::whereNull('name')->where('receipt_flg', 0)->get();
-        
+        // $initial_orders = InitialOrder::whereNull('name')->where('receipt_flg', 0)->get();
+
 
         // サンプルメッセージを作成
-
         // Helper::createDeviceMessage(
         //     0,
+        //     33,
         //     21,
-        //     21,
-        //     91,
+        //     81,
         //     91,
         //     "改行をテスト\n物品依頼の件ですが、○○は間違いではありませんか？\n確認をお願いします。"
         // );
@@ -53,7 +53,7 @@ class TestController extends Controller
         // $message->save();
 
 
-        // $res = Helper::sendNotification('ePV0Lrqp-hld0Szo9Sopc3:APA91bHU_fEgOB_9YV4iGxHT86jh1WeV9Oj5KL_hRugg2yJryR7KnDDLIukouqW5ze7ec-NQYBiyiAo9WNqkEAG7daGo23_cSny0z8iqLKvWo-6hSx4N5LM', 'test', 'test');
+
 
         // return $res;
 

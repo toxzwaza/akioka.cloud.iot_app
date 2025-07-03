@@ -2,6 +2,7 @@
 
 namespace App\Http\Services;
 
+use App\Models\Device;
 use App\Models\DeviceMessage;
 use App\Models\InventoryOperation;
 use App\Models\InventoryOperationRecord;
@@ -205,6 +206,8 @@ class Helper
 
     public static function createDeviceMessage($priority, $to_device_id, $from_device_id = null, $to_user_id, $from_user_id, $msg)
     {
+
+
         $message = new DeviceMessage();
         $message->priority = $priority;
         $message->to_device_id = $to_device_id;
@@ -214,5 +217,10 @@ class Helper
         $message->del_flg = 0;
         $message->message = $msg;
         $message->save();
+
+        $device = Device::find($to_device_id);
+        if ($device && $device->token) {
+            self::sendNotification($device->token, '在庫管理システムからの通知です。', $msg);
+        }
     }
 }

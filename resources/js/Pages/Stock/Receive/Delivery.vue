@@ -81,16 +81,28 @@ const createStock = () => {
 
 const updateDelivery = () => {
   if (confirm("納品登録をおこないますか？")) {
-    router.get(route("stock.receive.updateDelivery"), {
-      id: form.id,
-      stock_id: form.stock_id,
-      stock_storage_id: form.stock_storage_id,
-      storage_address_id: form.storage_address_id,
-      conversion_flg: form.conversion_flg,
-      quantity: form.quantity,
-      calc_quantity: form.calc_quantity,
-      signage: form.signage,
-    });
+    axios.get(route("stock.receive.updateDelivery"), {
+      params: {
+        id: form.id,
+        stock_id: form.stock_id,
+        stock_storage_id: form.stock_storage_id,
+        storage_address_id: form.storage_address_id,
+        conversion_flg: form.conversion_flg,
+        quantity: form.quantity,
+        calc_quantity: form.calc_quantity,
+        signage: form.signage,
+      },
+    })
+    .then(res => {
+      console.log(res.data)
+      if(res.data.status){
+        if(res.data.route === 'reload'){
+          window.location.reload()
+        }else{
+          window.location.href = route('stock.receive.archive');
+        }
+      }
+    })
   }
 };
 
