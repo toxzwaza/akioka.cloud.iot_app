@@ -79,9 +79,16 @@ const handleProcessId = (val) => {
 
 const handleFileSelect = (event) => {
   const files = Array.from(event.target.files);
+  const currentPdfCount = selectedFiles.value.filter(file => file.type === 'application/pdf').length;
+  const newPdfCount = files.filter(file => file.type === 'application/pdf').length;
 
   if (selectedFiles.value.length + files.length > 5) {
-    alert("添付ファイルは最大5つまでです");
+    alert("添付ファイルは合計で最大5つまでです");
+    return;
+  }
+
+  if (currentPdfCount + newPdfCount > 1) {
+    alert("PDFファイルは1つまでです");
     return;
   }
 
@@ -722,9 +729,8 @@ onMounted(() => {
                 添付ファイルがある場合は以下より添付してください。（最大5つまで）
               </p>
               <ul class="mt-4 list-disc list-inside text-sm text-gray-600">
-                <li class="mb-1">・購入物品の画像</li>
-                <li class="mb-1">・承認済み稟議書(承認をスキップできます)</li>
-                <li class="mb-1">・その他参考資料 etc...</li>
+                <li class="mb-1">承認済み稟議書<span class="text-red-500 font-bold"> (PDFは一枚にまとめてください！)</span></li>
+                <li class="mb-1">購入物品の画像</li>
               </ul>
               <div class="flex items-center justify-center w-full">
                 <label
@@ -803,11 +809,11 @@ onMounted(() => {
               </div>
 
               <div class="flex justify-between">
-                <button
+                <!-- <button
                   class="mr-4 w-1/2 bg-green-500 hover:bg-green-700 text-white font-bold mt-12 px-4 rounded py-4"
                 >
                   AI添削
-                </button>
+                </button> -->
                 <button
                   class="ml-4 w-1/2 bg-blue-500 hover:bg-blue-700 text-white font-bold mt-12 px-4 rounded py-4"
                   @click.prevent="submitForm"

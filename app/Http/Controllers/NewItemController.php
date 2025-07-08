@@ -66,6 +66,8 @@ class NewItemController extends Controller
 
         try {
             if ($new_approval) {
+                $approval_file_path = '';
+
                 // ここでデータベースに保存する処理を追加
                 $document = new Document();
                 $document->user_id = $user_id;
@@ -87,18 +89,17 @@ class NewItemController extends Controller
                     }
                 }
 
-                foreach ($filePaths as $key => $filePath) {
+                foreach ($filePaths as $filePath) {
                     $documentImage = new DocumentImage();
                     $documentImage->document_id = $document->id;
                     $documentImage->image_path = $filePath;
-                    $documentImage->extension = $file->getClientOriginalExtension();
+                    $documentImage->extension = pathinfo($filePath, PATHINFO_EXTENSION);
                     $documentImage->save();
 
-                    // 最初のファイルが画像の場合、stock->img_pathに設定
-                    // if ($key === 0 && $documentImage->extension !== 'pdf') {
-                    //     $stock->img_path = $filePath;
-                    //     $stock->save();
-                    // }
+                    // PDFがアップロードされている場合、それを稟議書とみなして添付
+                    if ($documentImage->extension === 'pdf') {
+                        $approval_file_path = $filePath;
+                    }
                 }
 
                 foreach ($approval_stocks as $approval_stock) {
@@ -120,6 +121,7 @@ class NewItemController extends Controller
                     $order_request->new_stock_flg = 1;
                     $order_request->document_id = $document->id;
                     $order_request->desire_delivery_date = $desire_delivery_date;
+                    $order_request->file_path = $approval_file_path;
                     $order_request->save();
                 }
 
