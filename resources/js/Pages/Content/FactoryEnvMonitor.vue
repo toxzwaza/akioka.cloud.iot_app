@@ -75,8 +75,8 @@ onMounted(() => {
           v-if="data && data.temperature"
           :class="{
             val: true,
-            'text-purple-600': data.temperature > 30,
-            'text-purple-400': data.temperature > 25,
+            'text-orange-600': data.temperature > 30,
+            'text-orange-400': data.temperature > 25,
             'text-green-500': data.temperature < 25,
           }"
         >
@@ -95,8 +95,8 @@ onMounted(() => {
           v-if="data && data.humidity"
           :class="{
             val: true,
-            'text-purple-600': data.humidity > 70,
-            'text-purple-400': data.humidity > 60,
+            'text-blue-600': data.humidity > 70,
+            'text-blue-400': data.humidity > 60,
             'text-green-500': data.humidity < 60,
           }"
         >
