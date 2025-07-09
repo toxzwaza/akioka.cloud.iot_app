@@ -192,9 +192,6 @@ class StockRequestController extends Controller
                 $stock_request_order->save();
             }
 
-            // 発注依頼を通知 -----------------------------------------------------------
-            Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}のの物品依頼を受付ました。以下のURLから発注を完了させてください。", "http://monokanri-manage.local/stock/order-requests", [91, 81, 68, 48]);
-            // -----------------------------------------------------------
 
         } catch (Exception $e) {
             $status = false;
