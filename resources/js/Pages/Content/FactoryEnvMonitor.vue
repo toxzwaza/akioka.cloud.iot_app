@@ -35,14 +35,14 @@ const getWeather = () => {
 };
 
 const calculateWbgt = (temperature, humidity) => {
-  return (
-    Math.round(
-      0.725 * temperature +
-        0.0368 * humidity +
-        0.00364 * (temperature * humidity) * 10
-    ) / 10
-  );
+  const wbgt =
+    0.725 * temperature +
+    0.0368 * humidity +
+    0.00364 * temperature * humidity -
+    3.246;
+  return Math.round(wbgt * 10) / 10; // 小数第1位で四捨五入
 };
+
 
 onMounted(() => {
   getData();
@@ -76,7 +76,7 @@ onMounted(() => {
           :class="{
             val: true,
             'text-orange-600': data.temperature > 30,
-            'text-orange-400': data.temperature > 25,
+            'text-orange-400': data.temperature >= 25,
             'text-green-500': data.temperature < 25,
           }"
         >
@@ -96,7 +96,7 @@ onMounted(() => {
           :class="{
             val: true,
             'text-blue-600': data.humidity > 70,
-            'text-blue-400': data.humidity > 60,
+            'text-blue-400': data.humidity >= 60,
             'text-green-500': data.humidity < 60,
           }"
         >
@@ -116,7 +116,7 @@ onMounted(() => {
           :class="{
             val: true,
             'text-purple-600': data.co2 > 5000,
-            'text-purple-400': data.co2 > 1000,
+            'text-purple-400': data.co2 >= 1000,
             'text-green-500': data.co2 < 1000,
           }"
         >
@@ -134,9 +134,9 @@ onMounted(() => {
           v-if="data && data.wbgt"
           :class="{
             val: true,
-            'text-red-600': data.wbgt > 27,
-            'text-red-400': data.wbgt > 18,
-            'text-green-500': data.wbgt < 18,
+            'text-red-600': data.wbgt > 35,
+            'text-red-400': data.wbgt >= 27,
+            'text-green-500': data.wbgt < 27,
           }"
         >
           {{ data.wbgt }}
@@ -285,6 +285,7 @@ onMounted(() => {
         justify-content: center;
         align-items: center;
         background-color: white;
+
       }
     }
   }
