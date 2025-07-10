@@ -3,6 +3,7 @@
 use App\Http\Controllers\AcceptController;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\ARController;
+use App\Http\Controllers\CheckOrderRequestController;
 use App\Http\Controllers\ContentController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\DeviceController;
@@ -150,6 +151,9 @@ Route::post('/lunch/receive', [LunchController::class, 'receive'])->name('lunch.
 Route::get('/lunch/getOrders', [LunchController::class, 'getOrders'])->name('lunch.getOrders');
 Route::get('/lunch/getUsers', [LunchController::class, 'getUsers'])->name('lunch.getUsers');
 
+// 物品依頼確認用
+Route::get('/check_order_request', [CheckOrderRequestController::class, 'index'])->name('stock.check_order_request.home');
+Route::get('/check_order_request/getOrderRequests', [CheckOrderRequestController::class, 'getOrderRequests'])->name('stock.check_order_request.getOrderRequests');
 
 ////////// API用 //////////
 Route::get('/getGroups', [ApiController::class, 'getGroups'])->name('getGroups');

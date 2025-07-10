@@ -53,19 +53,20 @@ const device_message_method = {
       (message) => message.id === device_message_id
     );
     if (device_message && device_message.answer) {
-      axios.post(route("device-message.send_answer"), {
-        device_message_id: device_message_id,
-        answer: device_message.answer
-      })
-      .then((res) => {
-        console.log(res.data);
-        if (res.data.status) {
-          alert('メッセージを送信しました。')
-          device_messages.messages = device_messages.messages.filter(
-            (message) => message.id !== device_message_id
-          );
-        }
-      });
+      axios
+        .post(route("device-message.send_answer"), {
+          device_message_id: device_message_id,
+          answer: device_message.answer,
+        })
+        .then((res) => {
+          console.log(res.data);
+          if (res.data.status) {
+            alert("メッセージを送信しました。");
+            device_messages.messages = device_messages.messages.filter(
+              (message) => message.id !== device_message_id
+            );
+          }
+        });
     }
   },
 };
@@ -156,7 +157,7 @@ onMessage(messaging, (payload) => {
   // alert(
   //   `📩 フォアグラウンド通知を受信しました: ${payload.notification.title}\n ${payload.notification.body}`
   // );
-  window.location.reload()
+  window.location.reload();
 });
 </script>
 <template>
@@ -185,6 +186,26 @@ onMessage(messaging, (payload) => {
           /></Link>
         </div>
 
+        <!-- 物品依頼 -->
+        <div class="w-1/2 p-4">
+          <a :href="route('stock.new_item.home')"
+            ><img
+              class=""
+              src="/images/stocks/icons/approval.png"
+              alt="物品依頼"
+          /></a>
+        </div>
+
+        <!-- 物品依頼 -->
+        <div class="w-1/2 p-4">
+          <a :href="route('stock.check_order_request.home')"
+            ><img
+              class=""
+              src="/images/stocks/icons/check-order-request.png"
+              alt="物品依頼"
+          /></a>
+        </div>
+
         <!-- 定期物品依頼 -->
         <div class="w-1/2 p-4">
           <a :href="route('stock.request.home')"
@@ -192,16 +213,6 @@ onMessage(messaging, (payload) => {
               class=""
               src="/images/stocks/icons/per_stock_request.png"
               alt="現場物品依頼"
-          /></a>
-        </div>
-
-        <!-- 新規品依頼 -->
-        <div class="w-1/2 p-4">
-          <a :href="route('stock.new_item.home')"
-            ><img
-              class=""
-              src="/images/stocks/icons/approval.png"
-              alt="新規品依頼"
           /></a>
         </div>
 
