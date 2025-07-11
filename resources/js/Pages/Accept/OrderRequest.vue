@@ -8,12 +8,10 @@ const props = defineProps({
   user: Object,
   order_requests: Array,
 });
-
-const approval_modal = ref(false);
-const viewerUrl = ref("");
-// 稟議書OBJ
-const approval_document = reactive({
+const description_order_request = reactive({
+  approval_document: {
   document_id: null,
+  process_name: null,
   user_name: null,
   evalution_date: null, //評価日
   desire_delivery_date: null, //希望日
@@ -27,57 +25,64 @@ const approval_document = reactive({
   title: null,
   content: null,
   main_reason: null,
-  sub_reason: null,
-});
+  sub_reason: null, 
+  },
+  viewerUrl: '',
+  comment: {
+    order_request_id: null,
+    placeholder: "",
+    msg: "",
+  }
+})
 
-const comment = reactive({
-  order_request_id: null,
-  placeholder: "",
-  msg: "",
-});
+// const comment = reactive({
+//   order_request_id: null,
+//   placeholder: "",
+//   msg: "",
+// });
 
 const save_comment = () => {
   const order_request = props.order_requests.find(
-    (order_request) => order_request.id === comment.order_request_id
+    (order_request) => order_request.id === description_order_request.comment.order_request_id
   );
-  order_request.comment = comment.msg;
+  order_request.comment = description_order_request.comment.msg;
+
   console.log(props.order_requests);
-};
-const set_comment = (order_request) => {
-  console.log(order_request);
-  comment.order_request_id = order_request.id;
-  comment.msg = order_request.comment || "";
-  comment.placeholder = `${order_request.name} - ${order_request.s_name} のコメントを入力してください。`;
+  alert('コメントを追記しました。')
 };
 
-const openApproval = (order_request) => {
+const openDescription = (order_request) => {
   console.log(order_request);
+
+  description_order_request.comment.order_request_id = order_request.id;
+  description_order_request.comment.msg = order_request.comment || "";
+  description_order_request.comment.placeholder = `${order_request.name} - ${order_request.s_name} のコメントを入力してください。`;
 
   if (order_request.file_path) {
+    console.log("file_path登録:", order_request.file_path);
+
     const filePath = order_request.file_path.startsWith("/storage/")
       ? order_request.file_path
       : `/storage/${order_request.file_path}`;
 
-    viewerUrl.value = `/pdfjs/web/main_viewer.html?file=${filePath}`;
-    approval_modal.value = true;
-  } else if (order_request.document_id) {
-    approval_document.document_id = order_request.document_id;
-    approval_document.user_name = order_request.user_name;
-    approval_document.evalution_date = order_request.evalution_date;
-    approval_document.desire_delivery_date = order_request.desire_delivery_date
-    approval_document.supplier_name = order_request.supplier_name;
-    approval_document.price = order_request.price;
-    approval_document.quantity = order_request.quantity
-    approval_document.calc_price = order_request.calc_price
-    approval_document.name = order_request.name
-    approval_document.s_name = order_request.s_name
-    approval_document.title = order_request.title;
-    approval_document.content = order_request.content;
-    approval_document.main_reason = order_request.main_reason;
-    approval_document.sub_reason = order_request.sub_reason;
-
-
-    approval_modal.value = true;
+    description_order_request.viewerUrl = `/pdfjs/web/main_viewer.html?file=${filePath}`;
+  }
+  if (order_request.document_id) {
+    description_order_request.approval_document.document_id = order_request.document_id;
+    description_order_request.approval_document.process_name = order_request.request_user_process_name;
+    description_order_request.approval_document.user_name = order_request.request_user_name;
+    description_order_request.approval_document.evalution_date = order_request.evalution_date;
+    description_order_request.approval_document.desire_delivery_date = order_request.desire_delivery_date;
+    description_order_request.approval_document.supplier_name = order_request.supplier_name;
+    description_order_request.approval_document.price = order_request.price;
+    description_order_request.approval_document.quantity = order_request.quantity;
+    description_order_request.approval_document.calc_price = order_request.calc_price;
+    description_order_request.approval_document.name = order_request.name;
+    description_order_request.approval_document.s_name = order_request.s_name;
+    description_order_request.approval_document.title = order_request.title;
+    description_order_request.approval_document.content = order_request.content;
+    description_order_request.approval_document.main_reason = order_request.main_reason;
+    description_order_request.approval_document.sub_reason = order_request.sub_reason;
   }
 };
 const sendAccept = (order_request_approval_id, action) => {
@@ -98,7 +103,7 @@ const sendAccept = (order_request_approval_id, action) => {
       case "reject": //非承認
         if (!order_request_approval.comment) {
           alert("非承認の場合は、コメントを追加してください。");
-          set_comment(order_request_approval);
+          openDescription(order_request_approval)
           return;
         }
         status = 2;
@@ -129,6 +134,7 @@ onMounted(() => {
 <template>
   <AcceptLayout :title="'承認画面'">
     <template #content>
+      <div v-if="description_order_request.comment.order_request_id" id="modal_cover"></div>
       <section class="text-gray-600 body-font" style="margin-bottom: 20vh">
         <div class="py-12 mx-auto">
           <div class="flex flex-col text-center w-full mb-20">
@@ -250,7 +256,7 @@ onMounted(() => {
                   <th
                     class="w-10 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tr rounded-br"
                   >
-                    コメント<i class="ml-1 fa-solid fa-comment"></i>
+                    詳細確認<i class="ml-1 fa-solid fa-comment"></i>
                   </th>
                   <th
                     class="w-10 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tr rounded-br"
@@ -292,9 +298,9 @@ onMounted(() => {
                         : "-"
                     }}
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900 ">
+                  <td class="px-4 py-8 text-lg text-gray-900">
                     <span v-if="order_request.name.length > 20">
-                      {{ order_request.name.substring(0, 20) + '...' }}
+                      {{ order_request.name.substring(0, 20) + "..." }}
                     </span>
                     <span v-else>
                       {{ order_request.name }}
@@ -304,7 +310,11 @@ onMounted(() => {
                     {{ order_request.s_name ?? "-" }}
                   </td>
                   <td class="px-4 py-8 text-lg text-gray-900">
-                    {{ `${order_request.quantity ?? ''}${order_request.unit ?? ''}` }}
+                    {{
+                      `${order_request.quantity ?? ""}${
+                        order_request.unit ?? ""
+                      }`
+                    }}
                   </td>
                   <td class="px-4 py-8 text-lg text-gray-900">
                     {{
@@ -367,14 +377,14 @@ onMounted(() => {
                         : "-"
                     }}
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900">
+                  <td class="px-4 py-8 text-lg text-gray-900 description">
                     {{ order_request.description ?? "-" }}
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900">
+                  <td class="px-4 py-8 text-lg text-gray-900 description">
                     {{ order_request.sub_description ?? "-" }}
                   </td>
                   <td class="w-10 text-center px-8">
-                    <button
+                    <!-- <button
                       v-if="
                         order_request.file_path || order_request.document_id
                       "
@@ -382,14 +392,20 @@ onMounted(() => {
                       class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
                     >
                       稟議書
-                    </button>
+                    </button> -->
 
+                    <span
+                      v-if="
+                        order_request.file_path || order_request.document_id
+                      "
+                      >あり</span
+                    >
                     <span v-else>未登録</span>
                   </td>
                   <td class="w-10 text-center px-8">
                     <button
                       class="mr-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                      @click="set_comment(order_request)"
+                      @click="openDescription(order_request)"
                     >
                       <i class="fa-solid fa-comment"></i>
                     </button>
@@ -427,64 +443,61 @@ onMounted(() => {
     </template>
   </AcceptLayout>
 
-  <!-- 稟議書用モーダル -->
-  <div
-    v-if="approval_modal"
-    id="approval_modal"
-    class="fixed inset-0 bg-gray-900 bg-opacity-50"
-  >
-    <div class="fixed inset-0 flex flex-col">
-      <div class="button_container flex justify-end p-4 bg-gray-800">
-        <button
-          @click="approval_modal = false"
-          class="text-white font-bold py-2 px-4 rounded hover:bg-gray-700"
-        >
-          閉じる
-        </button>
-      </div>
-      <div class="flex-1 bg-white">
-        <iframe
-          v-if="viewerUrl"
-          ref="pdfViewer"
-          :src="viewerUrl"
-          class="w-full h-full"
-          frameborder="0"
-        ></iframe>
-        <div v-else-if="approval_document.document_id" class="">
-          <ApprovalDocument :approval_document="approval_document" />
+  <div v-if="description_order_request.comment.order_request_id" id="description_container">
+    <!-- 稟議書用モーダル -->
+    <div id="approval_modal" class="bg-gray-900 bg-opacity-50">
+      <div class="">
+        <!-- <div class="button_container flex justify-end p-4 bg-gray-800">
+          <button
+            @click="approval_modal = false"
+            class="text-white font-bold py-2 px-4 rounded hover:bg-gray-700"
+          >
+            閉じる
+          </button>
+        </div> -->
+
+        <div class="flex flex-col bg-white w-full">
+          <div class="mb-4">
+            <div id="comment_container" class="w-2/3 mx-auto">
+              <div class="flex justify-between items-end mb-2">
+                <label
+                  for="message"
+                  class="w-1/2 block mb-2 text-sm font-medium text-white dark:text-white"
+                  >コメント追加</label
+                >
+                <button
+                  @click="description_order_request.comment.order_request_id = 0"
+                  class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
+                >
+                  <i class="fa-solid fa-times"></i>
+                </button>
+              </div>
+
+              <textarea
+                id="message"
+                rows="4"
+                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                :placeholder="description_order_request.comment.placeholder"
+                v-model="description_order_request.comment.msg"
+                @change="save_comment"
+              ></textarea>
+            </div>
+            <ApprovalDocument :approval_document="description_order_request.approval_document" />
+          </div>
+          <iframe
+            ref="pdfViewer"
+            :src="description_order_request.viewerUrl"
+            class="w-2/3 mx-auto"
+            frameborder="0"
+          ></iframe>
         </div>
       </div>
     </div>
   </div>
-
-  <div v-if="comment.order_request_id" id="comment_container">
-    <div class="flex justify-between items-end mb-2">
-      <label
-        for="message"
-        class="w-1/2 block mb-2 text-sm font-medium text-blue-600 dark:text-white"
-        >コメント追加</label
-      >
-      <button
-        @click="comment.order_request_id = 0"
-        class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
-      >
-        <i class="fa-solid fa-times"></i>
-      </button>
-    </div>
-
-    <textarea
-      id="message"
-      rows="4"
-      class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      :placeholder="comment.placeholder"
-      v-model="comment.msg"
-      @change="save_comment"
-    ></textarea>
-  </div>
 </template>
 <style scoped lang="scss">
 #order_request_table {
-  width: 200vw;
+  // width: 200vw;
   font-size: 0.9rem;
 
   @media screen and (min-width: 800px) {
@@ -493,7 +506,7 @@ onMounted(() => {
 
     td {
       img {
-        max-width: 12vw;
+        max-width: 100px;
       }
     }
   }
@@ -504,43 +517,66 @@ onMounted(() => {
     white-space: nowrap;
   }
 
-  td.img {
-    min-width: 20vw;
+  td {
+    &.img {
+      min-width: 120px;
 
-    img {
-      height: 100%;
-      width: 100%;
-      object-fit: contain;
+      & img {
+        height: 100%;
+        width: 100%;
+        object-fit: contain;
+      }
+    }
+
+    &.description {
+      overflow-x: scroll;
     }
   }
 }
 
-#approval_modal {
-  z-index: 50;
+#description_container {
+  background-color: white;
 
-  .button_container {
-    border-bottom: 1px solid #4a5568;
-  }
-
-  .main_container {
-    iframe {
-      width: 100%;
-      height: 100%;
-    }
-  }
-}
-
-#comment_container {
+  padding: 6% 0;
   position: fixed;
   bottom: 5%;
   right: 5%;
+  overflow-y: scroll;
 
   z-index: 50;
   width: 90%;
-  height: 16vh;
+  height: 80vh;
 
-  & textarea {
-    height: 100%;
+  #approval_modal {
+    height: 60%;
+
+    .button_container {
+      border-bottom: 1px solid #4a5568;
+    }
+
+    .main_container {
+      iframe {
+        width: 100%;
+        height: 100%;
+      }
+    }
   }
+
+  & #comment_container {
+    height: 20%;
+    & textarea {
+      height: 100%;
+    }
+  }
+}
+
+#modal_cover {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  z-index: 49;
+  background-color: rgba(0, 0, 0, 0.479);
 }
 </style>

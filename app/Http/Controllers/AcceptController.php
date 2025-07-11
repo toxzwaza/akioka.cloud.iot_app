@@ -43,6 +43,7 @@ class AcceptController extends Controller
                 'order_requests.new_stock_flg', //備考
                 'order_requests.created_at',
                 'request_users.name as request_user_name',
+                'request_user_processes.name as request_user_process_name',
                 'users.name as user_name',
                 'order_requests.postage',
                 'order_requests.calc_price',
@@ -68,6 +69,7 @@ class AcceptController extends Controller
             ->join('order_requests', 'order_requests.id', '=', 'order_request_approvals.order_request_id')
             ->join('stocks', 'stocks.id', '=', 'order_requests.stock_id')
             ->leftJoin('users as request_users', 'request_users.id', '=', 'order_requests.request_user_id')
+            ->leftJoin('processes as request_user_processes', 'request_user_processes.id', '=', 'request_users.process_id')
             ->leftJoin('users as users', 'users.id', '=', 'order_requests.user_id')
             ->join('suppliers', 'suppliers.id', '=', 'order_requests.supplier_id')
             ->leftJoin('documents', 'documents.id', '=', 'order_requests.document_id')

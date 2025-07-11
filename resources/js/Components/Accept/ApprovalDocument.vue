@@ -25,7 +25,7 @@ onMounted(() => {
         <p
           class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
         >
-          {{ props.approval_document.user_name }}
+          {{ props.approval_document.process_name }}
         </p>
       </div>
       <div class="w-full md:w-1/2 px-3">
@@ -185,7 +185,7 @@ onMounted(() => {
           発注内容
         </label>
         <p
-          v-html="props.approval_document.content.replace(/\n/g, '<br>')"
+          v-html="props.approval_document.content?.replace(/\n/g, '<br>')"
           class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
         ></p>
       </div>
@@ -200,7 +200,7 @@ onMounted(() => {
           申請理由
         </label>
         <p
-          v-html="props.approval_document.main_reason.replace(/\n/g, '<br>')"
+          v-html="props.approval_document.main_reason?.replace(/\n/g, '<br>')"
           class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
         ></p>
       </div>
@@ -215,7 +215,7 @@ onMounted(() => {
           選定理由
         </label>
         <p
-          v-html="props.approval_document.sub_reason.replace(/\n/g, '<br>')"
+          v-html="props.approval_document.sub_reason?.replace(/\n/g, '<br>')"
           class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
         ></p>
       </div>
@@ -225,8 +225,8 @@ onMounted(() => {
 <style scoped lang="scss">
 #approval_document {
     margin-top: 1rem;
-    height: 90vh;
-    overflow-y: scroll;
+    // height: 90vh;
+    // overflow-y: auto;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
     border: 1px solid rgba(201, 201, 201, 0.473);
 }
