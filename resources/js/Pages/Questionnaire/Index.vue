@@ -63,7 +63,7 @@ const getProgressColor = () => {
 
 onMounted( () => {
     console.log(props.uid)
-    form.uid = props.uid
+    form.value.uid = props.uid
 })
 </script>
 
