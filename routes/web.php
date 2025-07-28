@@ -18,6 +18,7 @@ use App\Http\Controllers\NotifyController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderRequestController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QuestionnaireController;
 use App\Http\Controllers\ReceiveController;
 use App\Http\Controllers\RetentionController;
 use App\Http\Controllers\SearchController;
@@ -213,3 +214,4 @@ Route::post('/device-login', [DeviceController::class, 'store'])->name('device-l
 
 // OTEX AR用サンプル
 Route::get('/ar', [ARController::class, 'index'])->name('ar.index');
+Route::get('/questionnaire/{uid}', [QuestionnaireController::class, 'index'])->name('questionnaire.index');
