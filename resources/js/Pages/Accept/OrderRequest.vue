@@ -9,31 +9,32 @@ const props = defineProps({
   order_requests: Array,
 });
 const description_order_request = reactive({
+  order_request: null,
   approval_document: {
-  document_id: null,
-  process_name: null,
-  user_name: null,
-  evalution_date: null, //評価日
-  desire_delivery_date: null, //希望日
-  supplier_name: null,
-  price: null,
-  quantity: null,
-  calc_price: null,
-  name: null,
-  s_name: null,
-  document_id: null,
-  title: null,
-  content: null,
-  main_reason: null,
-  sub_reason: null, 
+    document_id: null,
+    process_name: null,
+    user_name: null,
+    evalution_date: null, //評価日
+    desire_delivery_date: null, //希望日
+    supplier_name: null,
+    price: null,
+    quantity: null,
+    calc_price: null,
+    name: null,
+    s_name: null,
+    document_id: null,
+    title: null,
+    content: null,
+    main_reason: null,
+    sub_reason: null,
   },
-  viewerUrl: '',
+  viewerUrl: "",
   comment: {
     order_request_id: null,
     placeholder: "",
     msg: "",
-  }
-})
+  },
+});
 
 // const comment = reactive({
 //   order_request_id: null,
@@ -43,16 +44,19 @@ const description_order_request = reactive({
 
 const save_comment = () => {
   const order_request = props.order_requests.find(
-    (order_request) => order_request.id === description_order_request.comment.order_request_id
+    (order_request) =>
+      order_request.id === description_order_request.comment.order_request_id
   );
   order_request.comment = description_order_request.comment.msg;
 
   console.log(props.order_requests);
-  alert('コメントを追記しました。')
+  alert("コメントを追記しました。");
 };
 
 const openDescription = (order_request) => {
   console.log(order_request);
+
+  description_order_request.order_request = order_request;
 
   description_order_request.comment.order_request_id = order_request.id;
   description_order_request.comment.msg = order_request.comment || "";
@@ -68,21 +72,47 @@ const openDescription = (order_request) => {
     description_order_request.viewerUrl = `/pdfjs/web/main_viewer.html?file=${filePath}`;
   }
   if (order_request.document_id) {
-    description_order_request.approval_document.document_id = order_request.document_id;
-    description_order_request.approval_document.process_name = order_request.request_user_process_name;
-    description_order_request.approval_document.user_name = order_request.request_user_name;
-    description_order_request.approval_document.evalution_date = order_request.evalution_date;
-    description_order_request.approval_document.desire_delivery_date = order_request.desire_delivery_date;
-    description_order_request.approval_document.supplier_name = order_request.supplier_name;
+    description_order_request.approval_document.document_id =
+      order_request.document_id;
+    description_order_request.approval_document.process_name =
+      order_request.request_user_process_name;
+    description_order_request.approval_document.user_name =
+      order_request.request_user_name;
+    description_order_request.approval_document.evalution_date =
+      order_request.evalution_date;
+    description_order_request.approval_document.desire_delivery_date =
+      order_request.desire_delivery_date;
+    description_order_request.approval_document.supplier_name =
+      order_request.supplier_name;
     description_order_request.approval_document.price = order_request.price;
-    description_order_request.approval_document.quantity = order_request.quantity;
-    description_order_request.approval_document.calc_price = order_request.calc_price;
+    description_order_request.approval_document.quantity =
+      order_request.quantity;
+    description_order_request.approval_document.calc_price =
+      order_request.calc_price;
     description_order_request.approval_document.name = order_request.name;
     description_order_request.approval_document.s_name = order_request.s_name;
     description_order_request.approval_document.title = order_request.title;
     description_order_request.approval_document.content = order_request.content;
-    description_order_request.approval_document.main_reason = order_request.main_reason;
-    description_order_request.approval_document.sub_reason = order_request.sub_reason;
+    description_order_request.approval_document.main_reason =
+      order_request.main_reason;
+    description_order_request.approval_document.sub_reason =
+      order_request.sub_reason;
+  } else {
+    description_order_request.approval_document.document_id = null
+    description_order_request.approval_document.process_name = null
+    description_order_request.approval_document.user_name = null
+    description_order_request.approval_document.evalution_date = null
+    description_order_request.approval_document.desire_delivery_date = null
+    description_order_request.approval_document.supplier_name = null
+    description_order_request.approval_document.price = null
+    description_order_request.approval_document.quantity = null
+    description_order_request.approval_document.calc_price = null
+    description_order_request.approval_document.name = null
+    description_order_request.approval_document.s_name = null
+    description_order_request.approval_document.title = null
+    description_order_request.approval_document.content = null
+    description_order_request.approval_document.main_reason = null
+    description_order_request.approval_document.sub_reason = null
   }
 };
 const sendAccept = (order_request_approval_id, action) => {
@@ -103,7 +133,7 @@ const sendAccept = (order_request_approval_id, action) => {
       case "reject": //非承認
         if (!order_request_approval.comment) {
           alert("非承認の場合は、コメントを追加してください。");
-          openDescription(order_request_approval)
+          openDescription(order_request_approval);
           return;
         }
         status = 2;
@@ -134,7 +164,10 @@ onMounted(() => {
 <template>
   <AcceptLayout :title="'承認画面'">
     <template #content>
-      <div v-if="description_order_request.comment.order_request_id" id="modal_cover"></div>
+      <div
+        v-if="description_order_request.comment.order_request_id"
+        id="modal_cover"
+      ></div>
       <section class="text-gray-600 body-font" style="margin-bottom: 20vh">
         <div class="py-12 mx-auto">
           <div class="flex flex-col text-center w-full mb-20">
@@ -443,7 +476,10 @@ onMounted(() => {
     </template>
   </AcceptLayout>
 
-  <div v-if="description_order_request.comment.order_request_id" id="description_container">
+  <div
+    v-if="description_order_request.comment.order_request_id"
+    id="description_container"
+  >
     <!-- 稟議書用モーダル -->
     <div id="approval_modal" class="bg-gray-900 bg-opacity-50">
       <div class="">
@@ -466,7 +502,9 @@ onMounted(() => {
                   >コメント追加</label
                 >
                 <button
-                  @click="description_order_request.comment.order_request_id = 0"
+                  @click="
+                    description_order_request.comment.order_request_id = 0
+                  "
                   class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
                 >
                   <i class="fa-solid fa-times"></i>
@@ -476,18 +514,107 @@ onMounted(() => {
               <textarea
                 id="message"
                 rows="4"
-                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 my-8"
                 :placeholder="description_order_request.comment.placeholder"
                 v-model="description_order_request.comment.msg"
                 @change="save_comment"
               ></textarea>
+
+              <div id="info_content">
+                <div class="flex">
+                  <div class="w-1/2">
+                    <label
+                      class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
+                      >依頼者:</label
+                    >
+
+                    <p
+                      class="appearance-none block w-full text-gray-700 py-3 mb-3 leading-tight focus:outline-none focus:bg-white"
+                    >
+                      {{
+                        description_order_request.order_request
+                          .request_user_name
+                      }}
+                    </p>
+                  </div>
+                  <div class="w-1/2">
+                    <label
+                      class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
+                      >担当者:</label
+                    >
+
+                    <p
+                      class="appearance-none block w-full text-gray-700 py-3 mb-3 leading-tight focus:outline-none focus:bg-white"
+                    >
+                      {{ description_order_request.order_request.user_name }}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex">
+                    <div class="w-1/2">
+                      <label
+                        class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
+                        >品名:</label
+                      >
+
+                      <p
+                        class="appearance-none block w-full text-gray-700 py-3 mb-3 leading-tight focus:outline-none focus:bg-white"
+                      >
+                        {{ description_order_request.order_request.name }}
+                      </p>
+                    </div>
+                    <div class="w-1/2">
+                      <label
+                        class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
+                        >品番:</label
+                      >
+
+                      <p
+                        class="appearance-none block w-full text-gray-700 py-3 mb-3 leading-tight focus:outline-none focus:bg-white"
+                      >
+                        {{ description_order_request.order_request.s_name }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <label
+                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
+                    >依頼者備考:</label
+                  >
+
+                  <p
+                    class="appearance-none block w-full text-gray-700 py-3 mb-3 leading-tight focus:outline-none focus:bg-white"
+                  >
+                    {{
+                      description_order_request.order_request.description ?? "-"
+                    }}
+                  </p>
+                  <label
+                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
+                    >発注者備考:</label
+                  >
+
+                  <p
+                    class="appearance-none block w-full text-gray-700 py-3 mb-3 leading-tight focus:outline-none focus:bg-white"
+                  >
+                    {{
+                      description_order_request.order_request.sub_description
+                    }}
+                  </p>
+                </div>
+              </div>
             </div>
-            <ApprovalDocument :approval_document="description_order_request.approval_document" />
+            <ApprovalDocument
+              :approval_document="description_order_request.approval_document"
+            />
           </div>
           <iframe
             ref="pdfViewer"
             :src="description_order_request.viewerUrl"
             class="w-2/3 mx-auto"
+            style="min-height: 80vh; margin-top: 2%; margin-bottom: 8%"
             frameborder="0"
           ></iframe>
         </div>
