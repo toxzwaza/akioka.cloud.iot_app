@@ -94,7 +94,7 @@ class ReceiveController extends Controller
     
                 if ($order) {
                     // 公開用パスを設定（storage:link前提で /storage/deli_file/filename）
-                    $order->delifile_path = '/storage/deli_file/' . $filename;
+                    $order->delifile_path = '/deli_file/' . $filename;
                     $order->save();
     
                     Method::setDeliveryDateAndUpdateLeadTime($order->id);
