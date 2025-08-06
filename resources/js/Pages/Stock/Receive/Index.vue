@@ -97,7 +97,7 @@ const getInitialOrders = () => {
     .get(route("stock.receive.getInitialOrders"))
     .then((res) => {
       initial_orders.value = res.data;
-      console.log(res.data)
+      console.log(res.data);
       base_initial_orders.value = res.data;
       initial_order_suppliers.value = [
         ...new Set(initial_orders.value.map((order) => order.com_name)),
@@ -112,6 +112,8 @@ const startCamera = async () => {
   try {
     streamRef.value = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: cameraFacing.value },
+      width: { ideal: 1920 }, // 横解像度
+      height: { ideal: 1080 }, // 縦解像度
     });
     if (videoRef.value) {
       videoRef.value.srcObject = streamRef.value;
@@ -146,7 +148,9 @@ const captureImage = () => {
     canvas.toBlob((blob) => {
       const previewUrl = URL.createObjectURL(blob);
       previewImage.value = previewUrl;
-      previewFile.value = new File([blob], "capture.jpg", { type: "image/jpeg" });
+      previewFile.value = new File([blob], "capture.jpg", {
+        type: "image/jpeg",
+      });
       resolve();
     }, "image/jpeg");
   });
@@ -305,16 +309,20 @@ onMounted(() => {
                   <td class="px-4 py-6">
                     <input
                       type="checkbox"
-                      @change="updateSelectList(order.id, $event.target.checked)"
+                      @change="
+                        updateSelectList(order.id, $event.target.checked)
+                      "
                     />
                   </td>
                   <td class="px-4 py-6">{{ order.order_no }}</td>
                   <td class="w-24 px-4 py-6">
                     <img
                       @click="modalImage($event.target)"
-                      :src="order.img_path && order.img_path.includes('https://') 
-                          ? order.img_path 
-                          : 'https://akioka.cloud/' + order.img_path"
+                      :src="
+                        order.img_path && order.img_path.includes('https://')
+                          ? order.img_path
+                          : 'https://akioka.cloud/' + order.img_path
+                      "
                       alt=""
                     />
                   </td>
@@ -323,16 +331,30 @@ onMounted(() => {
                     {{ new Date(order.order_date).toLocaleDateString("ja-JP") }}
                   </td>
                   <td class="px-4 py-6">
-                    {{ order.desire_delivery_date ? new Date(order.desire_delivery_date).toLocaleDateString("ja-JP") : '未指定'  }}
+                    {{
+                      order.desire_delivery_date
+                        ? new Date(
+                            order.desire_delivery_date
+                          ).toLocaleDateString("ja-JP")
+                        : "未指定"
+                    }}
                   </td>
                   <td class="px-4 py-6">{{ order.com_name }}</td>
                   <td class="px-4 py-6">
-                    <span v-html="highlightMatch(order.name, order.nameMatch)"></span>
+                    <span
+                      v-html="highlightMatch(order.name, order.nameMatch)"
+                    ></span>
                   </td>
                   <td class="px-4 py-6">
-                    <span v-html="highlightMatch(order.s_name ?? '', order.sNameMatch)"></span>
+                    <span
+                      v-html="
+                        highlightMatch(order.s_name ?? '', order.sNameMatch)
+                      "
+                    ></span>
                   </td>
-                  <td class="px-4 py-6">{{ order.quantity + order.order_unit }}</td>
+                  <td class="px-4 py-6">
+                    {{ order.quantity + order.order_unit }}
+                  </td>
                   <td class="w-10 text-center whitespace-nowrap">
                     <button
                       @click="uploadFile(order.id)"
@@ -357,17 +379,19 @@ onMounted(() => {
       </section>
 
       <!-- カメラモーダル -->
-      <div v-if="modalStatus" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+      <div
+        v-if="modalStatus"
+        class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+      >
         <div class="bg-white p-4 rounded-xl shadow-xl w-2/3 max-w-2xl">
-
           <!-- カメラ映像：プレビューがない時のみ表示 -->
-          <video 
-            v-if="!previewImage" 
-            ref="videoRef" 
-            autoplay 
-            playsinline 
-            class="w-full rounded-lg mb-2">
-          </video>
+          <video
+            v-if="!previewImage"
+            ref="videoRef"
+            autoplay
+            playsinline
+            class="w-full rounded-lg mb-2"
+          ></video>
 
           <canvas ref="captureCanvas" class="hidden"></canvas>
 
@@ -380,36 +404,58 @@ onMounted(() => {
           <div class="flex justify-between space-x-2 mt-2">
             <!-- プレビュー前 -->
             <template v-if="!previewImage">
-              <button @click="handleCapture" class="bg-green-500 text-white px-4 py-2 rounded">
+              <button
+                @click="handleCapture"
+                class="bg-green-500 text-white px-4 py-2 rounded"
+              >
                 撮影
               </button>
-              <button @click="toggleCameraFacing" class="bg-yellow-500 text-white px-4 py-2 rounded">
+              <button
+                @click="toggleCameraFacing"
+                class="bg-yellow-500 text-white px-4 py-2 rounded"
+              >
                 カメラ切替
               </button>
-              <button @click="fileInputRef.click()" class="bg-blue-500 text-white px-4 py-2 rounded">
+              <button
+                @click="fileInputRef.click()"
+                class="bg-blue-500 text-white px-4 py-2 rounded"
+              >
                 ファイルから選択
               </button>
-              <input 
-                type="file" 
-                ref="fileInputRef" 
-                accept="image/*" 
-                class="hidden" 
+              <input
+                type="file"
+                ref="fileInputRef"
+                accept="image/*"
+                class="hidden"
                 @change="handleFileSelect"
               />
-              <button @click="handleCloseModal" class="bg-red-500 text-white px-4 py-2 rounded">
+              <button
+                @click="handleCloseModal"
+                class="bg-red-500 text-white px-4 py-2 rounded"
+              >
                 キャンセル
               </button>
             </template>
 
             <!-- プレビュー後 -->
             <template v-else>
-              <button @click="confirmUpload" class="bg-purple-500 text-white px-4 py-2 rounded" :disabled="!previewFile">
+              <button
+                @click="confirmUpload"
+                class="bg-purple-500 text-white px-4 py-2 rounded"
+                :disabled="!previewFile"
+              >
                 確定
               </button>
-              <button @click="retakePhoto" class="bg-yellow-500 text-white px-4 py-2 rounded">
+              <button
+                @click="retakePhoto"
+                class="bg-yellow-500 text-white px-4 py-2 rounded"
+              >
                 再撮影
               </button>
-              <button @click="handleCloseModal" class="bg-red-500 text-white px-4 py-2 rounded">
+              <button
+                @click="handleCloseModal"
+                class="bg-red-500 text-white px-4 py-2 rounded"
+              >
                 キャンセル
               </button>
             </template>
