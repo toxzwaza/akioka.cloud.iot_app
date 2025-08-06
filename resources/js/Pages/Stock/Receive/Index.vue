@@ -97,6 +97,7 @@ const getInitialOrders = () => {
     .get(route("stock.receive.getInitialOrders"))
     .then((res) => {
       initial_orders.value = res.data;
+      console.log(res.data)
       base_initial_orders.value = res.data;
       initial_order_suppliers.value = [
         ...new Set(initial_orders.value.map((order) => order.com_name)),
@@ -286,6 +287,7 @@ onMounted(() => {
                   <th class="px-4 py-3 bg-gray-100">画像</th>
                   <th class="px-4 py-3 bg-gray-100">注文者</th>
                   <th class="px-4 py-3 bg-gray-100">注文日</th>
+                  <th class="px-4 py-3 bg-gray-100">希望納期</th>
                   <th class="px-4 py-3 bg-gray-100">注文先</th>
                   <th class="px-4 py-3 bg-gray-100">品名</th>
                   <th class="px-4 py-3 bg-gray-100">品番</th>
@@ -319,6 +321,9 @@ onMounted(() => {
                   <td class="px-4 py-6">{{ order.order_user }}</td>
                   <td class="px-4 py-6">
                     {{ new Date(order.order_date).toLocaleDateString("ja-JP") }}
+                  </td>
+                  <td class="px-4 py-6">
+                    {{ order.desire_delivery_date ? new Date(order.desire_delivery_date).toLocaleDateString("ja-JP") : '未指定'  }}
                   </td>
                   <td class="px-4 py-6">{{ order.com_name }}</td>
                   <td class="px-4 py-6">
