@@ -11,6 +11,17 @@ const streamRef = ref(null);
 const captureCanvas = ref(null);
 const fileInputRef = ref(null);
 
+// デフォルトは外カメラ
+const cameraFacing = ref("environment");
+
+// 検索用データ
+const initial_order_suppliers = ref([]);
+const searchText = ref("");
+const base_initial_orders = ref([]);
+const initial_orders = ref([]);
+const select_list = ref([]);
+
+// モーダル内画像表示
 const modalImage = (target) => {
   modalStatus.value = true;
   modalImageSrc.value = target.src;
@@ -21,9 +32,7 @@ const handleCloseModal = () => {
   stopCamera();
 };
 
-// 検索用取引先リスト
-const initial_order_suppliers = ref([]);
-const searchText = ref("");
+// 取引先変更
 const handleChangeSupplier = (comName) => {
   if (comName) {
     initial_orders.value = base_initial_orders.value.filter(
@@ -33,7 +42,8 @@ const handleChangeSupplier = (comName) => {
     initial_orders.value = base_initial_orders.value;
   }
 };
-// 品名・品番検索
+
+// 検索
 const searchOrders = () => {
   if (searchText.value) {
     initial_orders.value = initial_orders.value.map((initial_order) => {
@@ -50,6 +60,7 @@ const searchOrders = () => {
   }
 };
 
+// ハイライト
 const highlightMatch = (text, isMatch) => {
   if (!isMatch) return `${text}`;
   const regex = new RegExp(`(${searchText.value})`, "gi");
@@ -59,10 +70,7 @@ const highlightMatch = (text, isMatch) => {
   );
 };
 
-const base_initial_orders = ref([]);
-const initial_orders = ref([]);
-
-const select_list = ref([]);
+// 選択リスト更新
 const updateSelectList = (orderId, isChecked) => {
   if (isChecked) {
     select_list.value.push(orderId);
@@ -82,15 +90,16 @@ const getInitialOrders = () => {
         ...new Set(initial_orders.value.map((order) => order.com_name)),
       ].sort();
     })
-    .catch((error) => {
-      console.log(error);
-    });
+    .catch(console.error);
 };
 
 // ===== カメラ制御部分 =====
 const startCamera = async () => {
+  stopCamera();
   try {
-    streamRef.value = await navigator.mediaDevices.getUserMedia({ video: true });
+    streamRef.value = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: cameraFacing.value },
+    });
     if (videoRef.value) {
       videoRef.value.srcObject = streamRef.value;
     }
@@ -101,11 +110,19 @@ const startCamera = async () => {
 
 const stopCamera = () => {
   if (streamRef.value) {
-    streamRef.value.getTracks().forEach(track => track.stop());
+    streamRef.value.getTracks().forEach((track) => track.stop());
     streamRef.value = null;
   }
 };
 
+// カメラ切替
+const toggleCameraFacing = async () => {
+  cameraFacing.value =
+    cameraFacing.value === "environment" ? "user" : "environment";
+  await startCamera();
+};
+
+// 撮影
 const captureImage = () => {
   const canvas = captureCanvas.value;
   const context = canvas.getContext("2d");
@@ -143,10 +160,9 @@ const handleFileSelect = async (event) => {
 
 // 共通アップロード処理
 const sendFile = async (file, fileName) => {
-
   const formData = new FormData();
   formData.append("file", file, fileName);
-  select_list.value.forEach(item => {
+  select_list.value.forEach((item) => {
     formData.append("select_list[]", item);
   });
 
@@ -155,7 +171,6 @@ const sendFile = async (file, fileName) => {
       headers: { "Content-Type": "multipart/form-data" },
     });
     if (res.data.status) {
-      console.log(res.data)
       alert("納品書を登録しました。");
       window.location.reload();
     }
@@ -181,9 +196,7 @@ const deleteInitialOrder = (id) => {
           }
         }
       })
-      .catch((error) => {
-        console.log(error);
-      });
+      .catch(console.error);
   } else {
     alert("キャンセルされました。");
   }
@@ -199,6 +212,7 @@ onMounted(() => {
     <template #content>
       <section class="text-gray-600 body-font">
         <div class="container py-12 mx-auto">
+          <!-- タイトル -->
           <div class="flex flex-col text-center w-full mb-8">
             <h1 class="text-3xl font-medium title-font mb-2 text-green-600">
               納品登録
@@ -209,10 +223,12 @@ onMounted(() => {
               一致するデータがない場合、納品登録画面にて作成する必要があります。
             </p>
           </div>
+
+          <!-- 絞り込み -->
           <div class="w-1/2 mx-auto mb-8">
             <div class="p-2 flex justify-start">
               <div class="w-1/3 relative mr-2">
-                <label for="search_text" class="leading-7 text-sm text-gray-600">絞込み</label>
+                <label class="leading-7 text-sm text-gray-600">絞込み</label>
                 <select
                   @change="handleChangeSupplier($event.target.value)"
                   class="w-full bg-gray-100 rounded border border-gray-300 focus:border-indigo-500"
@@ -229,12 +245,11 @@ onMounted(() => {
               </div>
 
               <div class="w-1/2 relative ml-2">
-                <label for="search_text" class="leading-7 text-sm text-gray-600">検索</label>
+                <label class="leading-7 text-sm text-gray-600">検索</label>
                 <input
                   @input="searchOrders"
                   v-model="searchText"
                   type="text"
-                  id="search_text"
                   class="w-full bg-gray-100 rounded border border-gray-300 focus:border-indigo-500"
                   placeholder="品名・品番"
                 />
@@ -242,6 +257,7 @@ onMounted(() => {
             </div>
           </div>
 
+          <!-- テーブル -->
           <div class="w-full mx-auto overflow-auto">
             <table class="table-auto w-full text-left whitespace-no-wrap">
               <thead>
@@ -282,7 +298,9 @@ onMounted(() => {
                     />
                   </td>
                   <td class="px-4 py-6">{{ order.order_user }}</td>
-                  <td class="px-4 py-6">{{ new Date(order.order_date).toLocaleDateString("ja-JP") }}</td>
+                  <td class="px-4 py-6">
+                    {{ new Date(order.order_date).toLocaleDateString("ja-JP") }}
+                  </td>
                   <td class="px-4 py-6">{{ order.com_name }}</td>
                   <td class="px-4 py-6">
                     <span v-html="highlightMatch(order.name, order.nameMatch)"></span>
@@ -323,10 +341,10 @@ onMounted(() => {
             <button @click="handleCaptureAndUpload" class="bg-green-500 text-white px-4 py-2 rounded">
               撮影・アップロード
             </button>
-            <button 
-              @click="fileInputRef.click()" 
-              class="bg-blue-500 text-white px-4 py-2 rounded"
-            >
+            <button @click="toggleCameraFacing" class="bg-yellow-500 text-white px-4 py-2 rounded">
+              カメラ切替
+            </button>
+            <button @click="fileInputRef.click()" class="bg-blue-500 text-white px-4 py-2 rounded">
               ファイルから選択
             </button>
             <input 
