@@ -143,6 +143,7 @@ const handleFileSelect = async (event) => {
 
 // 共通アップロード処理
 const sendFile = async (file, fileName) => {
+
   const formData = new FormData();
   formData.append("file", file, fileName);
   select_list.value.forEach(item => {
@@ -154,6 +155,7 @@ const sendFile = async (file, fileName) => {
       headers: { "Content-Type": "multipart/form-data" },
     });
     if (res.data.status) {
+      console.log(res.data)
       alert("納品書を登録しました。");
       window.location.reload();
     }

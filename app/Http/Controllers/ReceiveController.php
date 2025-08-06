@@ -69,48 +69,52 @@ class ReceiveController extends Controller
     {
         $status = true;
         $msg = '';
-
-        // $id = $request->id;
-        // idのリストを取得
+    
         $select_list = $request->select_list;
         $file = $request->file('file');
+    
+        if (!$file) {
+            return response()->json(['status' => false, 'msg' => 'ファイルが送信されていません']);
+        }
+    
+        // ファイル名を一度生成
+        $timestamp = time();
+        $filename = $timestamp . '.' . $file->getClientOriginalExtension();
+    
+        try {
+            // 保存（storage/public/deli_file/filename）
+            $path = $file->storeAs('public/deli_file', $filename);
+    
+            foreach ($select_list as $id) {
 
-
-        foreach ($select_list as $id) {
-            try {
-                if ($id && $file) {
-                    $timestamp = time();
-                    $filename = $timestamp . '.' . $file->getClientOriginalExtension();
-                    $file->storeAs('public/deli_file', $filename);
-                }
                 $order = InitialOrder::select('initial_orders.*', 'order_requests.device_id as from_device_id')
-                    ->join('order_requests', 'order_requests.id', '=', 'initial_orders.order_request_id')
+                    ->leftJoin('order_requests', 'order_requests.id', '=', 'initial_orders.order_request_id')
                     ->where('initial_orders.id', $id)
                     ->first();
-
+    
                 if ($order) {
-                    $order->delifile_path = '/deli_file/' . $filename;
+                    // 公開用パスを設定（storage:link前提で /storage/deli_file/filename）
+                    $order->delifile_path = '/storage/deli_file/' . $filename;
                     $order->save();
-
+    
                     Method::setDeliveryDateAndUpdateLeadTime($order->id);
+    
+                    // 品名・品番が一致する在庫データを確認
+                    $stock = Stock::find($order->stock_id);
+                    if (!$stock) {
+                        $order->not_found_flg = 1;
+                        $order->save();
+                    }
                 }
-
-                // 品名・品番が一致する在庫データを取得
-                // 見つからない場合は、フラグを立てる
-                $stock = Stock::find($order->stock_id);
-
-                if (!$stock) {
-                    $order->not_found_flg = 1;
-                    $order->save();
-                }
-            } catch (Exception $e) {
-                $status = false;
-                $msg = $e->getMessage();
             }
+        } catch (Exception $e) {
+            $status = false;
+            $msg = $e->getMessage();
         }
-
+    
         return response()->json(['status' => $status, 'msg' => $msg]);
     }
+    
     public function deleteInitialOrder($order_id)
     {
         $status = 'ng';
