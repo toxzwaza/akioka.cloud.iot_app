@@ -14,6 +14,10 @@ const fileInputRef = ref(null);
 // デフォルトは外カメラ
 const cameraFacing = ref("environment");
 
+// プレビュー用
+const previewImage = ref("");
+const previewFile = ref(null);
+
 // 検索用データ
 const initial_order_suppliers = ref([]);
 const searchText = ref("");
@@ -30,8 +34,16 @@ const modalImage = (target) => {
 const handleCloseModal = () => {
   modalStatus.value = false;
   stopCamera();
+  previewImage.value = "";
+  previewFile.value = null;
 };
 
+// 再撮影（プレビュー解除）
+const retakePhoto = async () => {
+  previewImage.value = "";
+  previewFile.value = null;
+  await startCamera(); // 再度カメラを起動
+};
 // 取引先変更
 const handleChangeSupplier = (comName) => {
   if (comName) {
@@ -131,7 +143,10 @@ const captureImage = () => {
   context.drawImage(videoRef.value, 0, 0);
   return new Promise((resolve) => {
     canvas.toBlob((blob) => {
-      resolve(blob);
+      const previewUrl = URL.createObjectURL(blob);
+      previewImage.value = previewUrl;
+      previewFile.value = new File([blob], "capture.jpg", { type: "image/jpeg" });
+      resolve();
     }, "image/jpeg");
   });
 };
@@ -145,23 +160,27 @@ const uploadFile = async (id) => {
   await startCamera();
 };
 
-// 撮影＆アップロード
-const handleCaptureAndUpload = async () => {
-  const imageBlob = await captureImage();
-  await sendFile(imageBlob, "capture.jpg");
+// 撮影（アップロードは確定時に行う）
+const handleCapture = async () => {
+  await captureImage();
 };
 
-// ファイル選択からアップロード
-const handleFileSelect = async (event) => {
+// ファイル選択（アップロードは確定時に行う）
+const handleFileSelect = (event) => {
   const file = event.target.files[0];
   if (!file) return;
-  await sendFile(file, file.name);
+  previewImage.value = URL.createObjectURL(file);
+  previewFile.value = file;
 };
 
-// 共通アップロード処理
-const sendFile = async (file, fileName) => {
+// 確定アップロード
+const confirmUpload = async () => {
+  if (!previewFile.value) {
+    alert("画像が選択されていません");
+    return;
+  }
   const formData = new FormData();
-  formData.append("file", file, fileName);
+  formData.append("file", previewFile.value);
   select_list.value.forEach((item) => {
     formData.append("select_list[]", item);
   });
@@ -334,29 +353,61 @@ onMounted(() => {
 
       <!-- カメラモーダル -->
       <div v-if="modalStatus" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-        <div class="bg-white p-4 rounded-xl shadow-xl w-2/3">
-          <video ref="videoRef" autoplay playsinline class="w-full rounded-lg mb-2"></video>
+        <div class="bg-white p-4 rounded-xl shadow-xl w-2/3 max-w-2xl">
+
+          <!-- カメラ映像：プレビューがない時のみ表示 -->
+          <video 
+            v-if="!previewImage" 
+            ref="videoRef" 
+            autoplay 
+            playsinline 
+            class="w-full rounded-lg mb-2">
+          </video>
+
           <canvas ref="captureCanvas" class="hidden"></canvas>
-          <div class="flex justify-between space-x-2">
-            <button @click="handleCaptureAndUpload" class="bg-green-500 text-white px-4 py-2 rounded">
-              撮影・アップロード
-            </button>
-            <button @click="toggleCameraFacing" class="bg-yellow-500 text-white px-4 py-2 rounded">
-              カメラ切替
-            </button>
-            <button @click="fileInputRef.click()" class="bg-blue-500 text-white px-4 py-2 rounded">
-              ファイルから選択
-            </button>
-            <input 
-              type="file" 
-              ref="fileInputRef" 
-              accept="image/*" 
-              class="hidden" 
-              @change="handleFileSelect"
-            />
-            <button @click="handleCloseModal" class="bg-red-500 text-white px-4 py-2 rounded">
-              キャンセル
-            </button>
+
+          <!-- プレビュー -->
+          <div v-if="previewImage" class="mb-2">
+            <p class="text-sm text-gray-700 mb-1 font-bold">プレビュー:</p>
+            <img :src="previewImage" class="w-full rounded border" />
+          </div>
+
+          <div class="flex justify-between space-x-2 mt-2">
+            <!-- プレビュー前 -->
+            <template v-if="!previewImage">
+              <button @click="handleCapture" class="bg-green-500 text-white px-4 py-2 rounded">
+                撮影
+              </button>
+              <button @click="toggleCameraFacing" class="bg-yellow-500 text-white px-4 py-2 rounded">
+                カメラ切替
+              </button>
+              <button @click="fileInputRef.click()" class="bg-blue-500 text-white px-4 py-2 rounded">
+                ファイルから選択
+              </button>
+              <input 
+                type="file" 
+                ref="fileInputRef" 
+                accept="image/*" 
+                class="hidden" 
+                @change="handleFileSelect"
+              />
+              <button @click="handleCloseModal" class="bg-red-500 text-white px-4 py-2 rounded">
+                キャンセル
+              </button>
+            </template>
+
+            <!-- プレビュー後 -->
+            <template v-else>
+              <button @click="confirmUpload" class="bg-purple-500 text-white px-4 py-2 rounded" :disabled="!previewFile">
+                確定
+              </button>
+              <button @click="retakePhoto" class="bg-yellow-500 text-white px-4 py-2 rounded">
+                再撮影
+              </button>
+              <button @click="handleCloseModal" class="bg-red-500 text-white px-4 py-2 rounded">
+                キャンセル
+              </button>
+            </template>
           </div>
         </div>
       </div>
