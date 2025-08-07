@@ -55,7 +55,8 @@ class StockRequestController extends Controller
             ->orderBy('stock_request_orders.created_at', 'desc');
         
         if($start_date && $end_date){
-            $query->whereBetween('stock_request_orders.created_at', [$start_date, $end_date]);
+            $end_date_with_time = $end_date . ' 23:59:59';
+            $query->whereBetween('stock_request_orders.created_at', [$start_date, $end_date_with_time]);
         }
 
         $stock_request_orders = $query->get();
