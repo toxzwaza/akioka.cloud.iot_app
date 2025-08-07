@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref,reactive, computed } from "vue";
 import { getImgPath, changeDateFormat } from "@/Helper/method";
 
 const props = defineProps({
@@ -8,16 +8,24 @@ const props = defineProps({
   stock_request_orders: Array,
 });
 
+const form = reactive({
+  start_date : null,
+  end_date: null,
+})
+
 const target_process = ref(null);
 const stock_requests = ref([]);
+const stock_request_orders = ref([]);
 
 const setProcess = (process_id) => {
+  console.log('実行', process_id)
+
   if (process_id) {
     target_process.value = props.processes.find(
       (process) => process.id == process_id
     );
 
-    stock_requests.value = props.stock_request_orders
+    stock_requests.value = stock_request_orders.value
       .filter(
         (stock_request_order) => stock_request_order.process_id == process_id
       )
@@ -42,7 +50,7 @@ const setProcess = (process_id) => {
     target_process.value = null;
 
     stock_requests.value = [];
-    props.stock_request_orders.forEach((stock_request_order) => {
+    stock_request_orders.value.forEach((stock_request_order) => {
       let stock_request = stock_requests.value.find(
         (sr) => sr.stock_id == stock_request_order.stock_id
       );
@@ -103,7 +111,7 @@ const orderRequestByStockRequestOrder = (stock) => {
 };
 
 const checkStockRequest = (process_id) => {
-  return props.stock_request_orders.some(
+  return stock_request_orders.value.some(
     (order) => order.process_id == process_id
   );
 };
@@ -141,10 +149,10 @@ const deleteStockRequest = (stock) => {
       }\nの発注削除を行います。よろしいですか？`
     )
   ) {
-    alert('発注削除を取消しました。')
-    return
+    alert("発注削除を取消しました。");
+    return;
   }
-  const deleteStockRequestOrder = props.stock_request_orders.find(
+  const deleteStockRequestOrder = stock_request_orders.value.find(
     (stock_request_order) =>
       stock_request_order.stock_id === stock.stock_id &&
       stock_request_order.process_id === target_process.value.id
@@ -173,13 +181,64 @@ const deleteStockRequest = (stock) => {
   console.log(deleteStockRequestOrder);
 };
 
+const getAdminStockRequestOrders = () => {
+  axios
+    .get(route("stock.request.getAdminStockRequestOrders"), {
+      params: {
+        start_date: form.start_date,
+        end_date : form.end_date
+      }
+    })
+    .then((res) => {
+      console.log(res.data);
+      stock_request_orders.value = res.data;
+      setProcess();
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
+
 onMounted(() => {
-  console.log("stock_requests:", props.stock_requests);
-  setProcess();
-  //   stock_requests.value = props.stock_requests
+  // 先週木曜日と今週水曜日の日付を設定
+  const today = new Date();
+  const currentDay = today.getDay(); // 0: 日曜日, 1: 月曜日, ..., 6: 土曜日
+  
+  // 先週木曜日を計算（木曜日は4）
+  const lastThursday = new Date(today);
+  const daysToLastThursday = (currentDay + 3) % 7; // 先週木曜日までの日数
+  lastThursday.setDate(today.getDate() - daysToLastThursday - 7);
+  
+  // start_dateに7日を加えてend_dateを設定
+  const endDate = new Date(lastThursday);
+  endDate.setDate(lastThursday.getDate() + 6);
+  
+  // YYYY-MM-DD形式に変換
+  form.start_date = lastThursday.toISOString().split('T')[0];
+  form.end_date = endDate.toISOString().split('T')[0];
+
+  getAdminStockRequestOrders();
+  setProcess()
+
 });
 </script>
 <template>
+  <div class="mb-12 flex items-center justify-center">
+    <div class="mr-12 flex items-center" >
+      <input class="appearance-none bg-gray-200 text-gray-700 border-transparent rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white" type="date" name="" id="" v-model="form.start_date" />
+      <span class="block mx-4">~</span>
+      <input class="appearance-none bg-gray-200 text-gray-700 border-transparent rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white" type="date" name="" id="" v-model="form.end_date" />
+    </div>
+
+    <button
+    @click="getAdminStockRequestOrders"
+      :class="{
+        'bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-10 rounded': true,
+      }"
+    >
+      検索
+    </button>
+  </div>
   <div class="flex justify-between">
     <button
       :class="{
@@ -261,7 +320,9 @@ onMounted(() => {
 
                 <span v-else>{{ stock.updateQuantity }}</span>
               </td>
-              <td class="unit text-2xl">{{ stock.orderUnit ?? stock.solo_unit }}</td>
+              <td class="unit text-2xl">
+                {{ stock.orderUnit ?? stock.solo_unit }}
+              </td>
               <td class="address text-2xl">{{ stock.address }}</td>
 
               <td class="comp_button text-lg">

@@ -38,11 +38,29 @@ class StockRequestController extends Controller
 
         // 物品依頼を取得
         $stock_request_orders = StockRequestOrder::select('stock_request_orders.id', 'stock_request_orders.process_id', 'stock_request_orders.stock_id', 'stock_request_orders.status', 'stock_request_orders.quantity', 'stock_request_orders.order_flg', 'stock_request_orders.created_at', 'users.name as user_name')
-        ->join('users', 'users.id', 'stock_request_orders.user_id')
+            ->join('users', 'users.id', 'stock_request_orders.user_id')
             ->where('stock_request_orders.status', 0)
             ->orderBy('stock_request_orders.created_at', 'desc')->get();
 
         return Inertia::render('Stock/Request/Home', ['processes' => $processes, 'stock_requests' => $stock_requests, 'users' => $users, 'stock_request_orders' => $stock_request_orders]);
+    }
+    public function getAdminStockRequestOrders(Request $request)
+    {
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+
+        // 物品依頼を取得
+        $query = StockRequestOrder::select('stock_request_orders.id', 'stock_request_orders.process_id', 'stock_request_orders.stock_id', 'stock_request_orders.status', 'stock_request_orders.quantity', 'stock_request_orders.order_flg', 'stock_request_orders.created_at', 'users.name as user_name')
+            ->join('users', 'users.id', 'stock_request_orders.user_id')
+            ->orderBy('stock_request_orders.created_at', 'desc');
+        
+        if($start_date && $end_date){
+            $query->whereBetween('stock_request_orders.created_at', [$start_date, $end_date]);
+        }
+
+        $stock_request_orders = $query->get();
+
+        return response()->json($stock_request_orders);
     }
 
     public function store(Request $request)
@@ -191,8 +209,6 @@ class StockRequestController extends Controller
                 $stock_request_order->order_flg = 1;
                 $stock_request_order->save();
             }
-
-
         } catch (Exception $e) {
             $status = false;
             $msg = $e->getMessage();

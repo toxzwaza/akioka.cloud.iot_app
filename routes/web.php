@@ -134,6 +134,7 @@ Route::get('/requests', [StockRequestController::class, 'home'])->name('stock.re
 Route::post('/requests/store', [StockRequestController::class, 'store'])->name('stock.request.store');
 Route::post('/requests/complete', [StockRequestController::class, 'complete'])->name('stock.request.complete');
 Route::delete('/requests/delete', [StockRequestController::class, 'delete'])->name('stock.request.delete');
+Route::get('/requests/getAdminStockRequestOrders', [StockRequestController::class, 'getAdminStockRequestOrders'])->name('stock.request.getAdminStockRequestOrders');
 // 足りない分を発注依頼
 Route::post('/requests/order', [StockRequestController::class, 'order'])->name('stock.request.order');
 // Route::get('/requests/stocks', [RequestController::class, 'index'])->name('stock.request');
