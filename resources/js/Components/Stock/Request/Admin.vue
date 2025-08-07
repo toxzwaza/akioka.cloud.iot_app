@@ -174,7 +174,7 @@ const deleteStockRequest = (stock) => {
 };
 
 onMounted(() => {
-  console.log("stock_request_orders:", props.stock_request_orders);
+  console.log("stock_requests:", props.stock_requests);
   setProcess();
   //   stock_requests.value = props.stock_requests
 });
@@ -261,7 +261,7 @@ onMounted(() => {
 
                 <span v-else>{{ stock.updateQuantity }}</span>
               </td>
-              <td class="unit text-2xl">{{ stock.solo_unit }}</td>
+              <td class="unit text-2xl">{{ stock.orderUnit ?? stock.solo_unit }}</td>
               <td class="address text-2xl">{{ stock.address }}</td>
 
               <td class="comp_button text-lg">
