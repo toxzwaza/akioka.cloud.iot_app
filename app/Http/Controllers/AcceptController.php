@@ -79,6 +79,8 @@ class AcceptController extends Controller
 
         if ($user_id == 63) { // 常務
             $query->where('order_request_approvals.user_id', 63);
+        } else if ($user_id == 94) { // 部長
+            $query->where('order_request_approvals.user_id', 94);
         } else if ($user_id == 36) { // 部長
             $query->where('order_request_approvals.user_id', 36);
         } else if ($user_id == 2) { // 社長
@@ -89,6 +91,8 @@ class AcceptController extends Controller
             $query->where('order_request_approvals.user_id', 37);
         } else if ($user_id == 84) { //宮原
             $query->where('order_request_approvals.user_id', 84);
+        } else {
+            return response("アクセス権限がありません", 403);
         }
 
         $order_requests = $query->get();
@@ -100,7 +104,7 @@ class AcceptController extends Controller
                 ->where('document_id', $order_request->document_id)
                 ->pluck('image_path')
                 ->toArray();
-            
+
             $order_request->document_images = $document_images;
         }
 

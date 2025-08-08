@@ -10,6 +10,10 @@ use Inertia\Inertia;
 
 class LunchController extends Controller
 {
+    public function test(){
+
+        return Inertia::render('Lunch/Test');
+    }
     //
     public function index()
     {

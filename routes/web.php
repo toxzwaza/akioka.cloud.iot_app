@@ -146,6 +146,7 @@ Route::post('/stock/new-item/store', [NewItemController::class, 'store'])->name(
 
 //////////弁当注文用 //////////
 Route::get('/lunch', [LunchController::class, 'index'])->name('lunch.home');
+Route::get('/lunch/test', [LunchController::class, 'test'])->name('lunch.test');
 // 注文
 Route::post('/lunch/order', [LunchController::class, 'order'])->name('lunch.order');
 // 受け取り
