@@ -181,6 +181,16 @@ class AcceptController extends Controller
                     // 端末への通知
                     if ($order_request->device_id) {
                         $device = Device::find($order_request->device_id);
+                        Helper::createDeviceMessage(
+                            2,
+                            $order_request->device_id,
+                            null,
+                            $order_request->user_id,
+                            $order_request_approval_user->id,
+                            "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment . "\n以下のボタンをクリックして稟議書を修正してください。",
+                            'https://akioka.cloud/new_item?order_request_id=' . $order_request->id
+                        );
+
                         Helper::sendNotification($device->token, "在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment);
                     }
 

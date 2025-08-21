@@ -328,8 +328,17 @@ onMessage(messaging, (payload) => {
               </div>
 
               <p v-html="message.message.replace(/\n/g, '<br>')"></p>
+              <!-- 稟議再作成用ボタン -->
+              <Link
+                v-if="message.link"
+                :href="message.link"
+                class="inline-block mt-4 mb-2 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+              >
+                稟議書を編集
+              </Link>
 
-              <hr class="mt-4 mb-8" />
+              <hr class="mt-4 mb-6" />
+
               <form class="max-full mb-8">
                 <label
                   for="default-search"

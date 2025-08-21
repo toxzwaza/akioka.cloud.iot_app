@@ -204,7 +204,7 @@ class Helper
         return $response->getBody()->getContents();
     }
 
-    public static function createDeviceMessage($priority, $to_device_id, $from_device_id = null, $to_user_id, $from_user_id, $msg)
+    public static function createDeviceMessage($priority, $to_device_id, $from_device_id = null, $to_user_id, $from_user_id, $msg, $link = null)
     {
 
 
@@ -216,6 +216,7 @@ class Helper
         $message->from_user_id = $from_user_id;
         $message->del_flg = 0;
         $message->message = $msg;
+        $message->link = $link;
         $message->save();
 
         $device = Device::find($to_device_id);

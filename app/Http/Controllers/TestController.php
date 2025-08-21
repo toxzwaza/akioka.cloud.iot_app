@@ -26,7 +26,7 @@ class TestController extends Controller
     //
     public function test()
     {
-        // $res = Helper::sendNotification('ePV0Lrqp-hld0Szo9Sopc3:APA91bHU_fEgOB_9YV4iGxHT86jh1WeV9Oj5KL_hRugg2yJryR7KnDDLIukouqW5ze7ec-NQYBiyiAo9WNqkEAG7daGo23_cSny0z8iqLKvWo-6hSx4N5LM', 'test', 'test');
+        $res = Helper::sendNotification('d8c5Kmgn5ublH03J3E3Of8:APA91bGrD6z8supi_HkG7o2RnA3C6dxgoi4D0jXuEEoCtAhfAN9Q0R7z8rckcQ1juhdmWPEdXBegLq-I3b7aB4dTUH_iXBfxzv-TLQBgvS_wTxa2u3ZBx-c', 'test', 'test');
 
         // $initial_orders = InitialOrder::whereNull('name')->where('receipt_flg', 0)->get();
 

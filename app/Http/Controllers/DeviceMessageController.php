@@ -24,7 +24,8 @@ class DeviceMessageController extends Controller
                 'from_devices.name as from_device_name',
                 'device_messages.message',
                 'device_messages.answer',
-                'device_messages.created_at'
+                'device_messages.created_at',
+                'device_messages.link'
             )
                 ->join('users as to_users', 'to_users.id', '=', 'device_messages.to_user_id')
                 ->join('users as from_users', 'from_users.id', '=', 'device_messages.from_user_id')
