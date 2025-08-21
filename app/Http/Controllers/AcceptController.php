@@ -129,6 +129,7 @@ class AcceptController extends Controller
             $order_request_approval->status = $flg;
             $order_request_approval->comment = $comment;
             $order_request_approval->save();
+            $order_request_approval_user = User::find($order_request_approval->user_id);
 
             $order_request = OrderRequest::find($order_request_approval->order_request_id);
             $stock = Stock::find($order_request->stock_id);
@@ -167,13 +168,20 @@ class AcceptController extends Controller
                     $order_request->save();
 
                     //  コメントを取得してコメントも送信
-                    Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。", "", [$order_request->user_id]);
-                    Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。", "", [$order_request->request_user_id]);
+                    $user = User::find($order_request->user_id);
+                    if ($user && $user->email) {
+                        Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment, "", [$order_request->user_id]);
+                    }
+
+                    $request_user = User::find($order_request->request_user_id);
+                    if ($request_user && $request_user->email) {
+                        Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment, "", [$order_request->request_user_id]);
+                    }
 
                     // 端末への通知
                     if ($order_request->device_id) {
                         $device = Device::find($order_request->device_id);
-                        Helper::sendNotification($device->token, "在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。");
+                        Helper::sendNotification($device->token, "在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment);
                     }
 
                     break;
