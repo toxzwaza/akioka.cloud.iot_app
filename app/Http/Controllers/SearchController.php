@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Classification;
 use App\Models\InitialOrder;
 use App\Models\Process;
 use App\Models\Stock;
@@ -19,7 +20,8 @@ class SearchController extends Controller
 
         $processes = Process::all();
         $users = User::where('del_flg', 0)->get();
-        return Inertia::render('Stock/Search', ['processes' => $processes, 'users' => $users, 'search' => $search]);
+        $classifications = Classification::all();
+        return Inertia::render('Stock/Search', ['processes' => $processes, 'users' => $users, 'search' => $search, 'classifications' => $classifications ]);
     }
     public function result(Request $request)
     {
@@ -30,6 +32,7 @@ class SearchController extends Controller
         $alias = $request->alias;
         $process_id = $request->process_id;
         $user_id = $request->user_id;
+        $classification_id = $request->classification_id;
 
         $search = [
             'stock_name' => $stock_name,
@@ -39,6 +42,7 @@ class SearchController extends Controller
             'alias' => $alias,
             'process_id' => $process_id,
             'user_id' => $user_id,
+            'classification_id' => $classification_id
         ];
 
 
@@ -94,6 +98,10 @@ class SearchController extends Controller
             // 在庫IDもしくはJANコードから検索
             if ($stock_id) {
                 $query->where('stocks.id', $request->stock_id)->orWhere('stocks.jan_code', $stock_id);
+            }
+
+            if($classification_id){
+                $query->where('stocks.classification_id', $request->classification_id);
             }
 
             $stocks = $query->get();

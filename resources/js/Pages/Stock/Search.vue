@@ -9,6 +9,7 @@ const props = defineProps({
   processes: Array,
   users: Array,
   search: Array,
+  classifications: Array
 });
 const form = reactive({
   search: {
@@ -19,6 +20,7 @@ const form = reactive({
     stock_id: null,
     process_id: 0,
     user_id: 0,
+    classification_id: 0,
   },
 });
 const process_users = ref([]);
@@ -41,6 +43,7 @@ const clickButton = () => {
     stock_id: form.search.stock_id,
     process_id: form.search.process_id,
     user_id: form.search.user_id,
+    classification_id: form.search.classification_id,
   });
 };
 const clearStocks = () => {
@@ -57,6 +60,7 @@ onMounted(() => {
   form.search.alias = props.search?.alias ?? "";
   form.search.address_id = props.search?.address_id ?? "";
   form.search.stock_id = props.search?.stock_id ?? "";
+  form.search.classification_id = props.search?.classification_id ?? 0;
   if (props.search?.process_id) {
     form.search.process_id = props.search?.process_id;
     changeProcess();
@@ -137,6 +141,25 @@ onMounted(() => {
                   placeholder="品番"
                   v-model="form.search.stock_s_name"
                 />
+              </div>
+            </div>
+            <div class="flex flex-wrap -mx-3 mb-6">
+              <div class="w-full px-3">
+                <select
+                  name=""
+                  id=""
+                  v-model="form.search.classification_id"
+                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 mt-2"
+                >
+                  <option value="0">カテゴリを選択</option>
+                  <option
+                    v-for="classification in props.classifications"
+                    :key="classification.id"
+                    :value="classification.id"
+                  >
+                    {{ classification.name }}
+                  </option>
+                </select>
               </div>
             </div>
             <div class="flex flex-wrap -mx-3 mb-6">
