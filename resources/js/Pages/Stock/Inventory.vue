@@ -51,7 +51,10 @@ const selectedFile = ref(null);
 const change_quantity = ref(null);
 
 // 画像の配列を作成（正しく画像パスを取得）
-const images = ref([props.stock.img_path, ...props.stock.stock_images.map(image => image.img_path)]);
+const images = ref([
+  props.stock.img_path,
+  ...props.stock.stock_images.map((image) => image.img_path),
+]);
 
 // 入庫月平均
 const receive_average = ref(0);
@@ -263,24 +266,25 @@ const handleUpdateLocation = (payload) => {
 };
 
 const deleteImage = (index) => {
-  if(index){
-    const image_path = images.value[index]
-    console.log(image_path)
+  if (index) {
+    const image_path = images.value[index];
+    console.log(image_path);
 
-    axios.delete(route('stock.deleteImage'), {
-      params: {
-        image_path: image_path
-      }
-    })
-    .then(res => {
-      console.log(res.data)
-      if(res.data.status){
-        window.location.reload()
-      }
-    })
-    .catch(error => {
-      console.log(error)
-    })
+    axios
+      .delete(route("stock.deleteImage"), {
+        params: {
+          image_path: image_path,
+        },
+      })
+      .then((res) => {
+        console.log(res.data);
+        if (res.data.status) {
+          window.location.reload();
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 };
 
@@ -363,6 +367,8 @@ onMounted(() => {
 <template>
   <StockLayout :title="'在庫詳細'">
     <template #content>
+
+
       <div v-if="previewImage.img_path" id="previewImage" class="py-4 px-8">
         <!-- 画像変更時のダイアログボックス -->
         <div class="flex justify-between items-center my-4">

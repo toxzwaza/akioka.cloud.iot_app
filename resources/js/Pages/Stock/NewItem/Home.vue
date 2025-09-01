@@ -7,6 +7,7 @@ const props = defineProps({
   processes: Array,
   users: Array,
   suppliers: Array,
+  order_request: Object,
 });
 
 const form = reactive({
@@ -39,6 +40,7 @@ const form = reactive({
   quantity_unit: null, //必要個数単位
   // desire_delivery_date:null, 希望納期
   description: null, //備考
+  device_name: null,
 });
 
 const select_users = ref([]);
@@ -79,8 +81,12 @@ const handleProcessId = (val) => {
 
 const handleFileSelect = (event) => {
   const files = Array.from(event.target.files);
-  const currentPdfCount = selectedFiles.value.filter(file => file.type === 'application/pdf').length;
-  const newPdfCount = files.filter(file => file.type === 'application/pdf').length;
+  const currentPdfCount = selectedFiles.value.filter(
+    (file) => file.type === "application/pdf"
+  ).length;
+  const newPdfCount = files.filter(
+    (file) => file.type === "application/pdf"
+  ).length;
 
   if (selectedFiles.value.length + files.length > 5) {
     alert("添付ファイルは合計で最大5つまでです");
@@ -123,7 +129,7 @@ const submitForm = () => {
   // 通常のフォームデータを追加
   Object.keys(form).forEach((key) => {
     if (form[key] !== null) {
-      if (key === 'approval_stocks' && Array.isArray(form[key])) {
+      if (key === "approval_stocks" && Array.isArray(form[key])) {
         // 配列の場合はJSON文字列として送信
         formData.append(key, JSON.stringify(form[key]));
       } else {
@@ -320,17 +326,43 @@ const push_gpt_msg = (msg) => {
 };
 
 onMounted(() => {
+  // デバイスID取得
+  const savedId = localStorage.getItem("device_id");
+  if (savedId && savedId != "null") {
+    form.device_name = savedId;
+    console.log(form.device_name);
+  }
+
   select_users.value = props.users;
   push_gpt_msg(
     nl2br(
       "稟議書作成AIアシスタントです！\n入力頂いた内容についてアドバイスをおこないます。"
     )
   );
+
+  if (props.order_request.new_stock_flg) {
+    form.new_approval = 1
+    form.user_id = props.order_request.request_user_id
+    form.desire_delivery_date = props.order_request.desire_delivery_date
+    form.calc_price = props.order_request.calc_price
+    form.title = props.order_request.title
+    form.content = props.order_request.content
+    form.main_reason = props.order_request.main_reason
+    form.sub_reason = props.order_request.sub_reason
+
+  }else{
+    form.new_approval = 0
+  }
+  console.log(props.order_request);
 });
 </script>
 <template>
   <StockLayout :title="'在庫管理システム'">
     <template #content>
+      <p class="text-gray-700 mb-4 text-left ml-4">
+        device_id :{{ form.device_name }}
+      </p>
+
       <ul class="flex border-b">
         <li class="-mb-px mr-1">
           <button
@@ -638,9 +670,7 @@ onMounted(() => {
                         <td
                           class="py-2 px-4 border-b border-gray-200 text-sm text-gray-700"
                         >
-                          {{
-                            approval_stock.price * approval_stock.quantity
-                          }}
+                          {{ approval_stock.price * approval_stock.quantity }}
                           円
                         </td>
                       </tr>
@@ -729,7 +759,11 @@ onMounted(() => {
                 添付ファイルがある場合は以下より添付してください。（最大5つまで）
               </p>
               <ul class="mt-4 list-disc list-inside text-sm text-gray-600">
-                <li class="mb-1">承認済み稟議書<span class="text-red-500 font-bold"> (PDFは一枚にまとめてください！)</span></li>
+                <li class="mb-1">
+                  承認済み稟議書<span class="text-red-500 font-bold">
+                    (PDFは一枚にまとめてください！)</span
+                  >
+                </li>
                 <li class="mb-1">購入物品の画像</li>
               </ul>
               <div class="flex items-center justify-center w-full">

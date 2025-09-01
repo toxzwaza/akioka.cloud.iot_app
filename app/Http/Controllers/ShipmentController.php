@@ -88,6 +88,7 @@ class ShipmentController extends Controller
                 if ($stock_supplier) {
                     $order_request->supplier_id = $stock_supplier->supplier_id;
                     $order_request->lead_time = $stock_supplier->lead_time;
+                    $order_request->postage = $stock_supplier->postage;
                 }
                 $order_request->save();
                 // -----------------------------------------------------------

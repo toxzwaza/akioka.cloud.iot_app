@@ -98,21 +98,21 @@ const openDescription = (order_request) => {
     description_order_request.approval_document.sub_reason =
       order_request.sub_reason;
   } else {
-    description_order_request.approval_document.document_id = null
-    description_order_request.approval_document.process_name = null
-    description_order_request.approval_document.user_name = null
-    description_order_request.approval_document.evalution_date = null
-    description_order_request.approval_document.desire_delivery_date = null
-    description_order_request.approval_document.supplier_name = null
-    description_order_request.approval_document.price = null
-    description_order_request.approval_document.quantity = null
-    description_order_request.approval_document.calc_price = null
-    description_order_request.approval_document.name = null
-    description_order_request.approval_document.s_name = null
-    description_order_request.approval_document.title = null
-    description_order_request.approval_document.content = null
-    description_order_request.approval_document.main_reason = null
-    description_order_request.approval_document.sub_reason = null
+    description_order_request.approval_document.document_id = null;
+    description_order_request.approval_document.process_name = null;
+    description_order_request.approval_document.user_name = null;
+    description_order_request.approval_document.evalution_date = null;
+    description_order_request.approval_document.desire_delivery_date = null;
+    description_order_request.approval_document.supplier_name = null;
+    description_order_request.approval_document.price = null;
+    description_order_request.approval_document.quantity = null;
+    description_order_request.approval_document.calc_price = null;
+    description_order_request.approval_document.name = null;
+    description_order_request.approval_document.s_name = null;
+    description_order_request.approval_document.title = null;
+    description_order_request.approval_document.content = null;
+    description_order_request.approval_document.main_reason = null;
+    description_order_request.approval_document.sub_reason = null;
   }
 };
 const sendAccept = (order_request_approval_id, action) => {
@@ -511,6 +511,35 @@ onMounted(() => {
                 </button>
               </div>
 
+              <div
+                class="approval_button_container flex justify-around mt-4 mb-16"
+              >
+                <button
+                  @click.prevent="
+                    sendAccept(
+                      description_order_request.order_request
+                        .order_request_approval_id,
+                      'accept'
+                    )
+                  "
+                  class="w-1/3 py-4 font-bold mr-2 bg-green-500 hover:bg-green-700 text-white font-bold px-4 rounded"
+                >
+                  承認
+                </button>
+                <button
+                  @click.prevent="
+                    sendAccept(
+                      description_order_request.order_request
+                        .order_request_approval_id,
+                      'reject'
+                    )
+                  "
+                  class="w-1/3 py-4 font-bold ml-2 bg-red-500 hover:bg-red-700 text-white font-bold px-4 rounded"
+                >
+                  非承認
+                </button>
+              </div>
+
               <textarea
                 id="message"
                 rows="4"
@@ -521,6 +550,48 @@ onMounted(() => {
               ></textarea>
 
               <div id="info_content">
+                <h2 class="font-bold my-4 text-gray-700">基本情報</h2>
+                <div class="mb-6">
+                  <div class="w-1/2">
+                    <label
+                      class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
+                      >画像:</label
+                    >
+
+                    <img :src="getImgPath(description_order_request.order_request.img_path)" alt="" />
+                  </div>
+                </div>
+                <div class="flex">
+                  <div class="w-1/2">
+                    <label
+                      class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
+                      >単価:</label
+                    >
+
+                    <p
+                      class="appearance-none block w-full text-gray-700 py-3 mb-3 leading-tight focus:outline-none focus:bg-white"
+                    >
+                      {{
+                        description_order_request.order_request.price.toLocaleString()
+                      }}
+                    </p>
+                  </div>
+
+                  <div class="w-1/2">
+                    <label
+                      class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
+                      >金額:</label
+                    >
+
+                    <p
+                      class="appearance-none block w-full text-gray-700 py-3 mb-3 leading-tight focus:outline-none focus:bg-white"
+                    >
+                      {{
+                        description_order_request.order_request.calc_price.toLocaleString()
+                      }}
+                    </p>
+                  </div>
+                </div>
                 <div class="flex">
                   <div class="w-1/2">
                     <label
@@ -605,12 +676,59 @@ onMounted(() => {
                   </p>
                 </div>
               </div>
+
+              <h2 class="font-bold my-4 text-gray-700">承認フロー</h2>
+              <div
+                class="flex items-center justify-start mb-8"
+                id="approval_container"
+              >
+                <div
+                  v-for="approval in description_order_request.order_request
+                    .order_request_approvals"
+                  :key="approval.id"
+                  class="card rounded overflow-hidden shadow-lg mr-8"
+                >
+                  <img
+                    class="w-full"
+                    :src="
+                      approval.status === 1
+                        ? '/images/order_request/approval_icon.png'
+                        : approval.status === 2
+                        ? '/images/order_request/not_approval_icon.png'
+                        : '/images/order_request/none_approval.png'
+                    "
+                    alt="承認状態アイコン"
+                  />
+                  <div class="px-6 py-4">
+                    <div class="text-sm mb-2">
+                      {{ new Date(approval.updated_at).getFullYear() }}年{{
+                        new Date(approval.updated_at).getMonth() + 1
+                      }}月{{ new Date(approval.updated_at).getDate() }}日
+                      {{ new Date(approval.updated_at).getHours() }}時{{
+                        new Date(approval.updated_at).getMinutes()
+                      }}分
+                    </div>
+                    <div class="font-bold text-xl mb-2">
+                      {{ approval.name }}
+                    </div>
+                    <p class="text-gray-700 text-base">
+                      {{
+                        approval.comment
+                          ? approval.comment
+                          : "コメントがありません。"
+                      }}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
             <ApprovalDocument
+              v-if="description_order_request.order_request.new_stock_flg"
               :approval_document="description_order_request.approval_document"
             />
           </div>
           <iframe
+            v-if="description_order_request.viewerUrl != ''"
             ref="pdfViewer"
             :src="description_order_request.viewerUrl"
             class="w-2/3 mx-auto"

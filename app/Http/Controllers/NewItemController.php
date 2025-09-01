@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Services\Helper;
+use App\Models\Device;
 use App\Models\Document;
 use App\Models\DocumentImage;
+use App\Models\DocumentStock;
 use App\Models\OrderRequest;
 use App\Models\Process;
 use App\Models\Stock;
@@ -19,14 +21,17 @@ use Illuminate\Support\Facades\DB;
 class NewItemController extends Controller
 {
     //
-    public function home()
+    public function home(Request $request)
     {
 
         $processes = Process::all();
         $users = User::where('del_flg', 0)->orderBy('process_id', 'desc')->orderBy('position_id', 'asc')->get();
         $suppliers = Supplier::all();
 
-        return Inertia::render('Stock/NewItem/Home', ['processes' => $processes, 'users' => $users, 'suppliers' => $suppliers]);
+        $order_request_id = $request->order_request_id;
+        $order_request = OrderRequest::select('order_requests.*', 'documents.title as title', 'documents.content as content', 'documents.main_reason as main_reason', 'documents.sub_reason')->leftJoin('documents', 'documents.id','order_requests.document_id')->where('order_requests.id', $order_request_id)->first();
+
+        return Inertia::render('Stock/NewItem/Home', ['processes' => $processes, 'users' => $users, 'suppliers' => $suppliers, 'order_request' => $order_request]);
     }
 
     public function store(Request $request)
@@ -50,6 +55,15 @@ class NewItemController extends Controller
         $name = $request->name;
         $s_name = $request->s_name;
         $approval_stocks = $request->input('approval_stocks', []);
+
+        $device_id = null;
+        $device_name = $request->device_name;
+        if ($device_name) {
+            $device = Device::where('name', $device_name)->first();
+            if ($device) {
+                $device_id = $device->id;
+            }
+        }
 
         // JSON文字列の場合は配列に戻す
         if (is_string($approval_stocks)) {
@@ -122,7 +136,14 @@ class NewItemController extends Controller
                     $order_request->document_id = $document->id;
                     $order_request->desire_delivery_date = $desire_delivery_date;
                     $order_request->file_path = $approval_file_path;
+                    $order_request->device_id = $device_id;
                     $order_request->save();
+
+                    // 稟議書と物品の紐づけ
+                    $document_stock = new DocumentStock();
+                    $document_stock->stock_id = $stock->id;
+                    $document_stock->document_id = $document->id;
+                    $document_stock->save();
                 }
 
                 $msg = '稟議書が正常に保存されました';
@@ -140,6 +161,7 @@ class NewItemController extends Controller
                 $order_request->digest_date = $digest_date; //消化予定日
                 $order_request->desire_delivery_date = $desire_delivery_date; //希望納入日
                 $order_request->description = $description; //備考
+                $order_request->device_id = $device_id;
                 $order_request->save();
 
                 // 発注依頼を通知 -----------------------------------------------------------

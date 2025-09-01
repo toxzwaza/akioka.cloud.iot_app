@@ -99,6 +99,14 @@ class AcceptController extends Controller
 
         // documents_imagesを配列として取得
         foreach ($order_requests as $order_request) {
+            $order_request_approvals = OrderRequestApproval::select('users.id as user_id', 'users.name', 'ora.status', 'ora.final_flg', 'ora.comment', 'ora.updated_at')
+                ->where('order_request_id', $order_request->id)
+                ->join('users', 'users.id', '=', 'ora.user_id')
+                ->from('order_request_approvals as ora')
+                ->get();
+            $order_request->order_request_approvals = $order_request_approvals;
+
+
             $document_images = DB::table('document_images')
                 ->select(DB::raw('CONCAT("/storage/", SUBSTRING_INDEX(image_path, "storage/", -1)) as image_path'))
                 ->where('document_id', $order_request->document_id)
