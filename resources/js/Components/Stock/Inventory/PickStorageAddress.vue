@@ -3,6 +3,7 @@ import { onMounted, ref, reactive } from "vue";
 import axios from "axios";
 const props = defineProps({
   quantity: Number,
+  stock_storage_id: Number,
 });
 const locations = ref([]);
 const storage_addresses = ref([]);
@@ -14,26 +15,48 @@ const location = reactive({
 });
 
 const emit = defineEmits(["updateLocation"]);
-const updateLocation = () => {
-  // 入力チェック
+const updateLocation = (flg) => {
+  if (!flg) {
+    // 入力チェック
 
-  const selectedLocation = locations.value.find(
-    (loc) => loc.id === location.location_id
-  );
+    const selectedLocation = locations.value.find(
+      (loc) => loc.id === location.location_id
+    );
 
-  const selectedAddress = storage_addresses.value.find(
-    (addr) => addr.id === location.storage_address_id
-  );
+    const selectedAddress = storage_addresses.value.find(
+      (addr) => addr.id === location.storage_address_id
+    );
 
-  if (
-    confirm(
-      `下記の内容で登録します。よろしいですか？\n格納先:${selectedLocation.name}\nアドレス:${selectedAddress.address}\n個数:${location.quantity}\n`
-    )
-  ) {
-    emit("updateLocation", {
-      storage_address_id: location.storage_address_id,
-      quantity: location.quantity,
-    });
+    if (
+      confirm(
+        `下記の内容で登録します。よろしいですか？\n格納先:${selectedLocation.name}\nアドレス:${selectedAddress.address}\n個数:${location.quantity}\n`
+      )
+    ) {
+      emit("updateLocation", {
+        storage_address_id: location.storage_address_id,
+        quantity: location.quantity,
+      });
+    }
+  } else {
+    // 削除
+
+
+    axios
+      .delete(route("stock.deleteStockStorage"), {
+        // 既存の格納先がある場合
+        params: {
+          stock_storage_id: props.stock_storage_id,
+        }
+      })
+      .then((res) => {
+        console.log(res.data);
+        alert('格納先アドレスを削除しました。TOP画面に戻ります。')
+
+        window.location.href = route('stock.home');
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 };
 
@@ -70,12 +93,19 @@ const getStorageAddresses = ($location_id) => {
 };
 
 onMounted(() => {
+  console.log(props.stock_storage_id)
   getLocations();
 
   location.quantity = props.quantity ?? 0;
 });
 </script>
 <template>
+  <button
+  @click="updateLocation('delete')"
+    class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-2 mb-4"
+  >
+    アドレス削除
+  </button>
   <div class="flex items-center justify-start py-2 mb-2">
     <label class="w-1/3 mr-1" for="">
       <span class="text-gray-600 text-sm mb-1">格納先</span>

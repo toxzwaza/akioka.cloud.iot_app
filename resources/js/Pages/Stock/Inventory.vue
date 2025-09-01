@@ -549,6 +549,7 @@ onMounted(() => {
                   <PickStorageAddress
                     @updateLocation="handleUpdateLocation"
                     :quantity="stock_storage.quantity"
+                    :stock_storage_id="stock_storage.id"
                   />
                 </div>
               </details>

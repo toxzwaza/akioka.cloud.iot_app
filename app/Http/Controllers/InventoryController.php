@@ -255,6 +255,19 @@ class InventoryController extends Controller
         return response()->json(['status' => $status, 'msg' => $msg, 'stock_storage_id' => $stock_storage->id]);
     }
 
+    // 格納先アドレス削除
+    public function deleteStockStorage(Request $request){
+        $status = true;
+        $msg = '';
+
+        $stock_storage_id = $request->stock_storage_id;
+
+        $stock_storage = StockStorage::find($stock_storage_id);
+        $stock_storage->delete();
+
+        return response()->json(['status' => $status, 'msg' => $msg]);
+    }
+
     // 格納先・アドレス編集
     public function getLocations()
     {

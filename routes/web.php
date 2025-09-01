@@ -66,6 +66,7 @@ Route::get('/search/result', [SearchController::class, 'result'])->name('stock.s
 Route::get('/stock/getLocations', [InventoryController::class, 'getLocations'])->name('stock.getLocations');
 Route::get('/stock/getStorageAddresses/{location_id}', [InventoryController::class, 'getStorageAddresses'])->name('stock.getStorageAddresses');
 Route::post('/stock/createStockStorage', [InventoryController::class, 'createStockStorage'])->name('stock.createStockStorage');
+Route::delete('/stock/deleteStockStorage', [InventoryController::class, 'deleteStockStorage'])->name('stock.deleteStockStorage');
 
 // 在庫詳細画面
 Route::get('/stock/{stock_id}/{stock_storage_id}', [InventoryController::class, 'show'])->name('stock.inventory.show');
