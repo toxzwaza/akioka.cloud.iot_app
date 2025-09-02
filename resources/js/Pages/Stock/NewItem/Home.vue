@@ -49,31 +49,6 @@ const previewUrls = ref([]);
 
 const gpt_msg = ref([]);
 
-const createApprovalStocks = () => {
-  if (
-    form.name &&
-    form.s_name &&
-    form.supplier_name &&
-    form.price &&
-    form.quantity
-  ) {
-    form.approval_stocks.push({
-      name: form.name,
-      s_name: form.s_name,
-      supplier_name: form.supplier_name,
-      price: form.price,
-      quantity: form.quantity,
-      calc_price: form.calc_price,
-    });
-
-    form.name = null;
-    form.s_name = null;
-    form.supplier_name = null;
-    form.price = null;
-    form.quantity = null;
-  }
-};
-
 const handleProcessId = (val) => {
   console.log(val);
   select_users.value = props.users.filter((user) => user.process_id == val);
@@ -325,6 +300,61 @@ const push_gpt_msg = (msg) => {
   });
 };
 
+const stockEdit = ref(null);
+const editStock = (index) => {
+  console.log(index);
+  stockEdit.value = index;
+  const stock = form.approval_stocks[index];
+  console.log(stock);
+  form.name = stock.name;
+  form.s_name = stock.s_name;
+  form.supplier_name = stock.supplier_name;
+  form.price = stock.price;
+  form.quantity = stock.quantity;
+};
+const deleteStock = (index) => {
+  form.approval_stocks.splice(index, 1);
+};
+const createApprovalStocks = () => {
+  if (
+    form.name &&
+    form.s_name &&
+    form.supplier_name &&
+    form.price &&
+    form.quantity
+  ) {
+    form.approval_stocks.push({
+      name: form.name,
+      s_name: form.s_name,
+      supplier_name: form.supplier_name,
+      price: form.price,
+      quantity: form.quantity,
+      calc_price: form.calc_price,
+    });
+
+    form.name = null;
+    form.s_name = null;
+    form.supplier_name = null;
+    form.price = null;
+    form.quantity = null;
+  }
+};
+const saveApprovalStocks = () => {
+  const stock = form.approval_stocks[stockEdit.value];
+  console.log(stockEdit.value, stock)
+  stock.name = form.name;
+  stock.s_name = form.s_name;
+  stock.supplier_name = form.supplier_name;
+  stock.price = form.price;
+  stock.quantity = form.quantity;
+
+  form.name = null;
+  form.s_name = null;
+  form.supplier_name = null;
+  form.price = null;
+  form.quantity = null;
+  stockEdit.value = null;
+};
 onMounted(() => {
   // デバイスID取得
   const savedId = localStorage.getItem("device_id");
@@ -341,17 +371,16 @@ onMounted(() => {
   );
 
   if (props.order_request.new_stock_flg) {
-    form.new_approval = 1
-    form.user_id = props.order_request.request_user_id
-    form.desire_delivery_date = props.order_request.desire_delivery_date
-    form.calc_price = props.order_request.calc_price
-    form.title = props.order_request.title
-    form.content = props.order_request.content
-    form.main_reason = props.order_request.main_reason
-    form.sub_reason = props.order_request.sub_reason
-
-  }else{
-    form.new_approval = 0
+    form.new_approval = 1;
+    form.user_id = props.order_request.request_user_id;
+    form.desire_delivery_date = props.order_request.desire_delivery_date;
+    form.calc_price = props.order_request.calc_price;
+    form.title = props.order_request.title;
+    form.content = props.order_request.content;
+    form.main_reason = props.order_request.main_reason;
+    form.sub_reason = props.order_request.sub_reason;
+  } else {
+    form.new_approval = 0;
   }
   console.log(props.order_request);
 });
@@ -594,10 +623,18 @@ onMounted(() => {
                 </div>
               </div>
               <button
+                v-if="stockEdit === null"
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-8"
                 @click.prevent="createApprovalStocks"
               >
                 追加
+              </button>
+              <button
+                v-else
+                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-8"
+                @click.prevent="saveApprovalStocks"
+              >
+                更新
               </button>
 
               <div v-if="form.approval_stocks.length > 0">
@@ -635,6 +672,9 @@ onMounted(() => {
                         >
                           金額
                         </th>
+                        <th
+                          class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                        ></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -672,6 +712,30 @@ onMounted(() => {
                         >
                           {{ approval_stock.price * approval_stock.quantity }}
                           円
+                        </td>
+                        <td
+                          class="py-2 px-4 border-b border-gray-200 text-sm text-gray-700 flex"
+                        >
+                          <button
+                            @click.prevent="
+                              editStock(
+                                form.approval_stocks.indexOf(approval_stock)
+                              )
+                            "
+                            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-4"
+                          >
+                            編集
+                          </button>
+                          <button
+                            @click.prevent="
+                              deleteStock(
+                                form.approval_stocks.indexOf(approval_stock)
+                              )
+                            "
+                            class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                          >
+                            削除
+                          </button>
                         </td>
                       </tr>
                       <!-- 他の行を追加する場合はここに -->
