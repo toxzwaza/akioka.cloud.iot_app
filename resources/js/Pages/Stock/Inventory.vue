@@ -85,9 +85,9 @@ const handleTenKeyDelete = () => {
   if (change_quantity.value && change_quantity.value.toString().length > 0) {
     const currentValue = change_quantity.value.toString();
     change_quantity.value = currentValue.slice(0, -1);
-    
+
     // 空になった場合はnullに設定
-    if (change_quantity.value === '') {
+    if (change_quantity.value === "") {
       change_quantity.value = null;
     }
   }
@@ -389,8 +389,6 @@ onMounted(() => {
 <template>
   <StockLayout :title="'在庫詳細'">
     <template #content>
-
-
       <div v-if="previewImage.img_path" id="previewImage" class="py-4 px-8">
         <!-- 画像変更時のダイアログボックス -->
         <div class="flex justify-between items-center my-4">
@@ -538,7 +536,7 @@ onMounted(() => {
                 <h1 id="quantity" class="">{{ stock_storage.quantity }}個</h1>
               </div>
             </div>
-            <div></div>
+            <div>
               <details class="manage_details">
                 <summary class="text-white pl-4 mt-4">数量編集</summary>
                 <div class="px-2 py-2 bg-gray-300">
@@ -547,38 +545,96 @@ onMounted(() => {
                   </p>
                   <div class="flex items-center justify-start py-2 mb-2">
                     <input
-                      class="appearance-none block w-1/2 bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                      class="appearance-none block w-1/2 bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 text-center font-bold text-xl pointer-events-none"
                       type="number"
                       name="change_quantity"
                       id=""
                       v-model="change_quantity"
                     />
-                  </div>
-                  <button
-                    @click="changeQuantity"
-                    v-if="change_quantity || change_quantity == '0'"
-                    class="text-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                  >
-                    確定
-                  </button>
 
+                    <button
+                      @click="changeQuantity"
+                      v-if="change_quantity || change_quantity == '0'"
+                      class="ml-4 text-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                    >
+                      確定
+                    </button>
+                  </div>
 
                   <div class="ten-keypad">
                     <div class="grid grid-cols-3 gap-2">
-                      <button class="ten-key-button" @click="handleTenKeyInput(1)">1</button>
-                      <button class="ten-key-button" @click="handleTenKeyInput(2)">2</button>
-                      <button class="ten-key-button" @click="handleTenKeyInput(3)">3</button>
-                      <button class="ten-key-button" @click="handleTenKeyInput(4)">4</button>
-                      <button class="ten-key-button" @click="handleTenKeyInput(5)">5</button>
-                      <button class="ten-key-button" @click="handleTenKeyInput(6)">6</button>
-                      <button class="ten-key-button" @click="handleTenKeyInput(7)">7</button>
-                      <button class="ten-key-button" @click="handleTenKeyInput(8)">8</button>
-                      <button class="ten-key-button" @click="handleTenKeyInput(9)">9</button>
-                      <button class="ten-key-button" @click="handleTenKeyDelete" title="削除">
+                      <button
+                        class="ten-key-button"
+                        @click="handleTenKeyInput(1)"
+                      >
+                        1
+                      </button>
+                      <button
+                        class="ten-key-button"
+                        @click="handleTenKeyInput(2)"
+                      >
+                        2
+                      </button>
+                      <button
+                        class="ten-key-button"
+                        @click="handleTenKeyInput(3)"
+                      >
+                        3
+                      </button>
+                      <button
+                        class="ten-key-button"
+                        @click="handleTenKeyInput(4)"
+                      >
+                        4
+                      </button>
+                      <button
+                        class="ten-key-button"
+                        @click="handleTenKeyInput(5)"
+                      >
+                        5
+                      </button>
+                      <button
+                        class="ten-key-button"
+                        @click="handleTenKeyInput(6)"
+                      >
+                        6
+                      </button>
+                      <button
+                        class="ten-key-button"
+                        @click="handleTenKeyInput(7)"
+                      >
+                        7
+                      </button>
+                      <button
+                        class="ten-key-button"
+                        @click="handleTenKeyInput(8)"
+                      >
+                        8
+                      </button>
+                      <button
+                        class="ten-key-button"
+                        @click="handleTenKeyInput(9)"
+                      >
+                        9
+                      </button>
+                      <button
+                        class="ten-key-button"
+                        @click="handleTenKeyDelete"
+                        title="削除"
+                      >
                         <i class="fas fa-backspace"></i>
                       </button>
-                      <button class="ten-key-button" @click="handleTenKeyInput(0)">0</button>
-                      <button class="ten-key-button" @click="change_quantity = null" title="クリア">
+                      <button
+                        class="ten-key-button"
+                        @click="handleTenKeyInput(0)"
+                      >
+                        0
+                      </button>
+                      <button
+                        class="ten-key-button"
+                        @click="change_quantity = null"
+                        title="クリア"
+                      >
                         <i class="fas fa-times"></i>
                       </button>
                     </div>
@@ -1235,7 +1291,7 @@ onMounted(() => {
 
 .ten-keypad {
   margin-top: 1rem;
-  
+
   .ten-key-button {
     background-color: #f3f4f6;
     border: 2px solid #d1d5db;
@@ -1250,20 +1306,20 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     &:hover {
       background-color: #e5e7eb;
       border-color: #9ca3af;
       transform: translateY(-1px);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    
+
     &:active {
       background-color: #d1d5db;
       transform: translateY(0);
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
-    
+
     &:focus {
       outline: none;
       border-color: #3b82f6;
