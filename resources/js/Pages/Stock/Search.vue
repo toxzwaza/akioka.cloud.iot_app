@@ -3,7 +3,8 @@ import StockLayout from "@/Layouts/StockLayout.vue";
 import StockForm from "@/Components/StockForm.vue";
 import { Link, router } from "@inertiajs/vue3";
 import { getImgPath } from "@/Helper/method";
-import { reactive, ref, onMounted } from "vue";
+import { reactive, ref, onMounted, onUnmounted } from "vue";
+import jsQR from "jsqr";
 
 const props = defineProps({
   processes: Array,
@@ -52,6 +53,107 @@ const clearStocks = () => {
 
 const search_box = ref(true);
 
+// QRスキャナー関連の状態
+const showQRScanner = ref(false);
+const video = ref(null);
+const canvas = ref(null);
+const qrResult = ref("");
+const isCameraActive = ref(false);
+const errorMessage = ref("");
+let stream = null;
+let animationFrame = null;
+
+const openScanner = () => {
+  showQRScanner.value = true;
+  // 次のティックでカメラを開始
+  setTimeout(() => {
+    startCamera();
+  }, 100);
+};
+
+const closeScanner = () => {
+  stopCamera();
+  showQRScanner.value = false;
+  qrResult.value = "";
+  errorMessage.value = "";
+};
+
+const startCamera = async () => {
+  try {
+    errorMessage.value = "";
+    
+    // 既存のストリームを停止
+    if (stream) {
+      stopCamera();
+    }
+
+    // カメラアクセス
+    stream = await navigator.mediaDevices.getUserMedia({ 
+      video: { 
+        facingMode: "environment",
+        width: { ideal: 640 },
+        height: { ideal: 480 }
+      } 
+    });
+    
+    video.value.srcObject = stream;
+    isCameraActive.value = true;
+    
+    // QRコード読み取り開始
+    startQRScanning();
+    
+  } catch (error) {
+    console.error("カメラアクセスエラー:", error);
+    errorMessage.value = "カメラにアクセスできません。ブラウザの設定を確認してください。";
+  }
+};
+
+const stopCamera = () => {
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    stream = null;
+  }
+  
+  if (animationFrame) {
+    cancelAnimationFrame(animationFrame);
+    animationFrame = null;
+  }
+  
+  if (video.value) {
+    video.value.srcObject = null;
+  }
+  
+  isCameraActive.value = false;
+};
+
+const startQRScanning = () => {
+  const context = canvas.value.getContext("2d");
+
+  const tick = () => {
+    if (video.value && video.value.readyState === video.value.HAVE_ENOUGH_DATA) {
+      canvas.value.width = video.value.videoWidth;
+      canvas.value.height = video.value.videoHeight;
+      context.drawImage(video.value, 0, 0, canvas.value.width, canvas.value.height);
+      
+      const imageData = context.getImageData(0, 0, canvas.value.width, canvas.value.height);
+      const code = jsQR(imageData.data, canvas.value.width, canvas.value.height);
+      
+      if (code) {
+        qrResult.value = code.data;
+        // QRコードが読み取れたら棚アドレスフィールドに設定してポップアップを閉じる
+        form.search.address_id = code.data;
+        closeScanner();
+      }
+    }
+    
+    if (isCameraActive.value) {
+      animationFrame = requestAnimationFrame(tick);
+    }
+  }
+  
+  tick();
+};
+
 onMounted(() => {
   console.log(props.search);
 
@@ -66,6 +168,10 @@ onMounted(() => {
     changeProcess();
   }
   form.search.user_id = props.search?.user_id ?? "";
+});
+
+onUnmounted(() => {
+  stopCamera();
 });
 </script>
 <template>
@@ -123,7 +229,7 @@ onMounted(() => {
               <div class="w-full px-3">
                 <input
                   name="search_name"
-                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   id="grid-password"
                   type="text"
                   placeholder="品名"
@@ -135,7 +241,7 @@ onMounted(() => {
               <div class="w-full px-3">
                 <input
                   name="search_name"
-                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   id="grid-password"
                   type="text"
                   placeholder="品番"
@@ -149,7 +255,7 @@ onMounted(() => {
                   name=""
                   id=""
                   v-model="form.search.classification_id"
-                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 mt-2"
+                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 mt-2"
                 >
                   <option value="0">カテゴリを選択</option>
                   <option
@@ -166,7 +272,7 @@ onMounted(() => {
               <div class="w-full px-3">
                 <input
                   name="alias"
-                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   id="grid-password"
                   type="text"
                   placeholder="略名"
@@ -175,22 +281,25 @@ onMounted(() => {
               </div>
             </div>
             <div class="flex flex-wrap -mx-3 mb-6">
-              <div class="w-full px-3">
+              <div class="w-full px-3 flex items-center justify-start">
                 <input
                   name="address_id"
-                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  class="w-5/6 appearance-none block bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   id="grid-password"
                   type="number"
                   placeholder="棚アドレス"
                   v-model="form.search.address_id"
                 />
+                <button @click.prevent="openScanner" class="ml-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <i class="fas fa-camera"></i>
+              </button>
               </div>
             </div>
             <div class="flex flex-wrap -mx-3 mb-6">
               <div class="w-full px-3">
                 <input
                   name="stock_id"
-                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-4 px-6 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   id="grid-password"
                   type="number"
                   placeholder="製品ID or JANコード"
@@ -217,6 +326,98 @@ onMounted(() => {
       >
         検索画面を表示
       </button>
+
+      <!-- QRスキャナーポップアップ -->
+      <div
+        v-if="showQRScanner"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        @click="closeScanner"
+      >
+        <div
+          class="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4"
+          @click.stop
+        >
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-semibold text-gray-800">
+              QRコードをスキャンしてください
+            </h3>
+            <button
+              @click="closeScanner"
+              class="text-gray-500 hover:text-gray-700 text-xl font-bold"
+            >
+              ×
+            </button>
+          </div>
+
+          <!-- カメラ表示エリア -->
+          <div class="mb-4">
+            <div class="relative bg-gray-200 rounded-lg overflow-hidden">
+              <video
+                ref="video"
+                autoplay
+                playsinline
+                muted
+                class="w-full h-80 object-cover"
+              ></video>
+              <canvas
+                ref="canvas"
+                class="hidden"
+              ></canvas>
+            </div>
+          </div>
+
+          <!-- 読み取り結果 -->
+          <div v-if="qrResult" class="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+            <p class="font-semibold">読み取り完了:</p>
+            <p class="font-mono">{{ qrResult }}</p>
+          </div>
+
+          <!-- エラーメッセージ -->
+          <div v-if="errorMessage" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            {{ errorMessage }}
+          </div>
+
+          <!-- ステータス表示 -->
+          <div class="mb-4 text-center">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                  :class="isCameraActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
+              <span class="w-2 h-2 rounded-full mr-2"
+                    :class="isCameraActive ? 'bg-green-500' : 'bg-gray-500'"></span>
+              {{ isCameraActive ? 'カメラ稼働中' : 'カメラ停止中' }}
+            </span>
+          </div>
+
+          <!-- 説明テキスト -->
+          <div class="text-center text-gray-600 text-base mb-6">
+            QRコードをカメラに向けてください。<br>
+            読み取りが完了すると自動的に棚アドレスに設定されます。
+          </div>
+
+          <!-- ボタン -->
+          <div class="flex gap-2 justify-center">
+            <button
+              @click="startCamera"
+              :disabled="isCameraActive"
+              class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+            >
+              カメラ開始
+            </button>
+            <button
+              @click="stopCamera"
+              :disabled="!isCameraActive"
+              class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+            >
+              カメラ停止
+            </button>
+            <button
+              @click="closeScanner"
+              class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
+            >
+              閉じる
+            </button>
+          </div>
+        </div>
+      </div>
     </template>
   </StockLayout>
 </template>

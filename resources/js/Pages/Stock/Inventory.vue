@@ -71,6 +71,28 @@ const activeSlideIndex = ref(0);
 // 画像タイプを保持するref
 const selectedFileType = ref("");
 
+// テンキー入力処理
+const handleTenKeyInput = (value) => {
+  if (change_quantity.value === null || change_quantity.value === undefined) {
+    change_quantity.value = value.toString();
+  } else {
+    change_quantity.value = change_quantity.value.toString() + value.toString();
+  }
+};
+
+// テンキー削除処理
+const handleTenKeyDelete = () => {
+  if (change_quantity.value && change_quantity.value.toString().length > 0) {
+    const currentValue = change_quantity.value.toString();
+    change_quantity.value = currentValue.slice(0, -1);
+    
+    // 空になった場合はnullに設定
+    if (change_quantity.value === '') {
+      change_quantity.value = null;
+    }
+  }
+};
+
 // 数量変更
 const changeQuantity = () => {
   if (
@@ -516,7 +538,7 @@ onMounted(() => {
                 <h1 id="quantity" class="">{{ stock_storage.quantity }}個</h1>
               </div>
             </div>
-            <div>
+            <div></div>
               <details class="manage_details">
                 <summary class="text-white pl-4 mt-4">数量編集</summary>
                 <div class="px-2 py-2 bg-gray-300">
@@ -539,6 +561,28 @@ onMounted(() => {
                   >
                     確定
                   </button>
+
+
+                  <div class="ten-keypad">
+                    <div class="grid grid-cols-3 gap-2">
+                      <button class="ten-key-button" @click="handleTenKeyInput(1)">1</button>
+                      <button class="ten-key-button" @click="handleTenKeyInput(2)">2</button>
+                      <button class="ten-key-button" @click="handleTenKeyInput(3)">3</button>
+                      <button class="ten-key-button" @click="handleTenKeyInput(4)">4</button>
+                      <button class="ten-key-button" @click="handleTenKeyInput(5)">5</button>
+                      <button class="ten-key-button" @click="handleTenKeyInput(6)">6</button>
+                      <button class="ten-key-button" @click="handleTenKeyInput(7)">7</button>
+                      <button class="ten-key-button" @click="handleTenKeyInput(8)">8</button>
+                      <button class="ten-key-button" @click="handleTenKeyInput(9)">9</button>
+                      <button class="ten-key-button" @click="handleTenKeyDelete" title="削除">
+                        <i class="fas fa-backspace"></i>
+                      </button>
+                      <button class="ten-key-button" @click="handleTenKeyInput(0)">0</button>
+                      <button class="ten-key-button" @click="change_quantity = null" title="クリア">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </details>
               <details class="manage_details">
@@ -1187,5 +1231,44 @@ onMounted(() => {
   height: 100%;
   object-fit: cover;
   border-radius: 4px;
+}
+
+.ten-keypad {
+  margin-top: 1rem;
+  
+  .ten-key-button {
+    background-color: #f3f4f6;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:hover {
+      background-color: #e5e7eb;
+      border-color: #9ca3af;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    &:active {
+      background-color: #d1d5db;
+      transform: translateY(0);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    &:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+  }
 }
 </style>

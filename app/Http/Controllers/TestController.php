@@ -102,4 +102,12 @@ class TestController extends Controller
         // return response()->download($fileName)->deleteFileAfterSend(true);
 
     }
+
+    /**
+     * QRコードスキャナーのテストページを表示
+     */
+    public function qrScanner()
+    {
+        return Inertia::render('Test/QRScanner');
+    }
 }
