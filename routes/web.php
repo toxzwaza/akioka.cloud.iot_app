@@ -158,6 +158,10 @@ Route::get('/lunch/getUsers', [LunchController::class, 'getUsers'])->name('lunch
 // 物品依頼確認用
 Route::get('/check_order_request', [CheckOrderRequestController::class, 'index'])->name('stock.check_order_request.home');
 Route::get('/check_order_request/getOrderRequests', [CheckOrderRequestController::class, 'getOrderRequests'])->name('stock.check_order_request.getOrderRequests');
+// 詳細画面
+Route::get('/check_order_request/show/{order_request_id}', [CheckOrderRequestController::class, 'show'])->name('stock.check_order_request.show');
+// 詳細データ取得
+Route::get('/check_order_request/detail/{order_request_id}', [CheckOrderRequestController::class, 'getOrderRequestDetail'])->name('stock.check_order_request.getOrderRequestDetail');
 
 ////////// API用 //////////
 Route::get('/getGroups', [ApiController::class, 'getGroups'])->name('getGroups');
