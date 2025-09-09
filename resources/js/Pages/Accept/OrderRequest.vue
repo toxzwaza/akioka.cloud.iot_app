@@ -115,6 +115,45 @@ const openDescription = (order_request) => {
     description_order_request.approval_document.sub_reason = null;
   }
 };
+// 行のスタイルを判定する関数
+const getRowStyle = (order_request) => {
+  // accept_flg が 6（差し戻し状態）の場合
+  if (order_request.accept_flg === 6) {
+    // 現在のユーザーの承認状況を確認
+    const currentUserApproval = order_request.order_request_approvals?.find(
+      approval => approval.user_id === props.user.id
+    );
+    
+    if (currentUserApproval) {
+      // 現在のユーザーの承認ステータスが0の場合（回答待ち）はオレンジ色背景
+      if (currentUserApproval.status === 0) {
+        return {
+          isDisabled: false,
+          isWaitingResponse: true,
+          rowClass: 'bg-orange-50 hover:bg-orange-100 transition-colors duration-200 border-l-4 border-orange-400',
+          textClass: 'text-gray-900'
+        };
+      }
+      // 現在のユーザーの承認ステータスがnullの場合はグレーアウト
+      else if (currentUserApproval.status === 2) {
+        return {
+          isDisabled: true,
+          isWaitingResponse: false,
+          rowClass: 'bg-gray-100 hover:bg-gray-200 transition-colors duration-200',
+          textClass: 'text-gray-500'
+        };
+      }
+    }
+  }
+  
+  return {
+    isDisabled: false,
+    isWaitingResponse: false,
+    rowClass: 'hover:bg-gray-50 transition-colors duration-200',
+    textClass: 'text-gray-900'
+  };
+};
+
 const sendAccept = (order_request_approval_id, action) => {
   let status;
   let msg = "";
@@ -159,6 +198,7 @@ const sendAccept = (order_request_approval_id, action) => {
 
 onMounted(() => {
   console.log(props.order_requests);
+
 });
 </script>
 <template>
@@ -168,157 +208,188 @@ onMounted(() => {
         v-if="description_order_request.comment.order_request_id"
         id="modal_cover"
       ></div>
-      <section class="text-gray-600 body-font" style="margin-bottom: 20vh">
-        <div class="py-12 mx-auto">
-          <div class="flex flex-col text-center w-full mb-20">
-            <h1
-              class="sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900"
-            >
-              承認者：{{ props.user.name }}
-            </h1>
-            <p class="lg:w-2/3 mx-auto leading-relaxed text-base">
-              以下より、承認を行ってください。
+      
+      <!-- ヘッダーセクション -->
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12 mb-8">
+        <div class="container mx-auto px-4">
+          <div class="text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
+              <i class="fas fa-user-check text-2xl"></i>
+            </div>
+            <h1 class="text-4xl font-bold mb-2">承認システム</h1>
+            <p class="text-xl opacity-90 mb-4">承認者：{{ props.user.name }}</p>
+            <p class="text-lg opacity-80">以下の発注依頼について承認をお願いします</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- インストラクション -->
+      <div class="container mx-auto px-4 mb-8">
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+          <div class="flex items-center">
+            <i class="fas fa-info-circle text-blue-400 mr-3"></i>
+            <p class="text-blue-800">
+              コメントを送信する場合は、<i class="fas fa-comment text-blue-600 mx-1"></i>から追加した後、承認登録を行ってください。
             </p>
           </div>
-          <div class="w-full mx-auto overflow-auto">
-            <h3 class="mb-4">
-              コメントを送信する場合は、<i
-                class="fa-solid fa-comment text-blue-600 mx-1"
-              >
-              </i>
-              から、追加した後、承認登録を行ってください。
-            </h3>
+        </div>
+      </div>
+
+      <!-- メインコンテンツ -->
+      <section class="container mx-auto px-4 pb-20">
+        <!-- テーブルコンテナ -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div class="overflow-x-auto">
             <table
               id="order_request_table"
-              class="table-auto w-full text-left whitespace-no-wrap"
+              class="w-full"
             >
               <thead>
-                <tr>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl"
-                  >
-                    画像
+                <tr class="bg-gradient-to-r from-gray-50 to-gray-100">
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <i class="fas fa-image mr-2 text-gray-400"></i>
+                      画像
+                    </div>
                   </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    分類<i class="ml-1 fa-solid fa-tags"></i>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <i class="fas fa-tags mr-2 text-gray-400"></i>
+                      分類
+                    </div>
                   </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    最終発注日<i class="ml-1 fa-solid fa-calendar-alt"></i>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <i class="fas fa-calendar-alt mr-2 text-gray-400"></i>
+                      最終発注日
+                    </div>
                   </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
                     品名
                   </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
                     品番
                   </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
                     必要数量
                   </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
                     現在数量
                   </th>
-
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    単価
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <i class="fas fa-yen-sign mr-2 text-gray-400"></i>
+                      単価
+                    </div>
                   </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    金額
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <i class="fas fa-calculator mr-2 text-gray-400"></i>
+                      金額
+                    </div>
                   </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    発注先
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <i class="fas fa-building mr-2 text-gray-400"></i>
+                      発注先
+                    </div>
                   </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    発注依頼者<i class="ml-1 fa-solid fa-user"></i>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <i class="fas fa-user mr-2 text-gray-400"></i>
+                      依頼者
+                    </div>
                   </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    発注担当者<i class="ml-1 fa-solid fa-user"></i>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <i class="fas fa-user-tie mr-2 text-gray-400"></i>
+                      担当者
+                    </div>
                   </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    発注依頼日<i class="ml-1 fa-solid fa-calendar-alt"></i>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <i class="fas fa-calendar-plus mr-2 text-gray-400"></i>
+                      依頼日
+                    </div>
                   </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    消化予定日<i class="ml-1 fa-solid fa-calendar-alt"></i>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <i class="fas fa-calendar-check mr-2 text-gray-400"></i>
+                      消化予定日
+                    </div>
                   </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    希望納期<i class="ml-1 fa-solid fa-calendar-alt"></i>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <i class="fas fa-calendar-day mr-2 text-gray-400"></i>
+                      希望納期
+                    </div>
                   </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    依頼者備考<i class="ml-1 fa-solid fa-comment"></i>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <i class="fas fa-comment mr-2 text-gray-400"></i>
+                      依頼者備考
+                    </div>
                   </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    発注者備考<i class="ml-1 fa-solid fa-comment"></i>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <i class="fas fa-comment-dots mr-2 text-gray-400"></i>
+                      発注者備考
+                    </div>
                   </th>
-
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 w-20"
-                  >
-                    添付ファイル<i class="ml-1 fa-solid fa-file-alt"></i>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <i class="fas fa-file-alt mr-2 text-gray-400"></i>
+                      添付ファイル
+                    </div>
                   </th>
-                  <th
-                    class="w-10 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tr rounded-br"
-                  >
-                    詳細確認<i class="ml-1 fa-solid fa-comment"></i>
+                  <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <div class="flex items-center justify-center">
+                      <i class="fas fa-search mr-2 text-gray-400"></i>
+                      詳細確認
+                    </div>
                   </th>
-                  <th
-                    class="w-10 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tr rounded-br"
-                  >
-                    承認登録<i class="ml-1 fa-solid fa-stamp"></i>
+                  <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
+                    <div class="flex items-center justify-center">
+                      <i class="fas fa-stamp mr-2 text-gray-400"></i>
+                      承認登録
+                    </div>
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="divide-y divide-gray-200">
                 <tr
                   v-for="order_request in order_requests"
                   :key="order_request.id"
+                  :class="getRowStyle(order_request).rowClass"
                 >
-                  <td class="img">
-                    <img :src="getImgPath(order_request.img_path)" alt="" />
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center justify-center">
+                      <img 
+                        :src="getImgPath(order_request.img_path)" 
+                        alt="商品画像"
+                        class="h-16 w-16 object-cover rounded-lg shadow-sm border border-gray-200" 
+                      />
+                    </div>
                   </td>
-                  <td class="px-4 py-8">
+                  <td class="px-6 py-4 whitespace-nowrap">
                     <span
                       v-if="order_request.new_stock_flg"
-                      class="bg-green-100 text-green-800 text-xs font-medium me-2 px-4 py-1 rounded-full dark:bg-green-900 dark:text-green-300"
-                      >新規品</span
+                      class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200"
                     >
+                      <i class="fas fa-plus-circle mr-1"></i>
+                      新規品
+                    </span>
                     <span
                       v-else
-                      class="bg-yellow-100 text-yellow-800 text-xs font-medium me-2 px-4 py-1 rounded-full dark:bg-yellow-900 dark:text-yellow-300"
-                      >既存品</span
+                      class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200"
                     >
+                      <i class="fas fa-box mr-1"></i>
+                      既存品
+                    </span>
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <div class="flex items-center">
+                      <i class="fas fa-calendar-alt mr-2 text-gray-400"></i>
                     {{
                       order_request.digest_date
                         ? new Date(order_request.last_order_date)
@@ -330,50 +401,88 @@ onMounted(() => {
                             .replace(/\//g, "/")
                         : "-"
                     }}
+                    </div>
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900">
+                  <td class="px-6 py-4 text-sm text-gray-900">
+                    <div class="font-medium truncate max-w-xs" :title="order_request.name">
                     <span v-if="order_request.name.length > 20">
                       {{ order_request.name.substring(0, 20) + "..." }}
                     </span>
                     <span v-else>
                       {{ order_request.name }}
                     </span>
+                    </div>
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900">
-                    {{ order_request.s_name ?? "-" }}
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <code class="bg-gray-100 px-2 py-1 rounded text-xs">{{ order_request.s_name ?? "-" }}</code>
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900">
-                    {{
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div class="flex items-center">
+                      <i class="fas fa-cube mr-2 text-blue-400"></i>
+                      <span class="font-semibold">{{
                       `${order_request.quantity ?? ""}${
                         order_request.unit ?? ""
                       }`
-                    }}
+                      }}</span>
+                    </div>
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <div class="flex items-center">
+                      <i class="fas fa-boxes mr-2 text-gray-400"></i>
                     {{
                       `${order_request.now_quantity ?? "-"}${
                         order_request.now_quantity_unit ?? "-"
                       }`
                     }}
+                    </div>
                   </td>
 
-                  <td class="px-4 py-8 text-lg text-gray-900">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div class="flex items-center font-semibold">
+                      <i class="fas fa-yen-sign mr-2 text-green-500"></i>
                     {{ order_request.price?.toLocaleString() }}
+                    </div>
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900">
-                    {{ order_request.calc_price?.toLocaleString() }}
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div class="flex items-center font-bold text-blue-600">
+                      <i class="fas fa-calculator mr-2"></i>
+                      ¥{{ order_request.calc_price?.toLocaleString() }}
+                    </div>
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div class="flex items-center">
+                      <i class="fas fa-building mr-2 text-gray-400"></i>
                     {{ order_request.supplier_name }}
+                    </div>
                   </td>
 
-                  <td class="px-4 py-8 text-lg text-gray-900">
-                    {{ order_request.request_user_name }}
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 h-8 w-8">
+                        <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                          <i class="fas fa-user text-blue-600 text-xs"></i>
+                        </div>
+                      </div>
+                      <div class="ml-3">
+                        <div class="text-sm font-medium text-gray-900">{{ order_request.request_user_name }}</div>
+                      </div>
+                    </div>
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900">
-                    {{ order_request.user_name }}
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 h-8 w-8">
+                        <div class="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
+                          <i class="fas fa-user-tie text-purple-600 text-xs"></i>
+                        </div>
+                      </div>
+                      <div class="ml-3">
+                        <div class="text-sm font-medium text-gray-900">{{ order_request.user_name }}</div>
+                      </div>
+                    </div>
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <div class="flex items-center">
+                      <i class="fas fa-calendar-plus mr-2 text-gray-400"></i>
                     {{
                       new Date(order_request.created_at)
                         .toLocaleDateString("ja-JP", {
@@ -383,8 +492,11 @@ onMounted(() => {
                         })
                         .replace(/\//g, "/")
                     }}
+                    </div>
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <div class="flex items-center">
+                      <i class="fas fa-calendar-check mr-2 text-gray-400"></i>
                     {{
                       order_request.digest_date
                         ? new Date(order_request.digest_date)
@@ -396,8 +508,11 @@ onMounted(() => {
                             .replace(/\//g, "/")
                         : "-"
                     }}
+                    </div>
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <div class="flex items-center">
+                      <i class="fas fa-calendar-day mr-2 text-red-400"></i>
                     {{
                       order_request.desire_delivery_date
                         ? new Date(order_request.desire_delivery_date)
@@ -409,63 +524,98 @@ onMounted(() => {
                             .replace(/\//g, "/")
                         : "-"
                     }}
+                    </div>
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900 description">
+                  <td class="px-6 py-4 text-sm text-gray-600 max-w-xs">
+                    <div class="truncate" :title="order_request.description">
+                      <i class="fas fa-comment mr-2 text-gray-400"></i>
                     {{ order_request.description ?? "-" }}
+                    </div>
                   </td>
-                  <td class="px-4 py-8 text-lg text-gray-900 description">
+                  <td class="px-6 py-4 text-sm text-gray-600 max-w-xs">
+                    <div class="truncate" :title="order_request.sub_description">
+                      <i class="fas fa-comment-dots mr-2 text-gray-400"></i>
                     {{ order_request.sub_description ?? "-" }}
+                    </div>
                   </td>
-                  <td class="w-10 text-center px-8">
-                    <!-- <button
-                      v-if="
-                        order_request.file_path || order_request.document_id
-                      "
-                      @click.prevent="openApproval(order_request)"
-                      class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-                    >
-                      稟議書
-                    </button> -->
-
+                  <td class="px-6 py-4 whitespace-nowrap text-center">
                     <span
-                      v-if="
-                        order_request.file_path || order_request.document_id
-                      "
-                      >あり</span
+                      v-if="order_request.file_path || order_request.document_id"
+                      class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
                     >
-                    <span v-else>未登録</span>
+                      <i class="fas fa-check mr-1"></i>
+                      あり
+                    </span>
+                    <span
+                      v-else
+                      class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                    >
+                      <i class="fas fa-minus mr-1"></i>
+                      未登録
+                    </span>
                   </td>
-                  <td class="w-10 text-center px-8">
+                  <td class="px-6 py-4 whitespace-nowrap text-center">
                     <button
-                      class="mr-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                       @click="openDescription(order_request)"
+                      class="inline-flex items-center px-4 py-2 border-2 border-blue-600 text-sm font-medium rounded-lg text-blue-600 bg-white hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-sm hover:shadow-md"
                     >
-                      <i class="fa-solid fa-comment"></i>
+                      <i class="fas fa-search mr-2"></i>
+                      詳細
                     </button>
                   </td>
-                  <td class="w-20 text-center">
-                    <button
-                      @click.prevent="
-                        sendAccept(
-                          order_request.order_request_approval_id,
-                          'accept'
-                        )
-                      "
-                      class="mr-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                    >
-                      承認
-                    </button>
-                    <button
-                      @click.prevent="
-                        sendAccept(
-                          order_request.order_request_approval_id,
-                          'reject'
-                        )
-                      "
-                      class="ml-2 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                    >
-                      非承認
-                    </button>
+                  <td class="px-6 py-4 whitespace-nowrap text-center">
+                    <div class="flex items-center justify-center space-x-2">
+                      <button
+                        @click.prevent="
+                          sendAccept(
+                            order_request.order_request_approval_id,
+                            'accept'
+                          )
+                        "
+                        :disabled="getRowStyle(order_request).isDisabled"
+                        :class="[
+                          'inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md transition-colors duration-200',
+                          getRowStyle(order_request).isDisabled 
+                            ? 'text-gray-400 bg-gray-300 cursor-not-allowed'
+                            : 'text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500'
+                        ]"
+                      >
+                        <i class="fas fa-check mr-1"></i>
+                        承認
+                      </button>
+                      <button
+                        @click.prevent="
+                          sendAccept(
+                            order_request.order_request_approval_id,
+                            'reject'
+                          )
+                        "
+                        :disabled="getRowStyle(order_request).isDisabled"
+                        :class="[
+                          'inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md transition-colors duration-200',
+                          getRowStyle(order_request).isDisabled 
+                            ? 'text-gray-400 bg-gray-300 cursor-not-allowed'
+                            : 'text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
+                        ]"
+                      >
+                        <i class="fas fa-times mr-1"></i>
+                        却下
+                      </button>
+                    </div>
+                    <!-- 差し戻し状態の説明 -->
+                    <div v-if="getRowStyle(order_request).isDisabled" class="mt-2">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                        <i class="fas fa-pause mr-1"></i>
+                        承認停止中
+                      </span>
+                    </div>
+                    <!-- 回答待ち状態の説明 -->
+                    <div v-if="getRowStyle(order_request).isWaitingResponse" class="mt-2">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 animate-pulse">
+                        <i class="fas fa-reply mr-1"></i>
+                        あなたの回答待ち
+                      </span>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -476,231 +626,188 @@ onMounted(() => {
     </template>
   </AcceptLayout>
 
+  <!-- 詳細ダイアログモーダル -->
   <div
     v-if="description_order_request.comment.order_request_id"
+    class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 overflow-y-auto"
     id="description_container"
   >
-    <!-- 稟議書用モーダル -->
-    <div id="approval_modal" class="bg-gray-900 bg-opacity-50">
-      <div class="">
-        <!-- <div class="button_container flex justify-end p-4 bg-gray-800">
-          <button
-            @click="approval_modal = false"
-            class="text-white font-bold py-2 px-4 rounded hover:bg-gray-700"
-          >
-            閉じる
-          </button>
-        </div> -->
+    <div class="flex items-start justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+      </div>
 
-        <div class="flex flex-col bg-white w-full">
-          <div class="mb-4">
-            <div id="comment_container" class="w-2/3 mx-auto">
-              <div class="flex justify-between items-end mb-2">
-                <label
-                  for="message"
-                  class="w-1/2 block mb-2 text-sm font-medium text-white dark:text-white"
-                  >コメント追加</label
-                >
+      <!-- モーダルコンテンツ -->
+      <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full">
+        <!-- ヘッダー -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                  <i class="fas fa-file-alt text-white text-lg"></i>
+                </div>
+              </div>
+              <div class="ml-4">
+                <h3 class="text-xl font-bold text-white">発注依頼詳細</h3>
+                <p class="text-blue-100 text-sm">{{ description_order_request.order_request.name }}</p>
+              </div>
+            </div>
                 <button
-                  @click="
-                    description_order_request.comment.order_request_id = 0
-                  "
-                  class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
-                >
-                  <i class="fa-solid fa-times"></i>
+              @click="description_order_request.comment.order_request_id = 0"
+              class="text-white hover:text-gray-200 transition-colors duration-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20"
+            >
+              <i class="fas fa-times text-xl"></i>
                 </button>
+          </div>
               </div>
 
-              <div
-                class="approval_button_container flex justify-around mt-4 mb-16"
-              >
-                <button
-                  @click.prevent="
-                    sendAccept(
-                      description_order_request.order_request
-                        .order_request_approval_id,
-                      'accept'
-                    )
-                  "
-                  class="w-1/3 py-4 font-bold mr-2 bg-green-500 hover:bg-green-700 text-white font-bold px-4 rounded"
-                >
-                  承認
-                </button>
-                <button
-                  @click.prevent="
-                    sendAccept(
-                      description_order_request.order_request
-                        .order_request_approval_id,
-                      'reject'
-                    )
-                  "
-                  class="w-1/3 py-4 font-bold ml-2 bg-red-500 hover:bg-red-700 text-white font-bold px-4 rounded"
-                >
-                  非承認
-                </button>
+        <!-- メインコンテンツ -->
+        <div class="bg-white px-6 py-6 max-h-screen-80 overflow-y-auto" style="max-height: 80vh;">
+          <!-- 状態表示 -->
+          <div v-if="getRowStyle(description_order_request.order_request).isDisabled" class="mb-6 p-4 bg-gray-100 border border-gray-200 rounded-xl">
+            <div class="flex items-center">
+              <i class="fas fa-info-circle text-gray-500 mr-3"></i>
+              <div>
+                <div class="text-sm font-medium text-gray-700">承認停止中</div>
+                <div class="text-xs text-gray-500">この発注依頼は差し戻されており、あなたの承認権限は現在停止中です。</div>
+              </div>
+            </div>
+          </div>
+          
+          <div v-if="getRowStyle(description_order_request.order_request).isWaitingResponse" class="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-xl">
+            <div class="flex items-center">
+              <i class="fas fa-exclamation-triangle text-orange-500 mr-3"></i>
+              <div>
+                <div class="text-sm font-medium text-orange-700">あなたの回答が必要です</div>
+                <div class="text-xs text-orange-600">この発注依頼は差し戻されており、あなたの再承認が必要です。</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- アクションボタン -->
+          <div class="flex justify-center space-x-4 mb-8 p-4 bg-gray-50 rounded-xl">
+            <button
+              @click.prevent="
+                sendAccept(
+                  description_order_request.order_request.order_request_approval_id,
+                  'accept'
+                )
+              "
+              :disabled="getRowStyle(description_order_request.order_request).isDisabled"
+              :class="[
+                'flex-1 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl transition-all duration-200',
+                getRowStyle(description_order_request.order_request).isDisabled
+                  ? 'text-gray-400 bg-gray-300 cursor-not-allowed'
+                  : 'text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 hover:transform hover:scale-105'
+              ]"
+            >
+              <i class="fas fa-check mr-2"></i>
+              承認する
+            </button>
+            <button
+              @click.prevent="
+                sendAccept(
+                  description_order_request.order_request.order_request_approval_id,
+                  'reject'
+                )
+              "
+              :disabled="getRowStyle(description_order_request.order_request).isDisabled"
+              :class="[
+                'flex-1 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl transition-all duration-200',
+                getRowStyle(description_order_request.order_request).isDisabled
+                  ? 'text-gray-400 bg-gray-300 cursor-not-allowed'
+                  : 'text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 hover:transform hover:scale-105'
+              ]"
+            >
+              <i class="fas fa-times mr-2"></i>
+              却下する
+            </button>
+          </div>
+
+          <!-- コメント入力セクション -->
+          <div class="mb-8">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+              <div class="flex items-center mb-4">
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-comment text-blue-600"></i>
+                </div>
+                <h4 class="text-lg font-semibold text-gray-900">コメント追加</h4>
               </div>
 
               <textarea
                 id="message"
                 rows="4"
-                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 my-8"
+                class="w-full p-4 text-sm text-gray-900 bg-gray-50 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none"
                 :placeholder="description_order_request.comment.placeholder"
                 v-model="description_order_request.comment.msg"
                 @change="save_comment"
               ></textarea>
+            </div>
+          </div>
 
-              <div id="info_content">
-                <h2 class="font-bold my-4 text-gray-700">基本情報</h2>
-                <div class="mb-6">
-                  <div class="w-1/2">
-                    <label
-                      class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
-                      >画像:</label
-                    >
-
-                    <img :src="getImgPath(description_order_request.order_request.img_path)" alt="" />
-                  </div>
-                </div>
-                <div class="flex">
-                  <div class="w-1/2">
-                    <label
-                      class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
-                      >単価:</label
-                    >
-
-                    <p
-                      class="appearance-none block w-full text-gray-700 py-3 mb-3 leading-tight focus:outline-none focus:bg-white"
-                    >
-                      {{
-                        description_order_request.order_request.price.toLocaleString()
-                      }}
-                    </p>
-                  </div>
-
-                  <div class="w-1/2">
-                    <label
-                      class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
-                      >金額:</label
-                    >
-
-                    <p
-                      class="appearance-none block w-full text-gray-700 py-3 mb-3 leading-tight focus:outline-none focus:bg-white"
-                    >
-                      {{
-                        description_order_request.order_request.calc_price.toLocaleString()
-                      }}
-                    </p>
-                  </div>
-                </div>
-                <div class="flex">
-                  <div class="w-1/2">
-                    <label
-                      class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
-                      >依頼者:</label
-                    >
-
-                    <p
-                      class="appearance-none block w-full text-gray-700 py-3 mb-3 leading-tight focus:outline-none focus:bg-white"
-                    >
-                      {{
-                        description_order_request.order_request
-                          .request_user_name
-                      }}
-                    </p>
-                  </div>
-                  <div class="w-1/2">
-                    <label
-                      class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
-                      >担当者:</label
-                    >
-
-                    <p
-                      class="appearance-none block w-full text-gray-700 py-3 mb-3 leading-tight focus:outline-none focus:bg-white"
-                    >
-                      {{ description_order_request.order_request.user_name }}
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <div class="flex">
-                    <div class="w-1/2">
-                      <label
-                        class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
-                        >品名:</label
-                      >
-
-                      <p
-                        class="appearance-none block w-full text-gray-700 py-3 mb-3 leading-tight focus:outline-none focus:bg-white"
-                      >
-                        {{ description_order_request.order_request.name }}
-                      </p>
-                    </div>
-                    <div class="w-1/2">
-                      <label
-                        class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
-                        >品番:</label
-                      >
-
-                      <p
-                        class="appearance-none block w-full text-gray-700 py-3 mb-3 leading-tight focus:outline-none focus:bg-white"
-                      >
-                        {{ description_order_request.order_request.s_name }}
-                      </p>
-                    </div>
-                  </div>
-
-                  <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
-                    >依頼者備考:</label
-                  >
-
-                  <p
-                    class="appearance-none block w-full text-gray-700 py-3 mb-3 leading-tight focus:outline-none focus:bg-white"
-                  >
-                    {{
-                      description_order_request.order_request.description ?? "-"
-                    }}
-                  </p>
-                  <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold"
-                    >発注者備考:</label
-                  >
-
-                  <p
-                    class="appearance-none block w-full text-gray-700 py-3 mb-3 leading-tight focus:outline-none focus:bg-white"
-                  >
-                    {{
-                      description_order_request.order_request.sub_description
-                    }}
-                  </p>
-                </div>
+          <!-- 承認フロー -->
+          <div class="mb-8">
+            <div class="flex items-center mb-6">
+              <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-route text-purple-600"></i>
               </div>
-
-              <h2 class="font-bold my-4 text-gray-700">承認フロー</h2>
+              <h4 class="text-lg font-semibold text-gray-900">承認フロー</h4>
+            </div>
+            
+            <div class="flex items-center justify-start overflow-x-auto pb-4" id="approval_container">
               <div
-                class="flex items-center justify-start mb-8"
-                id="approval_container"
-              >
-                <div
-                  v-for="approval in description_order_request.order_request
-                    .order_request_approvals"
+                v-for="(approval, index) in description_order_request.order_request.order_request_approvals"
                   :key="approval.id"
-                  class="card rounded overflow-hidden shadow-lg mr-8"
-                >
-                  <img
-                    class="w-full"
-                    :src="
-                      approval.status === 1
-                        ? '/images/order_request/approval_icon.png'
-                        : approval.status === 2
-                        ? '/images/order_request/not_approval_icon.png'
-                        : '/images/order_request/none_approval.png'
-                    "
-                    alt="承認状態アイコン"
-                  />
-                  <div class="px-6 py-4">
-                    <div class="text-sm mb-2">
+                class="flex items-center flex-shrink-0"
+              >
+                <!-- 承認カード -->
+                <div class="bg-white border-2 rounded-xl shadow-sm p-4 min-w-64 hover:shadow-md transition-shadow duration-200"
+                     :class="{
+                       'border-emerald-200 bg-emerald-50': approval.status === 1,
+                       'border-red-200 bg-red-50': approval.status === 2,
+                       'border-blue-200 bg-blue-50': approval.status === 0,
+                       'border-gray-200': approval.status === null
+                     }">
+                  
+                  <!-- ステータスアイコンとヘッダー -->
+                  <div class="flex items-center mb-3">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center mr-3"
+                         :class="{
+                           'bg-emerald-100': approval.status === 1,
+                           'bg-red-100': approval.status === 2,
+                           'bg-blue-100': approval.status === 0,
+                           'bg-gray-100': approval.status === null
+                         }">
+                      <i class="text-lg"
+                         :class="{
+                           'fas fa-check text-emerald-600': approval.status === 1,
+                           'fas fa-times text-red-600': approval.status === 2,
+                           'fas fa-clock text-blue-600': approval.status === 0,
+                           'fas fa-user text-gray-400': approval.status === null
+                         }"></i>
+                    </div>
+                    <div>
+                      <div class="font-bold text-gray-900">{{ approval.name }}</div>
+                      <div class="text-xs text-gray-500"
+                           :class="{
+                             'text-emerald-600': approval.status === 1,
+                             'text-red-600': approval.status === 2,
+                             'text-blue-600': approval.status === 0
+                           }">
+                        {{ 
+                          approval.status === 1 ? '承認済み' : 
+                          approval.status === 2 ? '却下' : 
+                          approval.status === 0 ? '承認待ち' : 
+                          '未処理' 
+                        }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 日時 -->
+                  <div class="text-xs text-gray-500 mb-2" v-if="approval.updated_at">
+                    <i class="fas fa-calendar-alt mr-1"></i>
                       {{ new Date(approval.updated_at).getFullYear() }}年{{
                         new Date(approval.updated_at).getMonth() + 1
                       }}月{{ new Date(approval.updated_at).getDate() }}日
@@ -708,120 +815,347 @@ onMounted(() => {
                         new Date(approval.updated_at).getMinutes()
                       }}分
                     </div>
-                    <div class="font-bold text-xl mb-2">
-                      {{ approval.name }}
+
+                  <!-- コメント -->
+                  <div class="text-sm text-gray-700 bg-white p-3 rounded-lg border border-gray-100">
+                    <i class="fas fa-quote-left text-gray-400 mr-2"></i>
+                    {{ approval.comment || "コメントがありません。" }}
                     </div>
-                    <p class="text-gray-700 text-base">
-                      {{
-                        approval.comment
-                          ? approval.comment
-                          : "コメントがありません。"
-                      }}
-                    </p>
+                </div>
+
+                <!-- 矢印（最後の要素以外） -->
+                <div v-if="index < description_order_request.order_request.order_request_approvals.length - 1" 
+                     class="mx-4 text-gray-400">
+                  <i class="fas fa-arrow-right text-2xl"></i>
+                </div>
+                  </div>
+                </div>
+              </div>
+
+              
+
+          <!-- 基本情報 -->
+          <div class="mb-8">
+            <div class="flex items-center mb-6">
+              <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-info-circle text-green-600"></i>
+              </div>
+              <h4 class="text-lg font-semibold text-gray-900">基本情報</h4>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- 左側 -->
+              <div class="space-y-6">
+                <!-- 商品画像 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                  <div class="flex items-center mb-4">
+                    <i class="fas fa-image text-gray-400 mr-2"></i>
+                    <span class="text-sm font-semibold text-gray-600 uppercase tracking-wide">商品画像</span>
+                  </div>
+                  <div class="flex justify-center">
+                    <img
+                      :src="getImgPath(description_order_request.order_request.img_path)"
+                      alt="商品画像"
+                      class="max-w-full h-48 object-contain rounded-lg border border-gray-200"
+                    />
+                  </div>
+                </div>
+
+                <!-- 価格情報 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                  <div class="flex items-center mb-4">
+                    <i class="fas fa-yen-sign text-gray-400 mr-2"></i>
+                    <span class="text-sm font-semibold text-gray-600 uppercase tracking-wide">価格情報</span>
+                  </div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">単価</label>
+                      <div class="mt-1 text-lg font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-yen-sign text-green-500 mr-2"></i>
+                        {{ description_order_request.order_request.price.toLocaleString() }}
+                  </div>
+                </div>
+                    <div>
+                      <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">合計金額</label>
+                      <div class="mt-1 text-lg font-bold text-blue-600 flex items-center">
+                        <i class="fas fa-calculator text-blue-500 mr-2"></i>
+                        ¥{{ description_order_request.order_request.calc_price.toLocaleString() }}
+                  </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 右側 -->
+              <div class="space-y-6">
+                <!-- 担当者情報 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                  <div class="flex items-center mb-4">
+                    <i class="fas fa-users text-gray-400 mr-2"></i>
+                    <span class="text-sm font-semibold text-gray-600 uppercase tracking-wide">担当者情報</span>
+                  </div>
+                  <div class="space-y-4">
+                    <div class="flex items-center">
+                      <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-user text-blue-600"></i>
+                      </div>
+                      <div>
+                        <div class="text-xs font-medium text-gray-500">依頼者</div>
+                        <div class="font-semibold text-gray-900">{{ description_order_request.order_request.request_user_name }}</div>
+                      </div>
+                    </div>
+                    <div class="flex items-center">
+                      <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-user-tie text-purple-600"></i>
+                      </div>
+                      <div>
+                        <div class="text-xs font-medium text-gray-500">担当者</div>
+                        <div class="font-semibold text-gray-900">{{ description_order_request.order_request.user_name }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 商品情報 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                  <div class="flex items-center mb-4">
+                    <i class="fas fa-box text-gray-400 mr-2"></i>
+                    <span class="text-sm font-semibold text-gray-600 uppercase tracking-wide">商品情報</span>
+                  </div>
+                  <div class="space-y-3">
+                <div>
+                      <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">品名</label>
+                      <div class="mt-1 text-sm font-medium text-gray-900">{{ description_order_request.order_request.name }}</div>
+                    </div>
+                    <div>
+                      <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">品番</label>
+                      <div class="mt-1">
+                        <code class="bg-gray-100 px-2 py-1 rounded text-xs">{{ description_order_request.order_request.s_name }}</code>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            <ApprovalDocument
-              v-if="description_order_request.order_request.new_stock_flg"
-              :approval_document="description_order_request.approval_document"
-            />
+
+            <!-- 備考情報 -->
+            <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div class="flex items-center mb-4">
+                  <i class="fas fa-comment text-gray-400 mr-2"></i>
+                  <span class="text-sm font-semibold text-gray-600 uppercase tracking-wide">依頼者備考</span>
+                    </div>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                  <p class="text-sm text-gray-700">{{ description_order_request.order_request.description || "-" }}</p>
+                </div>
+              </div>
+
+              <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div class="flex items-center mb-4">
+                  <i class="fas fa-comment-dots text-gray-400 mr-2"></i>
+                  <span class="text-sm font-semibold text-gray-600 uppercase tracking-wide">発注者備考</span>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                  <p class="text-sm text-gray-700">{{ description_order_request.order_request.sub_description || "-" }}</p>
+                </div>
+              </div>
+                    </div>
+                  </div>
+
+          <!-- 稟議書コンポーネント -->
+          <div v-if="description_order_request.order_request.new_stock_flg" class="mb-8">
+            <div class="flex items-center mb-6">
+              <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-file-contract text-indigo-600"></i>
+                </div>
+              <h4 class="text-lg font-semibold text-gray-900">稟議書</h4>
+              </div>
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <ApprovalDocument :approval_document="description_order_request.approval_document" />
+            </div>
           </div>
+
+          <!-- PDF ビューワー -->
+          <div v-if="description_order_request.viewerUrl != ''" class="mb-8">
+            <div class="flex items-center mb-6">
+              <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-file-pdf text-red-600"></i>
+              </div>
+              <h4 class="text-lg font-semibold text-gray-900">添付ファイル</h4>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
           <iframe
-            v-if="description_order_request.viewerUrl != ''"
             ref="pdfViewer"
             :src="description_order_request.viewerUrl"
-            class="w-2/3 mx-auto"
-            style="min-height: 80vh; margin-top: 2%; margin-bottom: 8%"
+                class="w-full"
+                style="min-height: 80vh;"
             frameborder="0"
           ></iframe>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
 <style scoped lang="scss">
+// テーブル全体のスタイル
 #order_request_table {
-  // width: 200vw;
-  font-size: 0.9rem;
-
-  @media screen and (min-width: 800px) {
-    width: 100%;
-    font-size: 1rem;
-
-    td {
-      img {
-        max-width: 100px;
-      }
-    }
+  border-collapse: separate;
+  border-spacing: 0;
+  
+  // レスポンシブ対応
+  @media screen and (max-width: 1200px) {
+    font-size: 0.875rem;
   }
-
-  td,
-  th {
-    max-width: 20vw;
-    white-space: nowrap;
+  
+  @media screen and (max-width: 800px) {
+    font-size: 0.75rem;
   }
+}
 
-  td {
-    &.img {
-      min-width: 120px;
+// グラデーション背景のアニメーション
+.bg-gradient-to-r {
+  background-size: 200% 200%;
+  animation: gradient 6s ease infinite;
+}
 
-      & img {
-        height: 100%;
-        width: 100%;
-        object-fit: contain;
-      }
-    }
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
 
-    &.description {
-      overflow-x: scroll;
+// ホバーエフェクト
+.hover\:bg-gray-50:hover {
+  background-color: #f9fafb;
+}
+
+// フォーカス状態のスタイル改善
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+// スクロールバーのカスタマイズ
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+  
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+    
+    &:hover {
+      background: #94a3b8;
     }
   }
 }
 
+// 影のカスタマイズ
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+// ボタンのホバーエフェクト改善
+button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  }
+  
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+// アイコンのアニメーション
+i.fas {
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+// モーダルのアニメーション
 #description_container {
-  background-color: white;
-
-  padding: 6% 0;
-  position: fixed;
-  bottom: 5%;
-  right: 5%;
-  overflow-y: scroll;
-
-  z-index: 50;
-  width: 90%;
-  height: 80vh;
-
-  #approval_modal {
-    height: 60%;
-
-    .button_container {
-      border-bottom: 1px solid #4a5568;
-    }
-
-    .main_container {
-      iframe {
-        width: 100%;
-        height: 100%;
-      }
-    }
+  backdrop-filter: blur(4px);
+  
+  .inline-block {
+    animation: modalSlideIn 0.3s ease-out;
   }
+}
 
-  & #comment_container {
-    height: 20%;
-    & textarea {
-      height: 100%;
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// 承認フローのスクロール
+#approval_container {
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+    
+    &:hover {
+      background: #94a3b8;
     }
   }
 }
 
-#modal_cover {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  width: 100vw;
-  z-index: 49;
-  background-color: rgba(0, 0, 0, 0.479);
+// カードのホバーエフェクト
+.hover\:shadow-md:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+// フォーム要素のフォーカス状態
+textarea:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+}
+
+// モーダルのz-index管理
+.z-50 {
+  z-index: 50;
 }
 </style>

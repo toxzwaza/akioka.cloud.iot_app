@@ -65,7 +65,6 @@ class AcceptController extends Controller
                     WHERE initial_orders.stock_id = order_requests.stock_id
                 ) as last_order_date')
             )
-            ->where('order_request_approvals.status', 0)
             ->join('order_requests', 'order_requests.id', '=', 'order_request_approvals.order_request_id')
             ->join('stocks', 'stocks.id', '=', 'order_requests.stock_id')
             ->leftJoin('users as request_users', 'request_users.id', '=', 'order_requests.request_user_id')
@@ -73,9 +72,12 @@ class AcceptController extends Controller
             ->leftJoin('users as users', 'users.id', '=', 'order_requests.user_id')
             ->join('suppliers', 'suppliers.id', '=', 'order_requests.supplier_id')
             ->leftJoin('documents', 'documents.id', '=', 'order_requests.document_id')
-            ->where('order_requests.status', '=', 0)
-            ->where('order_requests.del_flg', '=', 0)
-            ->where('order_requests.accept_flg', '=', 1);
+            ->where([
+                ['order_requests.status', '=', 0],
+                ['order_requests.del_flg', '=', 0]
+            ])
+            ->whereIn('order_request_approvals.status', [0, 2])
+            ->whereIn('order_requests.accept_flg', [1, 6]);
 
         if ($user_id == 63) { // 常務
             $query->where('order_request_approvals.user_id', 63);
@@ -147,6 +149,7 @@ class AcceptController extends Controller
 
 
                 case 1: //承認
+
                     if ($order_request_approval->final_flg) {
                         $order_request->accept_flg = 2;
                         $order_request->save();
@@ -159,10 +162,15 @@ class AcceptController extends Controller
                             Helper::sendNotification($device->token, "在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}が承認されました。");
                         }
                     } else { //次の承認を有効化
-                        $new_order_request_approval = OrderRequestApproval::where('order_request_id', $order_request_approval->order_request_id)
+                        if($order_request->accept_flg === 6){
+                            $order_request->accept_flg = 1;
+                            $order_request->save();
+                        }
+
+                        $new_order_request_approval = OrderRequestApproval::
+                        where('order_request_id', $order_request_approval->order_request_id)
                             ->where('id', '>', $order_request_approval->id)
                             ->where('order_request_id', $order_request_approval->order_request_id)
-                            ->whereNull('status')
                             ->first();
                         $new_order_request_approval->status = 0;
                         $new_order_request_approval->save();
@@ -172,36 +180,64 @@ class AcceptController extends Controller
 
                     break;
                 case 2: //非承認
-                    $order_request->accept_flg = 3;
+                    // 一つ前の承認者を探す
+                    $previous_order_request_approval = OrderRequestApproval::where('order_request_id', $order_request_approval->order_request_id)
+                        ->where('id', '<', $order_request_approval->id)
+                        ->orderBy('id', 'desc')
+                        ->first();
+
+                    if ($previous_order_request_approval) {
+                        // 一つ前の承認者が存在する場合、その承認者に戻す
+
+                        // 現在の承認者より後の承認者のステータスをリセット
+                        // OrderRequestApproval::where('order_request_id', $order_request_approval->order_request_id)
+                        //     ->where('id', '>', $order_request_approval->id)
+                        //     ->update(['status' => null, 'comment' => null]);
+
+                        // 一つ前の承認者を承認待ち状態に戻す
+                        $previous_order_request_approval->status = 0;
+                        // $previous_order_request_approval->comment = null;
+                        $previous_order_request_approval->save();
+
+                        // 発注依頼のステータスを差し戻しにする
+                        $order_request->accept_flg = 6;
+
+                        // 一つ前の承認者への通知
+                        Helper::createNotifyQueue("在庫管理システムからの通知です。", "承認依頼が差し戻されました。\n\n差し戻し者:" . $order_request_approval_user->name . "\nコメント：" . $comment . "\n\n以下のURLからコメントの回答及び、再承認を行ってください。", "https://akioka.cloud/accept/order-request?user_id=" . $previous_order_request_approval->user_id, [$previous_order_request_approval->user_id]);
+                    } else {
+                        // 一つ前の承認者が存在しない場合（第一承認者が非承認）
+                        $order_request->accept_flg = 3;
+
+                        // 発注担当者への通知
+                        $user = User::find($order_request->user_id);
+                        if ($user && $user->email) {
+                            Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment, "", [$order_request->user_id]);
+                        }
+
+                        // 依頼者への通知
+                        $request_user = User::find($order_request->request_user_id);
+                        if ($request_user && $request_user->email) {
+                            Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment, "", [$order_request->request_user_id]);
+                        }
+
+                        // 依頼者の端末への通知
+                        if ($order_request->device_id) {
+                            $device = Device::find($order_request->device_id);
+                            Helper::createDeviceMessage(
+                                2,
+                                $order_request->device_id,
+                                null,
+                                $order_request->user_id,
+                                $order_request_approval_user->id,
+                                "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment . "\n以下のボタンをクリックして稟議書を修正してください。",
+                                'https://akioka.cloud/new_item?order_request_id=' . $order_request->id
+                            );
+
+                            Helper::sendNotification($device->token, "在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment);
+                        }
+                    }
+
                     $order_request->save();
-
-                    //  コメントを取得してコメントも送信
-                    $user = User::find($order_request->user_id);
-                    if ($user && $user->email) {
-                        Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment, "", [$order_request->user_id]);
-                    }
-
-                    $request_user = User::find($order_request->request_user_id);
-                    if ($request_user && $request_user->email) {
-                        Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment, "", [$order_request->request_user_id]);
-                    }
-
-                    // 端末への通知
-                    if ($order_request->device_id) {
-                        $device = Device::find($order_request->device_id);
-                        Helper::createDeviceMessage(
-                            2,
-                            $order_request->device_id,
-                            null,
-                            $order_request->user_id,
-                            $order_request_approval_user->id,
-                            "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment . "\n以下のボタンをクリックして稟議書を修正してください。",
-                            'https://akioka.cloud/new_item?order_request_id=' . $order_request->id
-                        );
-
-                        Helper::sendNotification($device->token, "在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment);
-                    }
-
                     break;
             }
             $order_request->save();
