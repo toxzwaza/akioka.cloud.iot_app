@@ -15,6 +15,11 @@ const device_messages = reactive({
   messages: [],
 });
 
+// 過去メッセージ用
+const showHistoryModal = ref(false);
+const allMessages = ref([]);
+const historyLoading = ref(false);
+
 const device_message_method = {
   confirm_message: (device_message_id) => {
     let all_confirm_flg = false;
@@ -86,7 +91,24 @@ const loginAndCreateTokenWithDeviceId = () => {
         if (res.data.status) {
           localStorage.setItem("device_id", inputId.value);
           deviceId.value = inputId.value;
+          
+          // サーバーからのメッセージを表示
+          if (res.data.msg) {
+            alert(res.data.msg);
+          }
+          
+          // 最終アクセス日を更新
+          updateLastAccessDate();
+          
+          // メッセージを取得
+          getDeviceMessages();
+        } else {
+          alert("デバイス登録に失敗しました: " + (res.data.msg || ""));
         }
+      })
+      .catch((error) => {
+        console.error("ログイン失敗:", error);
+        alert("通信エラーが発生しました。");
       });
   } catch (error) {
     console.error("ログイン失敗:", error);
@@ -114,7 +136,7 @@ const getFCMToken = async () => {
   }
 };
 
-// デバイスメッセージ取得
+// デバイスメッセージ取得（未読のみ）
 const getDeviceMessages = () => {
   axios
     .get(route("device-message.getDeviceMessages"), {
@@ -124,11 +146,57 @@ const getDeviceMessages = () => {
     })
     .then((res) => {
       console.log(res.data);
-      device_messages.messages = res.data;
-      if (res.data.length > 0) {
+      // read_flgが0の未読メッセージのみフィルタリング
+      const unreadMessages = res.data.filter(message => message.read_flg === 0);
+      device_messages.messages = unreadMessages;
+      if (unreadMessages.length > 0) {
         device_messages.status = true;
       }
+      
+      // 全メッセージを保存（過去メッセージ表示用）
+      allMessages.value = res.data;
     });
+};
+
+// 過去メッセージを表示
+const showMessageHistory = () => {
+  showHistoryModal.value = true;
+};
+
+// 過去メッセージモーダルを閉じる
+const closeHistoryModal = () => {
+  showHistoryModal.value = false;
+};
+
+// device_id リセット機能
+const resetDeviceId = () => {
+  const password = prompt("パスワードを入力してください:");
+  
+  if (password === "Akioka55") {
+    // 正しいパスワードの場合
+    localStorage.removeItem("device_id");
+    alert("device_idを削除しました。ページをリロードします。");
+    window.location.reload();
+  } else if (password !== null) {
+    // パスワードが間違っている場合（キャンセル時はnull）
+    alert("パスワードが間違っています。");
+  }
+};
+
+// デバイスの最終アクセス日を更新
+const updateLastAccessDate = () => {
+  if (deviceId.value) {
+    axios
+      .post(route("device-update-access"), {
+        device_name: deviceId.value,
+      })
+      .then((res) => {
+        console.log("最終アクセス日を更新:", res.data);
+      })
+      .catch((error) => {
+        console.error("最終アクセス日更新エラー:", error);
+      });
+  }
 };
 
 // 初期処理：localStorageから読み込み
@@ -136,6 +204,9 @@ onMounted(() => {
   const savedId = localStorage.getItem("device_id");
   if (savedId && savedId != "null") {
     deviceId.value = savedId;
+
+    // 最終アクセス日を更新
+    updateLastAccessDate();
 
     // 通知を取得する処理
     getDeviceMessages();
@@ -163,9 +234,27 @@ onMessage(messaging, (payload) => {
 <template>
   <StockLayout :title="'在庫管理システム'">
     <template #content>
-      <p class="text-gray-700 mb-4 text-left ml-4">
-        device_id : {{ deviceId }}
-      </p>
+      <!-- ヘッダー部分 -->
+      <div class="flex justify-between items-center mb-4 mx-4">
+        <button
+          @click="resetDeviceId"
+          class="text-gray-700 hover:text-gray-900 transition-colors duration-200 cursor-pointer underline-offset-2 hover:underline"
+        >
+          device_id : {{ deviceId }}
+        </button>
+        
+        <!-- 過去メッセージボタン -->
+        <button
+          @click="showMessageHistory"
+          class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 shadow-sm"
+        >
+          <i class="fas fa-history mr-2 text-gray-500"></i>
+          過去メッセージ
+          <span v-if="allMessages.length > 0" class="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-blue-100 bg-blue-600 rounded-full">
+            {{ allMessages.length }}
+          </span>
+        </button>
+      </div>
       <div
         id="icon_container"
         :class="{ 'opacity-20': device_messages.status }"
@@ -334,7 +423,7 @@ onMessage(messaging, (payload) => {
                 :href="message.link"
                 class="inline-block mt-4 mb-2 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
               >
-                稟議書を編集
+                関連リンク
               </Link>
 
               <hr class="mt-4 mb-6" />
@@ -383,6 +472,142 @@ onMessage(messaging, (payload) => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 過去メッセージモーダル -->
+      <div 
+        v-if="showHistoryModal" 
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 z-50"
+        @click="closeHistoryModal"
+      >
+        <div 
+          class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-xl overflow-hidden"
+          style="height: 80vh; width: 90vw; z-index: 99;"
+          @click.stop
+        >
+          <!-- モーダルヘッダー -->
+          <div class="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
+            <div class="flex items-center">
+              <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-history text-blue-600"></i>
+              </div>
+              <div>
+                <h3 class="text-xl font-semibold text-gray-900">過去メッセージ履歴</h3>
+                <p class="text-sm text-gray-500">全{{ allMessages.length }}件のメッセージ</p>
+              </div>
+            </div>
+            <button 
+              @click="closeHistoryModal"
+              class="text-gray-400 hover:text-gray-600 transition-colors duration-200 p-2 rounded-full hover:bg-gray-200"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <!-- モーダルコンテンツ -->
+          <div class="p-6 overflow-y-auto" style="height: calc(80vh - 120px);">
+            <div v-if="allMessages.length === 0" class="text-center py-8">
+              <i class="fas fa-inbox text-gray-400 text-4xl mb-4"></i>
+              <p class="text-gray-500">メッセージがありません</p>
+            </div>
+            
+            <div v-else class="space-y-4">
+              <div
+                v-for="message in allMessages"
+                :key="message.id"
+                :class="[
+                  'p-4 border rounded-lg transition-colors duration-200',
+                  // 優先度による背景色（優先）
+                  {
+                    'bg-red-50 border-red-300': message.priority === 2,
+                    'bg-yellow-50 border-yellow-300': message.priority === 1,
+                    'bg-gray-50 border-gray-300': message.priority === 0,
+                  },
+                  // 既読・未読による背景色（優先度がない場合）
+                  {
+                    'bg-blue-50 border-blue-200': message.read_flg === 0 && ![0, 1, 2].includes(message.priority),
+                    'bg-white border-gray-200': message.read_flg === 1 && ![0, 1, 2].includes(message.priority),
+                  }
+                ]"
+              >
+                <!-- メッセージヘッダー -->
+                <div class="flex items-start justify-between mb-3">
+                  <div class="flex items-center">
+                    <i
+                      :class="{
+                        'fas fa-info-circle text-gray-500': message.priority === 0,
+                        'fas fa-exclamation-triangle text-yellow-500': message.priority === 1,
+                        'fas fa-exclamation-circle text-red-500': message.priority === 2,
+                      }"
+                      class="mr-3 mt-1"
+                    ></i>
+                    <div>
+                      <div class="flex items-center space-x-4 mb-1">
+                        <span class="text-sm font-medium text-gray-900">From: {{ message.from_user_name }}</span>
+                        <span class="text-sm text-gray-600">To: {{ message.to_user_name }}</span>
+                      </div>
+                      <div class="text-xs text-gray-500">
+                        {{ new Date(message.created_at).toLocaleString("ja-JP", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }) }}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- 既読・未読バッジ -->
+                  <div class="flex items-center space-x-2">
+                    <span 
+                      :class="{
+                        'bg-green-100 text-green-800': message.read_flg === 1,
+                        'bg-blue-100 text-blue-800': message.read_flg === 0,
+                      }"
+                      class="px-2 py-1 text-xs font-medium rounded-full"
+                    >
+                      {{ message.read_flg === 1 ? '既読' : '未読' }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- メッセージ内容 -->
+                <div class="text-sm text-gray-700 mb-3" v-html="message.message.replace(/\n/g, '<br>')"></div>
+
+                <!-- 返信がある場合 -->
+                <div v-if="message.answer" class="mt-3 p-3 bg-white rounded-lg border-l-4 border-blue-400">
+                  <div class="text-xs text-gray-500 mb-1">返信:</div>
+                  <div class="text-sm text-gray-700" v-html="message.answer.replace(/\n/g, '<br>')"></div>
+                </div>
+
+                <!-- リンクがある場合 -->
+                <div v-if="message.link" class="mt-3">
+                  <a
+                    :href="message.link"
+                    target="_blank"
+                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors duration-200"
+                  >
+                    <i class="fas fa-external-link-alt mr-2"></i>
+                    関連リンク
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- モーダルフッター -->
+          <div class="absolute bottom-0 left-0 right-0 flex justify-end p-6 border-t border-gray-200 bg-gray-50">
+            <button 
+              @click="closeHistoryModal"
+              class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 font-medium"
+            >
+              閉じる
+            </button>
           </div>
         </div>
       </div>

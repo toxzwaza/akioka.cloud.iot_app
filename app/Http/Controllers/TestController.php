@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Services\ChatGpt;
 use App\Http\Services\Helper;
+use App\Models\Device;
 use App\Models\DeviceMessage;
 use App\Models\InitialOrder;
 use App\Models\LunchOrder;
@@ -25,8 +26,31 @@ class TestController extends Controller
 {
     //
     public function test()
-    {
-        $res = Helper::sendNotification('d8c5Kmgn5ublH03J3E3Of8:APA91bGrD6z8supi_HkG7o2RnA3C6dxgoi4D0jXuEEoCtAhfAN9Q0R7z8rckcQ1juhdmWPEdXBegLq-I3b7aB4dTUH_iXBfxzv-TLQBgvS_wTxa2u3ZBx-c', 'test', 'test');
+    {   
+
+        // $devices = Device::where('name', 'like', '%梶谷PC%')->get();
+        // foreach ($devices as $index => $device) {
+        //     // 最後の要素のみスキップ
+        //     if ($index === $devices->count() - 1) {
+
+        //         continue;
+        //     }
+
+        //     $device_messages = DeviceMessage::where('to_device_id', $device->id)->get();
+        //     foreach ($device_messages as $device_message) {
+        //         $device_message->delete();
+        //     }
+        //     $device_messages = DeviceMessage::where('from_device_id', $device->id)->get();
+
+        //     foreach ($device_messages as $device_message) {
+        //         $device_message->delete();
+        //     }
+
+        //     $device->delete();
+        // }
+
+
+        // $res = Helper::sendNotification('d8c5Kmgn5ublH03J3E3Of8:APA91bGrD6z8supi_HkG7o2RnA3C6dxgoi4D0jXuEEoCtAhfAN9Q0R7z8rckcQ1juhdmWPEdXBegLq-I3b7aB4dTUH_iXBfxzv-TLQBgvS_wTxa2u3ZBx-c', 'test', 'test');
 
         // $initial_orders = InitialOrder::whereNull('name')->where('receipt_flg', 0)->get();
 

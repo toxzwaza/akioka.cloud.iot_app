@@ -25,14 +25,15 @@ class DeviceMessageController extends Controller
                 'device_messages.message',
                 'device_messages.answer',
                 'device_messages.created_at',
-                'device_messages.link'
+                'device_messages.link',
+                'device_messages.read_flg'
             )
                 ->join('users as to_users', 'to_users.id', '=', 'device_messages.to_user_id')
                 ->join('users as from_users', 'from_users.id', '=', 'device_messages.from_user_id')
                 ->join('devices as to_devices', 'to_devices.id', '=', 'device_messages.to_device_id')
                 ->leftJoin('devices as from_devices', 'from_devices.id', '=', 'device_messages.from_device_id')
                 ->where('to_devices.name', '=', $device_name) //自端末宛て
-                ->where('device_messages.read_flg', '=', 0) //未読
+                // ->where('device_messages.read_flg', '=', 0) //未読
                 ->where('device_messages.del_flg', '=', 0) //未削除
                 ->orderBy('device_messages.priority', 'desc')
                 ->orderBy('device_messages.created_at', 'desc')

@@ -219,6 +219,7 @@ Route::get('/test', [TestController::class, 'test'])->name('test');
 Route::get('/test/qr-scanner', [TestController::class, 'qrScanner'])->name('test.qr-scanner');
 
 Route::post('/device-login', [DeviceController::class, 'store'])->name('device-login');
+Route::post('/device-update-access', [DeviceController::class, 'updateLastAccess'])->name('device-update-access');
 
 // OTEX AR用サンプル
 Route::get('/ar', [ARController::class, 'index'])->name('ar.index');
