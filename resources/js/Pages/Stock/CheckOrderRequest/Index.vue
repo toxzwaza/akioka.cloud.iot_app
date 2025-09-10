@@ -1261,7 +1261,7 @@ onMounted(() => {
             </div>
 
             <Link
-              v-if="selectedOrderRequest.accept_flg === 2"
+              v-if="selectedOrderRequest.accept_flg === 3"
               class="inline-block text-center w-full py-6 bg-red-500 hover:bg-red-700 text-white font-bold px-4 rounded text-xl mt-12 mb-8"
               :href="route('order_request.reorder')"
               method="post"
