@@ -36,6 +36,13 @@ const description_order_request = reactive({
   },
 });
 
+// ローディング状態管理
+const loading = reactive({
+  isLoading: false,
+  currentAction: '', // 'accept' or 'reject'
+  message: ''
+});
+
 // const comment = reactive({
 //   order_request_id: null,
 //   placeholder: "",
@@ -154,6 +161,11 @@ const getRowStyle = (order_request) => {
 };
 
 const sendAccept = (order_request_approval_id, action) => {
+  // すでにローディング中の場合は処理を停止
+  if (loading.isLoading) {
+    return;
+  }
+
   let status;
   let msg = "";
 
@@ -167,6 +179,7 @@ const sendAccept = (order_request_approval_id, action) => {
       case "accept": //承認
         msg = "承認が完了しました。";
         status = 1;
+        loading.message = "承認処理中...";
         break;
       case "reject": //非承認
         if (!order_request_approval.comment) {
@@ -176,8 +189,13 @@ const sendAccept = (order_request_approval_id, action) => {
         }
         status = 2;
         msg = "承認を却下しました。";
+        loading.message = "却下処理中...";
         break;
     }
+
+    // ローディング開始
+    loading.isLoading = true;
+    loading.currentAction = action;
 
     axios
       .put(route("accept.order-request.update"), {
@@ -187,11 +205,24 @@ const sendAccept = (order_request_approval_id, action) => {
       })
       .then((res) => {
         console.log(res.data);
+        // ローディング終了
+        loading.isLoading = false;
+        loading.currentAction = '';
+        loading.message = '';
+        
         if (confirm(msg)) {
           window.location.reload();
         }
       })
-      .catch((error) => {});
+      .catch((error) => {
+        console.error('Error:', error);
+        // ローディング終了
+        loading.isLoading = false;
+        loading.currentAction = '';
+        loading.message = '';
+        
+        alert('処理中にエラーが発生しました。もう一度お試しください。');
+      });
   }
 };
 
@@ -571,16 +602,17 @@ onMounted(() => {
                             'accept'
                           )
                         "
-                        :disabled="getRowStyle(order_request).isDisabled"
+                        :disabled="getRowStyle(order_request).isDisabled || loading.isLoading"
                         :class="[
                           'inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md transition-colors duration-200',
-                          getRowStyle(order_request).isDisabled 
+                          getRowStyle(order_request).isDisabled || loading.isLoading
                             ? 'text-gray-400 bg-gray-300 cursor-not-allowed'
                             : 'text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500'
                         ]"
                       >
-                        <i class="fas fa-check mr-1"></i>
-                        承認
+                        <i v-if="loading.isLoading && loading.currentAction === 'accept'" class="fas fa-spinner fa-spin mr-1"></i>
+                        <i v-else class="fas fa-check mr-1"></i>
+                        {{ loading.isLoading && loading.currentAction === 'accept' ? '処理中...' : '承認' }}
                       </button>
                       <button
                         @click.prevent="
@@ -589,16 +621,17 @@ onMounted(() => {
                             'reject'
                           )
                         "
-                        :disabled="getRowStyle(order_request).isDisabled"
+                        :disabled="getRowStyle(order_request).isDisabled || loading.isLoading"
                         :class="[
                           'inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md transition-colors duration-200',
-                          getRowStyle(order_request).isDisabled 
+                          getRowStyle(order_request).isDisabled || loading.isLoading
                             ? 'text-gray-400 bg-gray-300 cursor-not-allowed'
                             : 'text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
                         ]"
                       >
-                        <i class="fas fa-times mr-1"></i>
-                        却下
+                        <i v-if="loading.isLoading && loading.currentAction === 'reject'" class="fas fa-spinner fa-spin mr-1"></i>
+                        <i v-else class="fas fa-times mr-1"></i>
+                        {{ loading.isLoading && loading.currentAction === 'reject' ? '処理中...' : '却下' }}
                       </button>
                     </div>
                     <!-- 差し戻し状態の説明 -->
@@ -624,6 +657,41 @@ onMounted(() => {
       </section>
     </template>
   </AcceptLayout>
+
+  <!-- 全画面ローディングオーバーレイ -->
+  <div
+    v-if="loading.isLoading"
+    class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+    style="z-index: 9999;"
+  >
+    <div class="bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full mx-4">
+      <div class="text-center">
+        <!-- スピナー -->
+        <div class="relative mb-6">
+          <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <i class="fas fa-check text-blue-600 text-lg" v-if="loading.currentAction === 'accept'"></i>
+            <i class="fas fa-times text-red-600 text-lg" v-else-if="loading.currentAction === 'reject'"></i>
+          </div>
+        </div>
+        
+        <!-- メッセージ -->
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">
+          {{ loading.message }}
+        </h3>
+        <p class="text-sm text-gray-600">
+          しばらくお待ちください...
+        </p>
+        
+        <!-- プログレスバー -->
+        <div class="mt-6">
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-blue-600 h-2 rounded-full animate-pulse" style="width: 70%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- 詳細ダイアログモーダル -->
   <div
@@ -693,16 +761,17 @@ onMounted(() => {
                   'accept'
                 )
               "
-              :disabled="getRowStyle(description_order_request.order_request).isDisabled"
+              :disabled="getRowStyle(description_order_request.order_request).isDisabled || loading.isLoading"
               :class="[
                 'flex-1 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl transition-all duration-200',
-                getRowStyle(description_order_request.order_request).isDisabled
+                getRowStyle(description_order_request.order_request).isDisabled || loading.isLoading
                   ? 'text-gray-400 bg-gray-300 cursor-not-allowed'
                   : 'text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 hover:transform hover:scale-105'
               ]"
             >
-              <i class="fas fa-check mr-2"></i>
-              承認する
+              <i v-if="loading.isLoading && loading.currentAction === 'accept'" class="fas fa-spinner fa-spin mr-2"></i>
+              <i v-else class="fas fa-check mr-2"></i>
+              {{ loading.isLoading && loading.currentAction === 'accept' ? '承認処理中...' : '承認する' }}
             </button>
             <button
               @click.prevent="
@@ -711,16 +780,17 @@ onMounted(() => {
                   'reject'
                 )
               "
-              :disabled="getRowStyle(description_order_request.order_request).isDisabled"
+              :disabled="getRowStyle(description_order_request.order_request).isDisabled || loading.isLoading"
               :class="[
                 'flex-1 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl transition-all duration-200',
-                getRowStyle(description_order_request.order_request).isDisabled
+                getRowStyle(description_order_request.order_request).isDisabled || loading.isLoading
                   ? 'text-gray-400 bg-gray-300 cursor-not-allowed'
                   : 'text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 hover:transform hover:scale-105'
               ]"
             >
-              <i class="fas fa-times mr-2"></i>
-              却下する
+              <i v-if="loading.isLoading && loading.currentAction === 'reject'" class="fas fa-spinner fa-spin mr-2"></i>
+              <i v-else class="fas fa-times mr-2"></i>
+              {{ loading.isLoading && loading.currentAction === 'reject' ? '却下処理中...' : '却下する' }}
             </button>
           </div>
 
@@ -741,6 +811,8 @@ onMounted(() => {
                 :placeholder="description_order_request.comment.placeholder"
                 v-model="description_order_request.comment.msg"
                 @change="save_comment"
+                :disabled="loading.isLoading"
+                :class="{ 'opacity-50 cursor-not-allowed': loading.isLoading }"
               ></textarea>
             </div>
           </div>

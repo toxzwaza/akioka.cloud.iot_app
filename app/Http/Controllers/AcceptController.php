@@ -249,7 +249,7 @@ class AcceptController extends Controller
                                 $order_request->user_id,
                                 $order_request_approval_user->id,
                                 "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment . "\n以下のボタンをクリックして稟議書を修正してください。",
-                                'https://akioka.cloud/new_item?order_request_id=' . $order_request->id
+                                'https://akioka.cloud/check_order_request?order_request_id=' . $order_request->id
                             );
 
                             Helper::sendNotification($device->token, "在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment);
