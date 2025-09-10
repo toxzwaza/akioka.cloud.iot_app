@@ -89,6 +89,7 @@ const loginAndCreateTokenWithDeviceId = () => {
       .then((res) => {
         console.log(res.data);
         if (res.data.status) {
+          // 既存のdevice_idでも新規でも、常にlocalStorageを更新
           localStorage.setItem("device_id", inputId.value);
           deviceId.value = inputId.value;
           
@@ -205,10 +206,8 @@ onMounted(() => {
   if (savedId && savedId != "null") {
     deviceId.value = savedId;
 
-    // 最終アクセス日を更新
+    // 既存のdevice_idの場合はトークンを再取得せず、基本機能のみ実行
     updateLastAccessDate();
-
-    // 通知を取得する処理
     getDeviceMessages();
   } else {
     inputId.value = prompt("デバイスIDを設定してください。");
@@ -226,6 +225,7 @@ onMounted(() => {
       return;
     }
     
+    // 新規デバイスの場合のみトークンを取得してデバイス登録
     getFCMToken().then((fetchedToken) => {
       token.value = fetchedToken;
 
@@ -237,8 +237,6 @@ onMounted(() => {
       }
     });
   }
-
-  getFCMToken();
 });
 
 onMessage(messaging, (payload) => {
