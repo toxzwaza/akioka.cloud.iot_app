@@ -24,3 +24,17 @@ export function confirmWindowUpdate(message, route) {
     }
 
 }
+export function nl2br(text){
+    
+    if (!text) return "";
+    // 文字列型でない場合は文字列に変換
+    const textStr = String(text);
+    const escapedText = textStr
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    return escapedText.replace(/\n/g, "<br>");
+      
+}

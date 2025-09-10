@@ -212,11 +212,28 @@ onMounted(() => {
     getDeviceMessages();
   } else {
     inputId.value = prompt("デバイスIDを設定してください。");
+    
+    // キャンセルが押された場合（inputId.value が null）
+    if (inputId.value === null) {
+      // エラーページにリダイレクト
+      window.location.href = route('stock.device.error');
+      return;
+    }
+    
+    // 空文字列が入力された場合も同様に処理
+    if (!inputId.value || inputId.value.trim() === "") {
+      window.location.href = route('stock.device.error');
+      return;
+    }
+    
     getFCMToken().then((fetchedToken) => {
       token.value = fetchedToken;
 
       if (inputId.value && token.value) {
         loginAndCreateTokenWithDeviceId();
+      } else {
+        // トークン取得失敗時もエラーページへ
+        window.location.href = route('stock.device.error');
       }
     });
   }

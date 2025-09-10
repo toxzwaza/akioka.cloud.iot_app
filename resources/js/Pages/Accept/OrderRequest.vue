@@ -50,7 +50,6 @@ const save_comment = () => {
   order_request.comment = description_order_request.comment.msg;
 
   console.log(props.order_requests);
-  alert("コメントを追記しました。");
 };
 
 const openDescription = (order_request) => {
@@ -817,10 +816,12 @@ onMounted(() => {
                     </div>
 
                   <!-- コメント -->
-                  <div class="text-sm text-gray-700 bg-white p-3 rounded-lg border border-gray-100">
+                  <div class="text-sm text-gray-700 bg-white p-3 rounded-lg border border-gray-100 h-64 max-h-64 overflow-y-auto">
                     <i class="fas fa-quote-left text-gray-400 mr-2"></i>
-                    {{ approval.comment || "コメントがありません。" }}
-                    </div>
+                    <p v-if="approval.comment" v-html="approval.comment.replace(/\n/g, '<br>')">
+                    </p>
+                    <p v-else>コメントはありません。</p>
+                  </div>
                 </div>
 
                 <!-- 矢印（最後の要素以外） -->

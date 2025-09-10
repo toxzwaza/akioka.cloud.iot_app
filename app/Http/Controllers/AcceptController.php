@@ -137,7 +137,26 @@ class AcceptController extends Controller
         try {
             $order_request_approval = OrderRequestApproval::find($order_request_approval_id);
             $order_request_approval->status = $flg;
-            $order_request_approval->comment = $comment;
+            
+            // コメントの履歴管理
+            if ($comment && trim($comment) !== "") {
+                // 現在の日付を取得
+                $dateString = date('y/m/d');
+                
+                // ステータスに基づいて承認・非承認を判定
+                $statusText = ($flg == 1) ? '承認' : '非承認';
+                
+                // 新しいコメント形式
+                $newComment = $dateString . " [" . $statusText . "]\n" . $comment . "\n----------------------";
+                
+                // 既存のコメントがある場合は追加、ない場合は新規作成
+                if ($order_request_approval->comment && trim($order_request_approval->comment) !== "") {
+                    $order_request_approval->comment = $order_request_approval->comment . "\n" . $newComment;
+                } else {
+                    $order_request_approval->comment = $newComment;
+                }
+            }
+            
             $order_request_approval->save();
             $order_request_approval_user = User::find($order_request_approval->user_id);
 

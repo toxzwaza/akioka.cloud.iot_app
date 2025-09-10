@@ -8,6 +8,7 @@ use App\Http\Controllers\ContentController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\DeviceMessageController;
+use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\HeatStrokeController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\LunchController;
@@ -48,6 +49,8 @@ Route::get('/sw.js', function () {
 //////////在庫管理システム （タブレット） //////////
 // メイン画面
 Route::get('/', [MainController::class, 'index'])->name('stock.home');
+// 端末IDエラーページ
+Route::get('/device-error', [ ErrorController::class, 'deviceError'])->name('stock.device.error');
 // デバイスメッセージ取得
 Route::get('/device-message', [DeviceMessageController::class, 'getDeviceMessages'])->name('device-message.getDeviceMessages');
 Route::post('/device-message', [DeviceMessageController::class, 'confirm_message'])->name('device-message.confirm_message');
