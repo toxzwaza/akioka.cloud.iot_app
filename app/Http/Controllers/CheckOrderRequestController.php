@@ -16,15 +16,18 @@ use Inertia\Inertia;
 class CheckOrderRequestController extends Controller
 {
     //
-    public function index()
+    public function index(Request $request)
     {
+        $order_request_id = $request->order_request_id;
+
         $processes = Process::all();
         $users = User::where('del_flg', 0)->get();
 
-        return Inertia::render('Stock/CheckOrderRequest/Index', [ 'processes' => $processes, 'users' => $users ]);
+        return Inertia::render('Stock/CheckOrderRequest/Index', ['processes' => $processes, 'users' => $users, 'order_request_id' => $order_request_id]);
     }
-    public function show($order_request_id){
-        return Inertia::render('Stock/CheckOrderRequest/Show', [ 'order_request_id' => $order_request_id ]);
+    public function show($order_request_id)
+    {
+        return Inertia::render('Stock/CheckOrderRequest/Show', ['order_request_id' => $order_request_id]);
     }
 
     public function getOrderRequestDetail($order_request_id)
@@ -125,7 +128,6 @@ class CheckOrderRequestController extends Controller
                     $order_request->document_images = $document_images;
                 }
             }
-
         } catch (Exception $e) {
             $status = false;
             $msg = $e->getMessage();
@@ -204,7 +206,7 @@ class CheckOrderRequestController extends Controller
                 ->leftJoin('device_messages', 'device_messages.id', '=', 'order_requests.device_message_id')
                 ->leftJoin('initial_orders', 'initial_orders.order_request_id', '=', 'order_requests.id')
                 ->where('order_requests.del_flg', '=', 0);
-                // ->where('order_requests.status', '=', 0)
+            // ->where('order_requests.status', '=', 0)
 
             // ユーザーIDによる絞り込み
             if ($user_id) {
@@ -212,6 +214,7 @@ class CheckOrderRequestController extends Controller
                     $q->where('order_requests.request_user_id', '=', $user_id);
                 });
             }
+
 
             // グループIDによる絞り込み
             if ($process_id) {
@@ -222,7 +225,7 @@ class CheckOrderRequestController extends Controller
             if ($name) {
                 $query->where(function ($q) use ($name) {
                     $q->where('stocks.name', 'LIKE', '%' . $name . '%')
-                      ->orWhere('order_requests.name', 'LIKE', '%' . $name . '%');
+                        ->orWhere('order_requests.name', 'LIKE', '%' . $name . '%');
                 });
             }
 
@@ -230,15 +233,14 @@ class CheckOrderRequestController extends Controller
             if ($s_name) {
                 $query->where(function ($q) use ($s_name) {
                     $q->where('stocks.s_name', 'LIKE', '%' . $s_name . '%')
-                      ->orWhere('order_requests.s_name', 'LIKE', '%' . $s_name . '%');
+                        ->orWhere('order_requests.s_name', 'LIKE', '%' . $s_name . '%');
                 });
             }
 
             // ソートとデータ取得（ページネーション）
             $order_requests = $query
-                                   ->orderBy('order_requests.created_at', 'desc')
-                                   ->paginate($perPage, ['*'], 'page', $page);
-
+                ->orderBy('order_requests.created_at', 'desc')
+                ->paginate($perPage, ['*'], 'page', $page);
         } catch (Exception $e) {
             $status = false;
             $msg = $e->getMessage();

@@ -7,6 +7,7 @@ import StockLayout from "@/Layouts/StockLayout.vue";
 const props = defineProps({
   processes: Array,
   users: Array,
+  order_request_id: Number,
 });
 
 const form = reactive({
@@ -83,16 +84,28 @@ const changePage = (page) => {
 };
 
 // モーダル関連のメソッド（Show.vueから移植）
-const getStatusText = (acceptFlg, receiveFlg, initialOrderId, orderCompleteFlg) => {
+const getStatusText = (
+  acceptFlg,
+  receiveFlg,
+  initialOrderId,
+  orderCompleteFlg
+) => {
   if (receiveFlg) return { text: "納品済", class: "bg-green-900 text-white" };
-  if (initialOrderId && orderCompleteFlg) return { text: "発注済", class: "bg-blue-700 text-white" };
-  if (initialOrderId && !orderCompleteFlg) return { text: "未発注", class: "bg-yellow-600 text-white" };
-  if (acceptFlg === 0) return { text: "依頼済", class: "bg-blue-500 text-white" };
-  if (acceptFlg === 1) return { text: "承認待ち", class: "bg-orange-500 text-white" };
-  if (acceptFlg === 2) return { text: "承認済", class: "bg-green-500 text-white" };
+  if (initialOrderId && orderCompleteFlg)
+    return { text: "発注済", class: "bg-blue-700 text-white" };
+  if (initialOrderId && !orderCompleteFlg)
+    return { text: "未発注", class: "bg-yellow-600 text-white" };
+  if (acceptFlg === 0)
+    return { text: "依頼済", class: "bg-blue-500 text-white" };
+  if (acceptFlg === 1 || acceptFlg === 6)
+    return { text: "承認待ち", class: "bg-orange-500 text-white" };
+  if (acceptFlg === 2)
+    return { text: "承認済", class: "bg-green-500 text-white" };
   if (acceptFlg === 3) return { text: "却下", class: "bg-red-500 text-white" };
-  if (acceptFlg === 4) return { text: "却下再依頼待ち", class: "bg-gray-500 text-white" };
-  if (acceptFlg === 5) return { text: "確認中", class: "bg-purple-500 text-white" };
+  if (acceptFlg === 4)
+    return { text: "却下再依頼待ち", class: "bg-gray-500 text-white" };
+  if (acceptFlg === 5)
+    return { text: "確認中", class: "bg-purple-500 text-white" };
   return { text: "不明", class: "bg-gray-400 text-white" };
 };
 
@@ -114,16 +127,18 @@ const formatDateTime = (dateString) => {
 };
 
 const getFilePreviewUrl = (filePath) => {
-  if (!filePath) return '';
-  
+  if (!filePath) return "";
+
   // ファイル拡張子を取得
-  const extension = filePath.split('.').pop().toLowerCase();
-  
+  const extension = filePath.split(".").pop().toLowerCase();
+
   // PDFファイルの場合はGoogle Docs Viewerを使用
-  if (extension === 'pdf') {
-    return `https://docs.google.com/viewer?url=${encodeURIComponent(filePath)}&embedded=true`;
+  if (extension === "pdf") {
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(
+      filePath
+    )}&embedded=true`;
   }
-  
+
   // その他のファイルは直接表示
   return filePath;
 };
@@ -131,10 +146,10 @@ const getFilePreviewUrl = (filePath) => {
 const handleIframeError = (event) => {
   console.warn("iframe読み込みエラー:", event);
   const iframe = event.target;
-  const fallback = document.getElementById('iframe-fallback');
+  const fallback = document.getElementById("iframe-fallback");
   if (iframe && fallback) {
-    iframe.style.display = 'none';
-    fallback.style.display = 'block';
+    iframe.style.display = "none";
+    fallback.style.display = "block";
   }
 };
 
@@ -143,11 +158,14 @@ const showOrderRequestDetail = async (orderRequestId) => {
     modalLoading.value = true;
     modalError.value = "";
     showModal.value = true;
-    
-    const response = await axios.get(`/check_order_request/detail/${orderRequestId}`);
-    
+
+    const response = await axios.get(
+      `/check_order_request/detail/${orderRequestId}`
+    );
+
     if (response.data.status) {
       selectedOrderRequest.value = response.data.order_request;
+      console.log(selectedOrderRequest.value);
     } else {
       modalError.value = response.data.msg || "データの取得に失敗しました。";
     }
@@ -166,6 +184,10 @@ const closeModal = () => {
 };
 
 onMounted(() => {
+  if (props.order_request_id) {
+    showOrderRequestDetail(props.order_request_id);
+  }
+
   getOrderRequest();
 
   process_users.value = props.users;
@@ -421,7 +443,7 @@ onMounted(() => {
                     'transition duration-300 border': true,
                   }"
                 >
-                  <td class="px-4 py-6 ">
+                  <td class="px-4 py-6">
                     <button
                       @click="showOrderRequestDetail(order_request.id)"
                       class="bg-gray-700 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded"
@@ -490,7 +512,7 @@ onMounted(() => {
                       </span>
                       <span
                         class="text-sm bg-orange-500 hover:bg-orange-300 text-white py-2 px-4 rounded-full"
-                        v-else-if="order_request.accept_flg === 1"
+                        v-else-if="order_request.accept_flg === 1 || order_request.accept_flg === 6"
                         >承認待ち</span
                       >
                       <span
@@ -606,38 +628,61 @@ onMounted(() => {
       </section>
 
       <!-- モーダルダイアログ -->
-      <div 
-        v-if="showModal" 
+      <div
+        v-if="showModal"
         class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
         @click="closeModal"
       >
-        <div 
+        <div
           class="relative top-5 mx-auto p-6 border w-11/12 max-w-7xl shadow-lg rounded-md bg-white"
           @click.stop
         >
           <!-- モーダルヘッダー -->
           <div class="flex items-center justify-between pb-3 border-b">
-            <h3 class="text-xl font-semibold text-gray-900">発注依頼詳細情報</h3>
-            <button 
+            <h3 class="text-xl font-semibold text-gray-900">
+              発注依頼詳細情報
+            </h3>
+            <button
               @click="closeModal"
               class="text-gray-400 hover:text-gray-600"
             >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
               </svg>
             </button>
           </div>
 
           <!-- モーダルコンテンツ -->
-          <div class="mt-4 max-h-screen-80 overflow-y-auto" style="max-height: 80vh;">
+          <div
+            class="mt-4 max-h-screen-80 overflow-y-auto"
+            style="max-height: 80vh"
+          >
             <!-- ローディング表示 -->
-            <div v-if="modalLoading" class="flex justify-center items-center py-12">
-              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            <div
+              v-if="modalLoading"
+              class="flex justify-center items-center py-12"
+            >
+              <div
+                class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"
+              ></div>
               <span class="ml-3 text-gray-600">読み込み中...</span>
             </div>
 
             <!-- エラー表示 -->
-            <div v-else-if="modalError" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div
+              v-else-if="modalError"
+              class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
+            >
               <strong class="font-bold">エラー:</strong>
               <span class="block sm:inline">{{ modalError }}</span>
             </div>
@@ -648,36 +693,74 @@ onMounted(() => {
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- 左側 -->
                 <div>
-                  <h4 class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2">基本情報</h4>
-                  
+                  <h4
+                    class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2"
+                  >
+                    基本情報
+                  </h4>
+
                   <div class="space-y-3">
                     <div class="flex">
-                      <span class="font-medium text-gray-600 w-32">依頼ID:</span>
-                      <span class="text-gray-900">{{ selectedOrderRequest.id }}</span>
+                      <span class="font-medium text-gray-600 w-32"
+                        >依頼ID:</span
+                      >
+                      <span class="text-gray-900">{{
+                        selectedOrderRequest.id
+                      }}</span>
                     </div>
-                    
+
                     <div class="flex">
-                      <span class="font-medium text-gray-600 w-32">依頼日時:</span>
-                      <span class="text-gray-900">{{ formatDateTime(selectedOrderRequest.created_at) }}</span>
+                      <span class="font-medium text-gray-600 w-32"
+                        >依頼日時:</span
+                      >
+                      <span class="text-gray-900">{{
+                        formatDateTime(selectedOrderRequest.created_at)
+                      }}</span>
                     </div>
-                    
+
                     <div class="flex">
-                      <span class="font-medium text-gray-600 w-32">依頼者:</span>
-                      <span class="text-gray-900">{{ selectedOrderRequest.request_user_name }} ({{ selectedOrderRequest.process_name }})</span>
+                      <span class="font-medium text-gray-600 w-32"
+                        >依頼者:</span
+                      >
+                      <span class="text-gray-900"
+                        >{{ selectedOrderRequest.request_user_name }} ({{
+                          selectedOrderRequest.process_name
+                        }})</span
+                      >
                     </div>
-                    
+
                     <div class="flex">
-                      <span class="font-medium text-gray-600 w-32">発注者:</span>
-                      <span class="text-gray-900">{{ selectedOrderRequest.order_user_name || '未設定' }}</span>
+                      <span class="font-medium text-gray-600 w-32"
+                        >発注者:</span
+                      >
+                      <span class="text-gray-900">{{
+                        selectedOrderRequest.order_user_name || "未設定"
+                      }}</span>
                     </div>
-                    
+
                     <div class="flex items-center">
-                      <span class="font-medium text-gray-600 w-32">ステータス:</span>
-                      <span 
-                        :class="getStatusText(selectedOrderRequest.accept_flg, selectedOrderRequest.receive_flg, selectedOrderRequest.initial_order_id, selectedOrderRequest.order_complete_flg).class"
+                      <span class="font-medium text-gray-600 w-32"
+                        >ステータス:</span
+                      >
+                      <span
+                        :class="
+                          getStatusText(
+                            selectedOrderRequest.accept_flg,
+                            selectedOrderRequest.receive_flg,
+                            selectedOrderRequest.initial_order_id,
+                            selectedOrderRequest.order_complete_flg
+                          ).class
+                        "
                         class="px-3 py-1 rounded-full text-sm font-medium"
                       >
-                        {{ getStatusText(selectedOrderRequest.accept_flg, selectedOrderRequest.receive_flg, selectedOrderRequest.initial_order_id, selectedOrderRequest.order_complete_flg).text }}
+                        {{
+                          getStatusText(
+                            selectedOrderRequest.accept_flg,
+                            selectedOrderRequest.receive_flg,
+                            selectedOrderRequest.initial_order_id,
+                            selectedOrderRequest.order_complete_flg
+                          ).text
+                        }}
                       </span>
                     </div>
                   </div>
@@ -685,32 +768,58 @@ onMounted(() => {
 
                 <!-- 右側 -->
                 <div>
-                  <h4 class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2">商品情報</h4>
-                  
+                  <h4
+                    class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2"
+                  >
+                    商品情報
+                  </h4>
+
                   <div class="space-y-3">
                     <div class="flex">
-                      <span class="font-medium text-gray-600 w-32">依頼品:</span>
-                      <span 
-                        :class="selectedOrderRequest.new_stock_flg ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'"
+                      <span class="font-medium text-gray-600 w-32"
+                        >依頼品:</span
+                      >
+                      <span
+                        :class="
+                          selectedOrderRequest.new_stock_flg
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-orange-100 text-orange-800'
+                        "
                         class="px-2 py-1 rounded text-xs font-medium"
                       >
-                        {{ selectedOrderRequest.new_stock_flg ? '新規品' : '既存品' }}
+                        {{
+                          selectedOrderRequest.new_stock_flg
+                            ? "新規品"
+                            : "既存品"
+                        }}
                       </span>
                     </div>
-                    
+
                     <div class="flex">
                       <span class="font-medium text-gray-600 w-32">品名:</span>
-                      <span class="text-gray-900">{{ selectedOrderRequest.stock_id ? selectedOrderRequest.name : selectedOrderRequest.order_request_name }}</span>
+                      <span class="text-gray-900">{{
+                        selectedOrderRequest.stock_id
+                          ? selectedOrderRequest.name
+                          : selectedOrderRequest.order_request_name
+                      }}</span>
                     </div>
-                    
+
                     <div class="flex">
                       <span class="font-medium text-gray-600 w-32">品番:</span>
-                      <span class="text-gray-900">{{ selectedOrderRequest.s_name || selectedOrderRequest.order_request_s_name || '未設定' }}</span>
+                      <span class="text-gray-900">{{
+                        selectedOrderRequest.s_name ||
+                        selectedOrderRequest.order_request_s_name ||
+                        "未設定"
+                      }}</span>
                     </div>
-                    
+
                     <div class="flex">
-                      <span class="font-medium text-gray-600 w-32">仕入先:</span>
-                      <span class="text-gray-900">{{ selectedOrderRequest.supplier_name || '未設定' }}</span>
+                      <span class="font-medium text-gray-600 w-32"
+                        >仕入先:</span
+                      >
+                      <span class="text-gray-900">{{
+                        selectedOrderRequest.supplier_name || "未設定"
+                      }}</span>
                     </div>
                   </div>
                 </div>
@@ -718,12 +827,20 @@ onMounted(() => {
 
               <!-- 商品画像 -->
               <div v-if="selectedOrderRequest.img_path" class="mb-6">
-                <h4 class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2">商品画像</h4>
+                <h4
+                  class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2"
+                >
+                  商品画像
+                </h4>
                 <div class="flex justify-center">
-                  <img 
-                    :src="selectedOrderRequest.img_path && selectedOrderRequest.img_path.includes('storage') 
-                      ? 'https://akioka.cloud/' + selectedOrderRequest.img_path 
-                      : selectedOrderRequest.img_path"
+                  <img
+                    :src="
+                      selectedOrderRequest.img_path &&
+                      selectedOrderRequest.img_path.includes('storage')
+                        ? 'https://akioka.cloud/' +
+                          selectedOrderRequest.img_path
+                        : selectedOrderRequest.img_path
+                    "
                     alt="商品画像"
                     class="max-w-md h-auto border border-gray-300 rounded-lg shadow-sm"
                   />
@@ -734,49 +851,99 @@ onMounted(() => {
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- 左側 -->
                 <div>
-                  <h4 class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2">数量情報</h4>
-                  
+                  <h4
+                    class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2"
+                  >
+                    数量情報
+                  </h4>
+
                   <div class="space-y-3">
                     <div class="flex">
-                      <span class="font-medium text-gray-600 w-32">現在個数:</span>
-                      <span class="text-gray-900">{{ selectedOrderRequest.now_quantity || '0' }}</span>
+                      <span class="font-medium text-gray-600 w-32"
+                        >現在個数:</span
+                      >
+                      <span class="text-gray-900">{{
+                        selectedOrderRequest.now_quantity || "0"
+                      }}</span>
                     </div>
-                    
+
                     <div class="flex">
-                      <span class="font-medium text-gray-600 w-32">発注点:</span>
-                      <span class="text-gray-900">{{ selectedOrderRequest.reorder_point || '未設定' }}</span>
+                      <span class="font-medium text-gray-600 w-32"
+                        >発注点:</span
+                      >
+                      <span class="text-gray-900">{{
+                        selectedOrderRequest.reorder_point || "未設定"
+                      }}</span>
                     </div>
-                    
+
                     <div class="flex">
-                      <span class="font-medium text-gray-600 w-32">発注数量:</span>
-                      <span class="text-gray-900">{{ selectedOrderRequest.quantity }}</span>
+                      <span class="font-medium text-gray-600 w-32"
+                        >発注数量:</span
+                      >
+                      <span class="text-gray-900">{{
+                        selectedOrderRequest.quantity
+                      }}</span>
                     </div>
-                    
+
                     <div class="flex">
-                      <span class="font-medium text-gray-600 w-32">発注単位:</span>
-                      <span class="text-gray-900">{{ selectedOrderRequest.unit || '未設定' }}</span>
+                      <span class="font-medium text-gray-600 w-32"
+                        >発注単位:</span
+                      >
+                      <span class="text-gray-900">{{
+                        selectedOrderRequest.unit || "未設定"
+                      }}</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- 右側 -->
                 <div>
-                  <h4 class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2">価格情報</h4>
-                  
+                  <h4
+                    class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2"
+                  >
+                    価格情報
+                  </h4>
+
                   <div class="space-y-3">
                     <div class="flex">
                       <span class="font-medium text-gray-600 w-32">単価:</span>
-                      <span class="text-gray-900">¥{{ selectedOrderRequest.price ? Number(selectedOrderRequest.price).toLocaleString() : '未設定' }}</span>
+                      <span class="text-gray-900"
+                        >¥{{
+                          selectedOrderRequest.price
+                            ? Number(
+                                selectedOrderRequest.price
+                              ).toLocaleString()
+                            : "未設定"
+                        }}</span
+                      >
                     </div>
-                    
+
                     <div class="flex">
                       <span class="font-medium text-gray-600 w-32">送料:</span>
-                      <span class="text-gray-900">¥{{ selectedOrderRequest.postage ? Number(selectedOrderRequest.postage).toLocaleString() : '0' }}</span>
+                      <span class="text-gray-900"
+                        >¥{{
+                          selectedOrderRequest.postage
+                            ? Number(
+                                selectedOrderRequest.postage
+                              ).toLocaleString()
+                            : "0"
+                        }}</span
+                      >
                     </div>
-                    
+
                     <div class="flex">
-                      <span class="font-bold text-gray-600 w-32 text-lg">合計金額:</span>
-                      <span class="text-gray-900 text-lg font-bold">¥{{ selectedOrderRequest.calc_price ? Number(selectedOrderRequest.calc_price).toLocaleString() : '未設定' }}</span>
+                      <span class="font-bold text-gray-600 w-32 text-lg"
+                        >合計金額:</span
+                      >
+                      <span class="text-gray-900 text-lg font-bold"
+                        >¥{{
+                          selectedOrderRequest.calc_price
+                            ? Number(
+                                selectedOrderRequest.calc_price
+                              ).toLocaleString()
+                            : "未設定"
+                        }}</span
+                      >
                     </div>
                   </div>
                 </div>
@@ -784,37 +951,66 @@ onMounted(() => {
 
               <!-- 日程情報 -->
               <div>
-                <h4 class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2">日程情報</h4>
-                
+                <h4
+                  class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2"
+                >
+                  日程情報
+                </h4>
+
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div class="flex">
-                    <span class="font-medium text-gray-600 w-32">希望納期:</span>
-                    <span class="text-gray-900">{{ formatDate(selectedOrderRequest.desire_delivery_date) }}</span>
+                    <span class="font-medium text-gray-600 w-32"
+                      >希望納期:</span
+                    >
+                    <span class="text-gray-900">{{
+                      formatDate(selectedOrderRequest.desire_delivery_date)
+                    }}</span>
                   </div>
-                  
+
                   <div class="flex">
-                    <span class="font-medium text-gray-600 w-32">消化予定日:</span>
-                    <span class="text-gray-900">{{ formatDate(selectedOrderRequest.digest_date) }}</span>
+                    <span class="font-medium text-gray-600 w-32"
+                      >消化予定日:</span
+                    >
+                    <span class="text-gray-900">{{
+                      formatDate(selectedOrderRequest.digest_date)
+                    }}</span>
                   </div>
                 </div>
               </div>
 
               <!-- 備考・説明 -->
-              <div v-if="selectedOrderRequest.description || selectedOrderRequest.sub_description">
-                <h4 class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2">備考・説明</h4>
-                
+              <div
+                v-if="
+                  selectedOrderRequest.description ||
+                  selectedOrderRequest.sub_description
+                "
+              >
+                <h4
+                  class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2"
+                >
+                  備考・説明
+                </h4>
+
                 <div class="space-y-4">
                   <div v-if="selectedOrderRequest.description">
-                    <span class="font-medium text-gray-600 block mb-2">詳細説明:</span>
+                    <span class="font-medium text-gray-600 block mb-2"
+                      >詳細説明:</span
+                    >
                     <div class="bg-gray-50 p-4 rounded border">
-                      <p class="text-gray-900 whitespace-pre-wrap">{{ selectedOrderRequest.description }}</p>
+                      <p class="text-gray-900 whitespace-pre-wrap">
+                        {{ selectedOrderRequest.description }}
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div v-if="selectedOrderRequest.sub_description">
-                    <span class="font-medium text-gray-600 block mb-2">補足説明:</span>
+                    <span class="font-medium text-gray-600 block mb-2"
+                      >補足説明:</span
+                    >
                     <div class="bg-gray-50 p-4 rounded border">
-                      <p class="text-gray-900 whitespace-pre-wrap">{{ selectedOrderRequest.sub_description }}</p>
+                      <p class="text-gray-900 whitespace-pre-wrap">
+                        {{ selectedOrderRequest.sub_description }}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -822,13 +1018,19 @@ onMounted(() => {
 
               <!-- 添付ファイル -->
               <div v-if="selectedOrderRequest.file_path">
-                <h4 class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2">添付ファイル</h4>
-                
+                <h4
+                  class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2"
+                >
+                  添付ファイル
+                </h4>
+
                 <div class="space-y-4">
                   <div class="flex items-center justify-between mb-2">
-                    <span class="font-medium text-gray-600">ファイルプレビュー:</span>
-                    <a 
-                      :href="selectedOrderRequest.file_path" 
+                    <span class="font-medium text-gray-600"
+                      >ファイルプレビュー:</span
+                    >
+                    <a
+                      :href="selectedOrderRequest.file_path"
                       target="_blank"
                       class="text-blue-600 hover:text-blue-800 underline inline-flex items-center text-sm"
                     >
@@ -836,9 +1038,11 @@ onMounted(() => {
                       新しいタブで開く
                     </a>
                   </div>
-                  
-                  <div class="border border-gray-300 rounded-lg overflow-hidden bg-white">
-                    <iframe 
+
+                  <div
+                    class="border border-gray-300 rounded-lg overflow-hidden bg-white"
+                  >
+                    <iframe
                       :src="getFilePreviewUrl(selectedOrderRequest.file_path)"
                       class="w-full h-64"
                       frameborder="0"
@@ -847,7 +1051,11 @@ onMounted(() => {
                     >
                       <p class="p-4 text-gray-500">
                         このブラウザではファイルプレビューがサポートされていません。
-                        <a :href="selectedOrderRequest.file_path" target="_blank" class="text-blue-600 underline">
+                        <a
+                          :href="selectedOrderRequest.file_path"
+                          target="_blank"
+                          class="text-blue-600 underline"
+                        >
                           こちらをクリックしてファイルを開いてください。
                         </a>
                       </p>
@@ -857,130 +1065,215 @@ onMounted(() => {
               </div>
 
               <!-- 承認状況 -->
-              <div v-if="selectedOrderRequest.order_request_approvals && selectedOrderRequest.order_request_approvals.length > 0">
-                <h4 class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2">承認状況</h4>
-                
+              <div
+                v-if="
+                  selectedOrderRequest.order_request_approvals &&
+                  selectedOrderRequest.order_request_approvals.length > 0
+                "
+              >
+                <h4
+                  class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2"
+                >
+                  承認状況
+                </h4>
+
                 <div class="space-y-4">
-                  <div 
-                    v-for="approval in selectedOrderRequest.order_request_approvals" 
+                  <div
+                    v-for="approval in selectedOrderRequest.order_request_approvals"
                     :key="approval.user_id"
                     class="bg-gray-50 p-4 rounded border"
                   >
                     <div class="flex items-center justify-between mb-2">
                       <div class="flex items-center space-x-3">
-                        <span class="font-medium text-gray-800">{{ approval.name }}</span>
-                        <span 
+                        <span class="font-medium text-gray-800">{{
+                          approval.name
+                        }}</span>
+                        <span
                           :class="{
                             'bg-green-500 text-white': approval.status === 1,
                             'bg-red-500 text-white': approval.status === 2,
                             'bg-yellow-500 text-white': approval.status === 0,
-                            'bg-gray-400 text-white': approval.status === null
+                            'bg-gray-400 text-white': approval.status === null,
                           }"
                           class="px-2 py-1 rounded text-xs font-medium"
                         >
-                          {{ 
-                            approval.status === 1 ? '承認' : 
-                            approval.status === 2 ? '却下' : 
-                            approval.status === 0 ? '承認待ち' : 
-                            '未処理' 
+                          {{
+                            approval.status === 1
+                              ? "承認"
+                              : approval.status === 2
+                              ? "却下"
+                              : approval.status === 0
+                              ? "承認待ち"
+                              : "未処理"
                           }}
                         </span>
-                        <span v-if="approval.final_flg" class="bg-purple-500 text-white px-2 py-1 rounded text-xs font-medium">
+                        <span
+                          v-if="approval.final_flg"
+                          class="bg-purple-500 text-white px-2 py-1 rounded text-xs font-medium"
+                        >
                           最終承認者
                         </span>
                       </div>
-                      <div v-if="approval.updated_at" class="text-sm text-gray-500">
+                      <div
+                        v-if="approval.updated_at"
+                        class="text-sm text-gray-500"
+                      >
                         {{ formatDateTime(approval.updated_at) }}
                       </div>
                     </div>
-                    
+
                     <div v-if="approval.comment" class="mt-2">
-                      <span class="font-medium text-gray-600 block mb-1">コメント:</span>
-                      <p class="text-gray-900 text-sm bg-white p-2 rounded border">{{ approval.comment }}</p>
+                      <span class="font-medium text-gray-600 block mb-1"
+                        >コメント:</span
+                      >
+                      <p
+                        v-html="approval.comment.replace(/\n/g, '<br>')"
+                        class="text-gray-900 text-sm bg-white p-2 rounded border"
+                      ></p>
                     </div>
                   </div>
                 </div>
               </div>
+              <div v-if="selectedOrderRequest.accept_flg === 3">
+                <!-- 稟議書情報 -->
+                <div v-if="selectedOrderRequest.document_id">
+                  <h4
+                    class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2"
+                  >
+                    稟議書情報
+                  </h4>
 
-              <!-- 稟議書情報 -->
-              <div v-if="selectedOrderRequest.document_id">
-                <h4 class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2">稟議書情報</h4>
-                
-                <div class="bg-gray-50 p-4 rounded border space-y-4">
-                  <div v-if="selectedOrderRequest.title">
-                    <span class="font-medium text-gray-600 block mb-2">タイトル:</span>
-                    <p class="text-gray-900">{{ selectedOrderRequest.title }}</p>
-                  </div>
-                  
-                  <div v-if="selectedOrderRequest.evalution_date">
-                    <span class="font-medium text-gray-600 block mb-2">評価日:</span>
-                    <p class="text-gray-900">{{ formatDate(selectedOrderRequest.evalution_date) }}</p>
-                  </div>
-                  
-                  <div v-if="selectedOrderRequest.content">
-                    <span class="font-medium text-gray-600 block mb-2">内容:</span>
-                    <div class="bg-white p-3 rounded border">
-                      <p class="text-gray-900 whitespace-pre-wrap">{{ selectedOrderRequest.content }}</p>
-                    </div>
-                  </div>
-                  
-                  <div v-if="selectedOrderRequest.main_reason">
-                    <span class="font-medium text-gray-600 block mb-2">主な理由:</span>
-                    <p class="text-gray-900">{{ selectedOrderRequest.main_reason }}</p>
-                  </div>
-                  
-                  <div v-if="selectedOrderRequest.sub_reason">
-                    <span class="font-medium text-gray-600 block mb-2">副次的理由:</span>
-                    <p class="text-gray-900">{{ selectedOrderRequest.sub_reason }}</p>
-                  </div>
-                  
-                  <!-- 稟議書画像 -->
-                  <div v-if="selectedOrderRequest.document_images && selectedOrderRequest.document_images.length > 0">
-                    <span class="font-medium text-gray-600 block mb-2">稟議書画像:</span>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div 
-                        v-for="(image, index) in selectedOrderRequest.document_images" 
-                        :key="index"
-                        class="border border-gray-300 rounded-lg overflow-hidden"
+                  <div class="bg-gray-50 p-4 rounded border space-y-4">
+                    <div v-if="selectedOrderRequest.title">
+                      <span class="font-medium text-gray-600 block mb-2"
+                        >タイトル:</span
                       >
-                        <img 
-                          :src="image" 
-                          :alt="`稟議書画像 ${index + 1}`"
-                          class="w-full h-auto cursor-pointer hover:opacity-80 transition-opacity"
-                          @click="window.open(image, '_blank')"
-                        />
+                      <p class="text-gray-900">
+                        {{ selectedOrderRequest.title }}
+                      </p>
+                    </div>
+
+                    <div v-if="selectedOrderRequest.evalution_date">
+                      <span class="font-medium text-gray-600 block mb-2"
+                        >評価日:</span
+                      >
+                      <p class="text-gray-900">
+                        {{ formatDate(selectedOrderRequest.evalution_date) }}
+                      </p>
+                    </div>
+
+                    <div v-if="selectedOrderRequest.content">
+                      <span class="font-medium text-gray-600 block mb-2"
+                        >内容:</span
+                      >
+                      <div class="bg-white p-3 rounded border">
+                        <p class="text-gray-900 whitespace-pre-wrap">
+                          {{ selectedOrderRequest.content }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div v-if="selectedOrderRequest.main_reason">
+                      <span class="font-medium text-gray-600 block mb-2"
+                        >主な理由:</span
+                      >
+                      <p class="text-gray-900">
+                        {{ selectedOrderRequest.main_reason }}
+                      </p>
+                    </div>
+
+                    <div v-if="selectedOrderRequest.sub_reason">
+                      <span class="font-medium text-gray-600 block mb-2"
+                        >副次的理由:</span
+                      >
+                      <p class="text-gray-900">
+                        {{ selectedOrderRequest.sub_reason }}
+                      </p>
+                    </div>
+
+                    <!-- 稟議書画像 -->
+                    <div
+                      v-if="
+                        selectedOrderRequest.document_images &&
+                        selectedOrderRequest.document_images.length > 0
+                      "
+                    >
+                      <span class="font-medium text-gray-600 block mb-2"
+                        >稟議書画像:</span
+                      >
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div
+                          v-for="(
+                            image, index
+                          ) in selectedOrderRequest.document_images"
+                          :key="index"
+                          class="border border-gray-300 rounded-lg overflow-hidden"
+                        >
+                          <img
+                            :src="image"
+                            :alt="`稟議書画像 ${index + 1}`"
+                            class="w-full h-auto cursor-pointer hover:opacity-80 transition-opacity"
+                            @click="window.open(image, '_blank')"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- デバイスメッセージ -->
-              <div v-if="selectedOrderRequest.message">
-                <h4 class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2">デバイスメッセージ</h4>
-                
-                <div class="space-y-4">
-                  <div>
-                    <span class="font-medium text-gray-600 block mb-2">メッセージ:</span>
-                    <div class="bg-blue-50 p-4 rounded border border-blue-200">
-                      <p class="text-gray-900">{{ selectedOrderRequest.message }}</p>
+                <!-- デバイスメッセージ -->
+                <div v-if="selectedOrderRequest.message">
+                  <h4
+                    class="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2"
+                  >
+                    デバイスメッセージ
+                  </h4>
+
+                  <div class="space-y-4">
+                    <div>
+                      <span class="font-medium text-gray-600 block mb-2"
+                        >メッセージ:</span
+                      >
+                      <div
+                        class="bg-blue-50 p-4 rounded border border-blue-200"
+                      >
+                        <p class="text-gray-900">
+                          {{ selectedOrderRequest.message }}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div v-if="selectedOrderRequest.answer">
-                    <span class="font-medium text-gray-600 block mb-2">回答:</span>
-                    <div class="bg-green-50 p-4 rounded border border-green-200">
-                      <p class="text-gray-900">{{ selectedOrderRequest.answer }}</p>
+
+                    <div v-if="selectedOrderRequest.answer">
+                      <span class="font-medium text-gray-600 block mb-2"
+                        >回答:</span
+                      >
+                      <div
+                        class="bg-green-50 p-4 rounded border border-green-200"
+                      >
+                        <p class="text-gray-900">
+                          {{ selectedOrderRequest.answer }}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+
+            <Link
+              v-if="selectedOrderRequest.accept_flg === 2"
+              class="inline-block text-center w-full py-6 bg-red-500 hover:bg-red-700 text-white font-bold px-4 rounded text-xl mt-12 mb-8"
+              :href="route('order_request.reorder')"
+              method="post"
+              :data="{ order_request_id: selectedOrderRequest.id }"
+            >
+              再依頼
+            </Link>
           </div>
 
           <!-- モーダルフッター -->
           <div class="flex justify-end pt-4 border-t">
-            <button 
+            <button
               @click="closeModal"
               class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
             >

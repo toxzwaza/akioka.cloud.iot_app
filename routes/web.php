@@ -165,6 +165,8 @@ Route::get('/check_order_request/getOrderRequests', [CheckOrderRequestController
 Route::get('/check_order_request/show/{order_request_id}', [CheckOrderRequestController::class, 'show'])->name('stock.check_order_request.show');
 // 詳細データ取得
 Route::get('/check_order_request/detail/{order_request_id}', [CheckOrderRequestController::class, 'getOrderRequestDetail'])->name('stock.check_order_request.getOrderRequestDetail');
+// 再依頼作成
+Route::post('/order_request/reorder', [OrderRequestController::class, 'reorder'])->name('order_request.reorder');
 
 ////////// API用 //////////
 Route::get('/getGroups', [ApiController::class, 'getGroups'])->name('getGroups');

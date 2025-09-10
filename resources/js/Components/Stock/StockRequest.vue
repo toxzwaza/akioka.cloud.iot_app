@@ -88,7 +88,7 @@ onMounted(() => {
 
   if (props.stock) {
     // 現在個数と希望納期のデフォルトを設定
-    console.log("stock", props.stock);
+    console.log("StockRequest.vue:stock", props.stock);
     if (props.stock.stock_storage && props.stock.stock_storage.quantity) {
       form.now_quantity = props.stock.stock_storage.quantity;
     }
@@ -109,6 +109,21 @@ onMounted(() => {
       form.process_id = props.request_user.process_id;
       form.user_id = props.request_user.id;
       handleUser();
+    }
+
+    if(props.stock.re_order_request){
+      const ror = props.stock.re_order_request;
+
+      form.user_id = ror.request_user_id 
+      form.now_quantity = ror.now_quantity
+      // form.now_quantity_unit = ror.now_quantity_unit
+      form.digest_date = ror.digest_date
+      form.quantity = ror.quantity
+      // form.quantity_unit = ror.quantity_unit
+      form.desire_delivery_date = ror.desire_delivery_date
+      form.description = ror.description
+      form.price = ror.price
+      form.calc_price = ror.calc_price
     }
   }
 });
@@ -383,7 +398,6 @@ onMounted(() => {
 
         <div class="w-1/2 pl-4">
           <div v-if="props.stock.special_area_cd == 1" class="">
-
             <div class="flex items-end mb-4">
               <div class="w-1/6 mr-4">
                 <label

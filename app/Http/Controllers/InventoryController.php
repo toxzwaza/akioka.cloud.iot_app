@@ -41,6 +41,12 @@ class InventoryController extends Controller
         $processes = Process::all();
         $users = User::where('del_flg', 0)->get();
 
+        $order_request_id = $request->order_request_id;
+        if($order_request_id){
+            $re_order_request = OrderRequest::find($order_request_id);
+            $stock->re_order_request = $re_order_request;
+        }
+
         // 発注依頼を取得
         $order_requests = OrderRequest::select('order_requests.*', 'users.name as user_name', 'request_users.name as request_user_name')
             ->leftJoin('users', 'order_requests.user_id', '=', 'users.id')

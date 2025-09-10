@@ -323,6 +323,7 @@ onMounted(() => {
     request_user.name = props.request_user.name;
   }
 
+
   stock_storage.value = props.stock.stock_storage;
   initial_orders.value = props.stock.initial_orders;
 
