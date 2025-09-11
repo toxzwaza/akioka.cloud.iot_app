@@ -16,7 +16,7 @@ const location = reactive({
 
 const emit = defineEmits(["updateLocation"]);
 const updateLocation = (flg) => {
-  if (!flg) {
+  if (!flg) { //格納先追加の場合
     // 入力チェック
 
     const selectedLocation = locations.value.find(
@@ -101,7 +101,8 @@ onMounted(() => {
 </script>
 <template>
   <button
-  @click="updateLocation('delete')"
+    v-if="stock_storage_id"
+    @click="updateLocation(true)"
     class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-2 mb-4"
   >
     アドレス削除
@@ -161,7 +162,7 @@ onMounted(() => {
     v-if="
       location.location_id && location.storage_address_id && location.quantity
     "
-    @click="updateLocation"
+    @click="updateLocation(false)"
     class="text-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
   >
     確定
