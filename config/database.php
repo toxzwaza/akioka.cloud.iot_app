@@ -62,6 +62,25 @@ return [
             ]) : [],
         ],
 
+        'remacs_calc' => [
+            'driver' => 'mysql',
+            'host' => env('SECOND_DB_HOST', 'akioka.cloud'),
+            'port' => env('SECOND_DB_PORT', '3306'),
+            'database' => env('SECOND_DB_DATABASE', 'remacs_calc_db'),
+            'username' => env('SECOND_DB_USERNAME', 'akioka_administrator'),
+            'password' => env('SECOND_DB_PASSWORD', 'Akiokapass0'),
+            'unix_socket' => env('SECOND_DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),

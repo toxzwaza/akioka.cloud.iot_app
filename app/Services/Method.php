@@ -8,6 +8,18 @@ use Carbon\Carbon;
 
 class Method
 {
+    // 棚卸しメッセージ
+    public static function msg($status="info", $msg){
+
+        session()->flash('message', $msg);
+        session()->flash('status', $status);
+    }
+
+    public static function errorMsg(){
+        self::msg('error','エラーが発生しました。管理者へ連絡してください。');
+    }
+
+    
     // 納品日セットトリードタイム再計算
     public static function setDeliveryDateAndUpdateLeadTime($initial_order_id, $delivery_date = null)
     {
