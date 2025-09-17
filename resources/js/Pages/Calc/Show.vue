@@ -355,7 +355,7 @@ onMounted(() => {
       </section>
 
       <!-- 在庫数比較カード（Sticky） -->
-      <div class="sticky top-0 bg-white/95 backdrop-blur-sm z-10 py-4">
+      <div class="sticky top-0 backdrop-blur-sm z-10 py-4">
         <div class="flex gap-4">
           <!-- 想定在庫数カード -->
           <div class="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm">
