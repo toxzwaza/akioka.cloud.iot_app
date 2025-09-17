@@ -21,7 +21,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <MainLayout :url="'calc.search'" :title="'製品検索'" :login_user="login_user">
+  <MainLayout :url="'stock.home'" :title="'製品検索'" :login_user="login_user">
     <template #content>
       <!-- 検索フォームと結果 -->
       <SearchInput

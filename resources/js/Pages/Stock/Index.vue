@@ -340,6 +340,16 @@ onMessage(messaging, (payload) => {
           /></a>
         </div>
 
+        <!-- 製品棚卸 -->
+        <div class="w-1/2 p-4">
+          <a :href="route('calc.home')"
+            ><img
+              class=""
+              src="/images/stocks/icons/calc_stock.png"
+              alt="製品棚卸"
+          /></a>
+        </div>
+
         <!-- 発注画面 -->
         <!-- <div class="w-1/2 p-4">
           <Link :href="route('stock.order.create')"

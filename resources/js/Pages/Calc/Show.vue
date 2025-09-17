@@ -207,7 +207,7 @@ onMounted(() => {
 });
 </script>
 <template>
-  <MainLayout :url="'calc.search'" :title="'棚卸し登録'" :login_user="login_user">
+  <MainLayout :url="'stock.home'" :title="'棚卸し登録'" :login_user="login_user">
     <template #content>
       <!-- 検索ページに戻るボタン -->
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">

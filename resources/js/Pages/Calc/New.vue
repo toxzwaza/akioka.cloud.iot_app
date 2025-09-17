@@ -13,7 +13,7 @@ const props = defineProps({
 onMounted(() => {});
 </script>
 <template>
-  <MainLayout :url="'calc.home'" :title="'棚卸し登録'" :login_user="login_user">
+  <MainLayout :url="'stock.home'" :title="'棚卸し登録'" :login_user="login_user">
     <template #content>
 
 

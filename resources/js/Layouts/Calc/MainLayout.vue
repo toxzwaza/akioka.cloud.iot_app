@@ -38,11 +38,21 @@ onMounted(() => {
             <span class="text-gray-700 font-semibold group-hover:text-blue-700 transition-colors">ホーム</span>
           </Link>
 
+          <!-- <Link 
+            :href="route('stock.home')"
+            class="flex items-center gap-3 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group"
+          >
+            <div class="bg-blue-100 rounded-full p-2 group-hover:bg-blue-200 transition-colors">
+              <i class="fas fa-home text-blue-600 text-lg"></i>
+            </div>
+            <span class="text-gray-700 font-semibold group-hover:text-blue-700 transition-colors">TOP</span>
+          </Link> -->
+
           <!-- ユーザー情報（クリックでログアウト） -->
           <div 
             v-if="props.login_user" 
             @click="logout"
-            class="flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-red-50 rounded-lg cursor-pointer transition-colors group"
+            class="flex items-center gap-2 px-4 py-2 hover:bg-red-50 rounded-lg cursor-pointer transition-colors group"
           >
             <div class="bg-green-100 group-hover:bg-red-100 rounded-full p-1 transition-colors">
               <i class="fas fa-user text-green-600 group-hover:text-red-600 text-sm transition-colors"></i>
