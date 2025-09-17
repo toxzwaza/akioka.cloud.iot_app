@@ -661,7 +661,7 @@ onMounted(() => {
                       <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">保管場所</th>
                       <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">箱No/現品票番号</th>
                       <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">工程</th>
-                      <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">棚卸数</th>
+                      <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">棚卸数</th>
                       <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">登録日</th>
                       <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">操作</th>
                     </tr>
@@ -677,17 +677,17 @@ onMounted(() => {
                           <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                             <i class="fas fa-user text-gray-500 text-xs"></i>
                           </div>
-                          <span class="text-sm font-medium text-gray-800">{{ calcProductStatement.user_name }}</span>
+                          <span class="text-sm font-medium text-gray-800 whitespace-nowrap">{{ calcProductStatement.user_name }}</span>
                         </div>
                       </td>
                       <td class="px-4 py-4">
-                        <span class="text-sm text-gray-700">{{ calcProductStatement.location_name }}</span>
+                        <span class="text-sm text-gray-700 whitespace-nowrap">{{ calcProductStatement.location_name }}</span>
                       </td>
                       <td class="px-4 py-4">
-                        <span class="text-sm font-mono bg-gray-100 px-2 py-1 rounded">{{ calcProductStatement.box_number }}</span>
+                        <span class="text-sm font-mono bg-gray-100 px-2 py-1 rounded whitespace-nowrap">{{ calcProductStatement.box_number }}</span>
                       </td>
                       <td class="px-4 py-4">
-                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
                           {{ calcProductStatement.process_name }}
                         </span>
                       </td>
@@ -708,7 +708,7 @@ onMounted(() => {
                       <td class="px-4 py-4 text-center">
                         <button
                           @click="editCalcProductStatement(calcProductStatement.id)"
-                          class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 rounded-lg transition-colors text-sm font-medium"
+                          class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
                         >
                           <i class="fas fa-edit text-xs"></i>
                           編集
