@@ -227,13 +227,10 @@ onMounted(() => {
     
     // 新規デバイスの場合のみトークンを取得してデバイス登録
     getFCMToken().then((fetchedToken) => {
-      token.value = fetchedToken;
-
-      if (inputId.value && token.value) {
+      token.value = fetchedToken || "";
+      // デバイスIDが設定されている場合のみ登録処理。トークン取得失敗でも続行
+      if (inputId.value) {
         loginAndCreateTokenWithDeviceId();
-      } else {
-        // トークン取得失敗時もエラーページへ
-        window.location.href = route('stock.device.error');
       }
     });
   }
