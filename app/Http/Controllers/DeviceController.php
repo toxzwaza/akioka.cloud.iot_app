@@ -18,28 +18,34 @@ class DeviceController extends Controller
         $token = $request->token;
 
         try {
-            if ($name && $token) {
+            if (!$name) {
+                $status = false;
+                $msg = 'デバイス名が指定されていません。';
+            } else {
                 // 既存のデバイスを検索
                 $device = Device::where('name', $name)->first();
-                
+
                 if ($device) {
-                    // 既存のデバイスが存在する場合はトークンを更新
-                    $device->token = $token;
+                    // 既存のデバイスが存在する場合、最終アクセスを更新し、トークンが来ていれば更新
+                    if ($token) {
+                        $device->token = $token;
+                        $msg = 'デバイスのトークンを更新しました。';
+                    } else {
+                        $msg = 'デバイスに最終アクセスを記録しました。';
+                    }
                     $device->last_access_date = now();
                     $device->save();
-                    $msg = 'デバイスのトークンを更新しました。';
                 } else {
-                    // 新しいデバイスを作成
+                    // 新しいデバイスを作成（トークンは任意）
                     $device = new Device();
                     $device->name = $name;
-                    $device->token = $token;
+                    if ($token) {
+                        $device->token = $token;
+                    }
                     $device->last_access_date = now();
                     $device->save();
                     $msg = '新しいデバイスを登録しました。';
                 }
-            } else {
-                $status = false;
-                $msg = 'デバイス名またはトークンが指定されていません。';
             }
         } catch (Exception $e) {
             $status = false;
