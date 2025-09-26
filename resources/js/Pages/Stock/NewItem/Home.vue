@@ -11,7 +11,8 @@ const props = defineProps({
 });
 
 const form = reactive({
-  new_approval: 0,
+  new_approval: 0, //新規品フラグ
+  before_order_request_id: null, //引き継ぎ元の発注依頼ID
   user_id: 0,
   evaluation_date: null,
   desire_delivery_date: null,
@@ -89,11 +90,28 @@ const removeFile = (index) => {
   previewUrls.value.splice(index, 1);
 };
 
-const submitForm = () => {
+const submitForm = (type = null) => {
   if (!validateForm()) {
     //バリデーション
     return;
   }
+
+  // new_approvalの場合、未追加の物品データがないかチェック
+  if (type === "new_approval") {
+    if (
+      form.name ||
+      form.s_name ||
+      form.supplier_name ||
+      form.price ||
+      form.quantity
+    ) {
+      alert(
+        "未登録の物品データがあります。追加ボタンを押してから確定してください。"
+      );
+      return;
+    }
+  }
+
 
   if (!confirm("上位役職者の承認は完了していますか？")) {
     return;
@@ -341,7 +359,7 @@ const createApprovalStocks = () => {
 };
 const saveApprovalStocks = () => {
   const stock = form.approval_stocks[stockEdit.value];
-  console.log(stockEdit.value, stock)
+  console.log(stockEdit.value, stock);
   stock.name = form.name;
   stock.s_name = form.s_name;
   stock.supplier_name = form.supplier_name;
@@ -379,10 +397,30 @@ onMounted(() => {
     form.content = props.order_request.content;
     form.main_reason = props.order_request.main_reason;
     form.sub_reason = props.order_request.sub_reason;
+    
+    // 新規品の場合、order_requestのデータで物品を自動追加
+    if (props.order_request.stock_name && props.order_request.stock_s_name && props.order_request.stock_supplier_name && props.order_request.price && props.order_request.quantity) {
+      form.approval_stocks.push({
+        name: props.order_request.stock_name,
+        s_name: props.order_request.stock_s_name,
+        supplier_name: props.order_request.stock_supplier_name,
+        price: props.order_request.price,
+        quantity: props.order_request.quantity,
+        calc_price: props.order_request.price * props.order_request.quantity,
+      });
+      console.log('自動追加')
+    }
   } else {
     form.new_approval = 0;
   }
-  console.log(props.order_request);
+  form.before_order_request_id = props.order_request.id;
+  console.log('props.order_request:', props.order_request);
+  console.log('new_stock_flg:', props.order_request.new_stock_flg);
+  console.log('name:', props.order_request.name);
+  console.log('s_name:', props.order_request.s_name);
+  console.log('stock_supplier_name:', props.order_request.stock_supplier_name);
+  console.log('price:', props.order_request.price);
+  console.log('quantity:', props.order_request.quantity);
 });
 </script>
 <template>
@@ -423,6 +461,25 @@ onMounted(() => {
         <h1 class="text-center text-3xl mb-4 text-gray-700 font-bold">
           {{ form.new_approval ? "新規品稟議書" : "既存品依頼" }}
         </h1>
+        
+        <!-- 再依頼モードの表示 -->
+        <div v-if="form.before_order_request_id" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium">
+                <strong>再依頼モード</strong>
+              </p>
+              <p class="mt-1 text-sm">
+                発注依頼ID: {{ form.before_order_request_id }} から引き継いだ内容で再依頼を行います。
+              </p>
+            </div>
+          </div>
+        </div>
         <div v-if="form.new_approval">
           <!-- <h1 class="text-4xl font-bold text-red-500 mt-8 text-center">
             準備中...
@@ -914,7 +971,7 @@ onMounted(() => {
                 </button> -->
                 <button
                   class="ml-4 w-1/2 bg-blue-500 hover:bg-blue-700 text-white font-bold mt-12 px-4 rounded py-4"
-                  @click.prevent="submitForm"
+                  @click.prevent="submitForm('new_approval')"
                 >
                   確定
                 </button>

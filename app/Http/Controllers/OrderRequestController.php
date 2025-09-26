@@ -80,6 +80,7 @@ class OrderRequestController extends Controller
 
             }else{ //新規品
 
+                return redirect()->route('stock.new_item.home', ['order_request_id' => $order_request_id]);
             }
 
 

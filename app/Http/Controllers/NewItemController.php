@@ -29,7 +29,35 @@ class NewItemController extends Controller
         $suppliers = Supplier::all();
 
         $order_request_id = $request->order_request_id;
-        $order_request = OrderRequest::select('order_requests.*', 'documents.title as title', 'documents.content as content', 'documents.main_reason as main_reason', 'documents.sub_reason')->leftJoin('documents', 'documents.id','order_requests.document_id')->where('order_requests.id', $order_request_id)->first();
+        $order_request = OrderRequest::select([
+                'order_requests.id',
+                'order_requests.quantity',
+                'order_requests.unit',
+                'order_requests.now_quantity',
+                'order_requests.now_quantity_unit',
+                'order_requests.digest_date',
+                'order_requests.desire_delivery_date',
+                'order_requests.description',
+                'order_requests.device_id',
+                'order_requests.new_stock_flg',
+                'order_requests.price',
+                'order_requests.calc_price',
+                'order_requests.request_user_id',
+                'documents.title as title',
+                'documents.content as content',
+                'documents.main_reason as main_reason',
+                'documents.sub_reason',
+                'stocks.name as stock_name',
+                'stocks.s_name as stock_s_name',
+                'suppliers.name as stock_supplier_name',
+                'stocks.price as stock_price',
+            ])
+            ->leftJoin('documents', 'documents.id', '=', 'order_requests.document_id')
+            ->leftJoin('stocks', 'stocks.id', '=', 'order_requests.stock_id')
+            ->leftJoin('stock_suppliers', 'stock_suppliers.stock_id', '=', 'stocks.id')
+            ->leftJoin('suppliers', 'suppliers.id', '=', 'stock_suppliers.supplier_id')
+            ->where('order_requests.id', $order_request_id)
+            ->first();
 
         return Inertia::render('Stock/NewItem/Home', ['processes' => $processes, 'users' => $users, 'suppliers' => $suppliers, 'order_request' => $order_request]);
     }
@@ -41,6 +69,7 @@ class NewItemController extends Controller
 
         $new_approval = $request->new_approval; //新規品フラグ
 
+        $before_order_request_id = $request->before_order_request_id;
         $user_id = $request->user_id;
         $evaluation_date = $request->evaluation_date;
         $desire_delivery_date = $request->desire_delivery_date;
