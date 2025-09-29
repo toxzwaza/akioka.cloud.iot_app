@@ -119,8 +119,30 @@ class AcceptController extends Controller
         }
 
         $user = User::select('id', 'name')->find($user_id);
+        // 承認者の情報を取得
+        // order_requests.created_atが今年のデータのみ取得するように修正
+        // order_requests.calc_priceの合計値と件数を取得
+        // users.process_idごとの合計金額と件数を取得
+        $order_request_approvals_query = OrderRequestApproval::
+            where('order_request_approvals.user_id', $user_id)
+            ->where('order_request_approvals.final_flg', 1)
+            ->where('order_request_approvals.status', 1) //自分が承認したもの
+            ->join('order_requests', 'order_requests.id', '=', 'order_request_approvals.order_request_id')
+            ->join('users', 'users.id', '=', 'order_requests.request_user_id')
+            ->join('processes', 'processes.id', '=', 'users.process_id')
+            ->whereYear('order_requests.created_at', date('Y'))
+            ->where('order_requests.del_flg', 0)
+            ->select('users.process_id',
+            'processes.name as process_name',
+                DB::raw('SUM(order_requests.calc_price) as total_calc_price'), 
+                DB::raw('COUNT(order_requests.id) as order_request_count'))
+            ->groupBy('users.process_id', 'processes.name');
 
-        return Inertia::render('Accept/OrderRequest', ['user' => $user, 'order_requests' => $order_requests]);
+        $process_stats = $order_request_approvals_query->get();
+
+
+
+        return Inertia::render('Accept/OrderRequest', ['user' => $user, 'order_requests' => $order_requests, 'process_stats' => $process_stats]);
     }
 
     public function update(Request $request)
@@ -266,5 +288,60 @@ class AcceptController extends Controller
         }
 
         return response()->json(['status' => $status, 'msg' => $msg]);
+    }
+
+    /**
+     * 部署別承認済み物品一覧取得
+     */
+    public function getDepartmentApprovedItems(Request $request)
+    {
+        $user_id = $request->user_id;
+        $process_id = $request->process_id;
+
+        // 権限チェック
+        if (!in_array($user_id, [63, 94, 36, 2, 16, 37, 84])) {
+            return response("アクセス権限がありません", 403);
+        }
+
+        // 承認済み物品を取得
+        $approved_items = DB::table('order_request_approvals')
+            ->select(
+                'order_requests.id',
+                'order_requests.stock_id',
+                'stocks.img_path',
+                'stocks.name',
+                'stocks.s_name',
+                'order_requests.quantity',
+                'order_requests.unit',
+                'order_requests.calc_price',
+                'order_requests.price',
+                'suppliers.name as supplier_name',
+                'order_requests.updated_at',
+                'request_users.name as request_user_name',
+                'classifications.id as classification_id',
+                'classifications.name as classification_name',
+                'request_users.name as request_user_name'
+            )
+            ->leftJoin('order_requests', 'order_requests.id', '=', 'order_request_approvals.order_request_id')
+            ->leftJoin('stocks', 'stocks.id', '=', 'order_requests.stock_id')
+            ->leftJoin('classifications', 'classifications.id', '=', 'stocks.classification_id')
+            ->leftJoin('suppliers', 'suppliers.id', '=', 'order_requests.supplier_id')
+            ->leftJoin('users as request_users', 'request_users.id', '=', 'order_requests.request_user_id')
+            ->leftJoin('processes', 'processes.id', '=', 'request_users.process_id')
+            ->where([
+                ['order_requests.del_flg', '=', 0],
+                ['processes.id', '=', $process_id], // 指定された部署
+                ['order_request_approvals.final_flg', '=', 1], // 最終承認
+                ['order_request_approvals.status', '=', 1], // 承認済み
+                ['order_request_approvals.user_id', '=', $user_id] // 現在のユーザーが承認したもの
+            ])
+            ->whereYear('order_requests.created_at', date('Y')) // 今年のデータのみ
+            ->orderBy('order_requests.updated_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'items' => $approved_items
+        ]);
     }
 }

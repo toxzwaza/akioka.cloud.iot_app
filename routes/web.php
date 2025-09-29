@@ -127,6 +127,8 @@ Route::get('/receive/none_storage/{order_id}', [ReceiveController::class, 'none_
 Route::put('/accept/order-request', [AcceptController::class, 'update'])->name('accept.order-request.update');
 // 発注用承認画面
 Route::get('/accept/order-request', [AcceptController::class, 'index'])->name('accept.order-request');
+// 部署別承認済み物品一覧取得
+Route::get('/accept/department-approved-items', [AcceptController::class, 'getDepartmentApprovedItems'])->name('accept.department-approved-items');
 
 // 滞留画面
 Route::get('/retentions', [RetentionController::class, 'home'])->name('stock.retention.home');
