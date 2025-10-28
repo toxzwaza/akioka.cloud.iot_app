@@ -22,3 +22,6 @@ Route::post('/sendMessage', [MessageController::class, 'sendMessage'])->name('se
 
 // ChatGPT API
 Route::post('/chatgpt', [ChatGptController::class, 'api'])->name('chatgpt.api');
+
+// 承認用API
+Route::get('/order_request/approval_requests', [ApiController::class, 'approvalRequests'])->name('order_request.approval_requests');

@@ -12,6 +12,7 @@ use App\Models\Supplier;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ApiController extends Controller
 {
@@ -215,7 +216,7 @@ class ApiController extends Controller
             $file = $request->file('file');
             $initial_order_id = $request->initial_order_id;
             $order = InitialOrder::find($initial_order_id);
-            
+
             $timestamp = time();
             $extension = $file->getClientOriginalExtension();
             $filename = $timestamp . '.' . $extension;
@@ -223,12 +224,72 @@ class ApiController extends Controller
 
             $order->delifile_path = 'storage/deli_file/' . $filename;
             $order->save();
-
         } catch (Exception $e) {
             $status = false;
             $msg = $e->getMessage();
         }
 
         return response()->json(['status' => $status, 'msg' => $msg]);
+    }
+
+    public function approvalRequests(Request $request)
+    {
+        $user_id = $request->user_id;
+
+        $query = DB::table('order_request_approvals')
+            ->select(
+                'order_requests.*',
+                'order_request_approvals.status as approval_status',
+                'order_request_approvals.user_id as approval_user_id'
+            )
+            ->join('order_requests', 'order_request_approvals.order_request_id', 'order_requests.id')
+            ->join('stocks', 'stocks.id', '=', 'order_requests.stock_id')
+            ->join('suppliers', 'suppliers.id', '=', 'order_requests.supplier_id')
+            ->where([
+                ['order_requests.status', '=', 0],
+                ['order_requests.del_flg', '=', 0],
+            ])
+            ->whereIn('order_request_approvals.status', [0, 2])
+            ->whereIn('order_requests.accept_flg', [1, 6]);
+
+        // 承認者ごとの制御
+        if (in_array($user_id, [63, 94, 36, 2, 16, 37, 84])) {
+            $query->where('order_request_approvals.user_id', $user_id);
+        } else {
+            return response("アクセス権限がありません", 403);
+        }
+
+        $order_requests = $query->get();
+
+        $danger_count = 0; // 期限切れ・今日まで
+        $alert_count  = 0; // 期限が近い（3日以内）
+        $today = strtotime(date('Y-m-d'));
+
+        foreach ($order_requests as $order_request) {
+            if ($order_request->lead_time && $order_request->desire_delivery_date) {
+
+                $desire_delivery_date = strtotime($order_request->desire_delivery_date);
+                $lead_time_date = strtotime('-' . $order_request->lead_time . ' days', $desire_delivery_date);
+
+                $diff_days = ($lead_time_date - $today) / 86400; // 秒→日換算
+
+                // 期限切れまたは当日
+                if ($lead_time_date <= $today) {
+                    $danger_count++;
+                    // echo "期限切れまたは当日: 発注依頼ID " . $order_request->id . " リードタイム到来日 " . date('Y-m-d', $lead_time_date) . "\n";
+                }
+                // 3日以内に期限到来
+                else if ($diff_days <= 3) {
+                    $alert_count++;
+                    // echo "期限間近（3日以内）: 発注依頼ID " . $order_request->id . " リードタイム到来日 " . date('Y-m-d', $lead_time_date) . "\n";
+                }
+            }
+        }
+
+        return response()->json([
+            'order_requests_count' => count($order_requests),
+            'danger_count' => $danger_count,
+            'alert_count' => $alert_count
+        ]);
     }
 }

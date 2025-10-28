@@ -63,14 +63,14 @@ class AcceptController extends Controller
                     SELECT MAX(initial_orders.order_date)
                     FROM initial_orders
                     WHERE initial_orders.stock_id = order_requests.stock_id
-                ) as last_order_date')
+                ) as last_order_date') //最新発注日を取得
             )
             ->join('order_requests', 'order_requests.id', '=', 'order_request_approvals.order_request_id')
             ->join('stocks', 'stocks.id', '=', 'order_requests.stock_id')
+            ->join('suppliers', 'suppliers.id', '=', 'order_requests.supplier_id')
             ->leftJoin('users as request_users', 'request_users.id', '=', 'order_requests.request_user_id')
             ->leftJoin('processes as request_user_processes', 'request_user_processes.id', '=', 'request_users.process_id')
             ->leftJoin('users as users', 'users.id', '=', 'order_requests.user_id')
-            ->join('suppliers', 'suppliers.id', '=', 'order_requests.supplier_id')
             ->leftJoin('documents', 'documents.id', '=', 'order_requests.document_id')
             ->where([
                 ['order_requests.status', '=', 0],
