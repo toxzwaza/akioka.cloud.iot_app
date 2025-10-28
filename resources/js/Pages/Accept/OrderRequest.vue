@@ -519,6 +519,12 @@ onMounted(() => {
                   <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
                     <div class="flex items-center">
                       <i class="fas fa-image mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <span class="hidden sm:inline">緊急度</span>
+                    </div>
+                  </th>
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <i class="fas fa-image mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
                       <span class="hidden sm:inline">画像</span>
                     </div>
                   </th>
@@ -566,6 +572,12 @@ onMounted(() => {
                     <div class="flex items-center">
                       <i class="fas fa-building mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
                       発注先
+                    </div>
+                  </th>
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap hidden sm:table-cell">
+                    <div class="flex items-center">
+                      <i class="fas fa-building mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      リードタイム
                     </div>
                   </th>
                   <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap hidden md:table-cell">
@@ -636,6 +648,13 @@ onMounted(() => {
                   :key="order_request.id"
                   :class="getRowStyle(order_request).rowClass"
                 >
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <div class="flex items-center justify-center">
+                      <span v-if="order_request.emergency_level == 2" class="bg-pink-100 text-pink-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-pink-900 dark:text-pink-300">緊急</span>
+                      <span v-else-if="order_request.emergency_level == 1" class="bg-orange-100 text-orange-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-orange-900 dark:text-orange-300">期限間近</span>
+                      <span v-else class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-gray-900 dark:text-gray-300">期限内</span>
+                    </div>
+                  </td>
                   <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                     <div class="flex items-center justify-center">
                       <img 
@@ -729,6 +748,12 @@ onMounted(() => {
                     <div class="flex items-center">
                       <i class="fas fa-building mr-1 sm:mr-2 text-gray-400 text-xs"></i>
                       <span class="text-xs sm:text-sm truncate max-w-xs" :title="order_request.supplier_name">{{ order_request.supplier_name }}</span>
+                    </div>
+                  </td>
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 hidden sm:table-cell">
+                    <div class="flex items-center">
+                      <i class="fas fa-building mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                      <span class="text-xs sm:text-sm truncate max-w-xs" :title="order_request.supplier_name">{{ order_request.lead_time }}</span>
                     </div>
                   </td>
 
