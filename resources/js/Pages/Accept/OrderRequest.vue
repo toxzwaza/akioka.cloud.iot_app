@@ -1582,6 +1582,49 @@ onMounted(() => {
 #order_request_table {
   border-collapse: separate;
   border-spacing: 0;
+  // 固定列の幅（調整可）
+  --col-1: 80px;   // 緊急度
+  --col-2: 100px;  // 画像
+  --col-3: 100px;  // 分類
+  --col-4: 120px;  // 最終発注日
+  --col-5: 220px;  // 品名
+  --col-6: 140px;  // 品番
+
+  // 1〜6列目を固定（ヘッダー・ボディ共通の幅指定）
+  thead th:nth-child(1), tbody td:nth-child(1) { min-width: var(--col-1); width: var(--col-1); }
+  thead th:nth-child(2), tbody td:nth-child(2) { min-width: var(--col-2); width: var(--col-2); }
+  thead th:nth-child(3), tbody td:nth-child(3) { min-width: var(--col-3); width: var(--col-3); }
+  thead th:nth-child(4), tbody td:nth-child(4) { min-width: var(--col-4); width: var(--col-4); }
+  thead th:nth-child(5), tbody td:nth-child(5) { min-width: var(--col-5); width: var(--col-5); }
+  thead th:nth-child(6), tbody td:nth-child(6) { min-width: var(--col-6); width: var(--col-6); }
+
+  // 左オフセット（横スクロール固定）
+  thead th:nth-child(1), tbody td:nth-child(1) { position: sticky; left: 0; }
+  thead th:nth-child(2), tbody td:nth-child(2) { position: sticky; left: var(--col-1); }
+  thead th:nth-child(3), tbody td:nth-child(3) { position: sticky; left: calc(var(--col-1) + var(--col-2)); }
+  thead th:nth-child(4), tbody td:nth-child(4) { position: sticky; left: calc(var(--col-1) + var(--col-2) + var(--col-3)); }
+  thead th:nth-child(5), tbody td:nth-child(5) { position: sticky; left: calc(var(--col-1) + var(--col-2) + var(--col-3) + var(--col-4)); }
+  thead th:nth-child(6), tbody td:nth-child(6) { position: sticky; left: calc(var(--col-1) + var(--col-2) + var(--col-3) + var(--col-4) + var(--col-5)); }
+
+  // 固定セルの背景を不透明化（透け防止）。ヘッダー/ボディのデフォルト背景
+  thead th:nth-child(-n+6), tbody td:nth-child(-n+6) {
+    background-color: #fff;
+    background-clip: padding-box;
+  }
+
+  // 行ホバー時・状態別の背景同期（固定列にも反映）
+  tbody tr:hover td:nth-child(-n+6) { background-color: #f9fafb; } // gray-50
+  tbody tr.bg-orange-50 td:nth-child(-n+6) { background-color: #fff7ed; } // orange-50
+  tbody tr.bg-orange-50:hover td:nth-child(-n+6) { background-color: #ffedd5; } // orange-100
+  tbody tr.bg-gray-100 td:nth-child(-n+6) { background-color: #f3f4f6; } // gray-100
+  tbody tr.bg-gray-100:hover td:nth-child(-n+6) { background-color: #e5e7eb; } // gray-200
+
+  // 前面に出すためのz-index（ヘッダーはボディより上）
+  tbody td:nth-child(-n+6) { z-index: 3; }
+  thead th:nth-child(-n+6) { z-index: 5; }
+
+  // 固定領域の右側を視認しやすくする影
+  thead th:nth-child(6), tbody td:nth-child(6) { box-shadow: 2px 0 0 #e5e7eb; }
   
   // レスポンシブ対応
   @media screen and (max-width: 1200px) {

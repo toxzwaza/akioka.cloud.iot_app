@@ -97,7 +97,7 @@ class ReceiveController extends Controller
                     $order->delifile_path = '/deli_file/' . $filename;
                     $order->save();
     
-                    Method::setDeliveryDateAndUpdateLeadTime($order->id);
+                    Method::setDeliveryDateAndUpdateLeadTime($order->id); //リードタイム再設定
     
                     // 品名・品番が一致する在庫データを確認
                     $stock = Stock::find($order->stock_id);
