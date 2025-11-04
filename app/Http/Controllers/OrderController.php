@@ -15,8 +15,10 @@ use App\Models\NotifyQueueUser;
 use App\Models\Stock;
 use App\Models\StockStorage;
 use App\Models\StockSupplier;
+use App\Models\StockSupplierPrice;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -49,6 +51,8 @@ class OrderController extends Controller
 
         try {
             $stock = Stock::find($stock_id);
+
+            //適用中を優先的に取得するように変更予定
             $stock_supplier = StockSupplier::where('stock_id', $stock_id)->first();
 
 
@@ -66,7 +70,7 @@ class OrderController extends Controller
             if ($stock->classification_id == 34) {
                 $order_request->user_id = 39;
             }
-            $order_request->price = $stock->price;
+
             $order_request->quantity =  $quantity;
             $order_request->unit = $quantity_unit;
             $order_request->now_quantity = $now_quantity;
@@ -76,9 +80,47 @@ class OrderController extends Controller
             $order_request->description = $description;
             $order_request->device_id = $device_id;
 
-            if ($stock->price !== null) {
-                $order_request->calc_price = $stock->price * $quantity;
+            // 単価・金額設定
+            // 希望納期時点で有効な価格を取得（希望納期がない場合は現在日時を使用）
+            $target_date = $desire_delivery_date ?? now();
+            
+            // デバッグ用ログ
+            Log::info('価格取得デバッグ', [
+                'stock_id' => $stock_id,
+                'desire_delivery_date' => $desire_delivery_date,
+                'target_date' => $target_date,
+                'stock_price' => $stock->price,
+            ]);
+            
+            $stock_supplier_price = StockSupplierPrice::where('stock_id', $stock_id)
+                ->where('active_flg', 1)
+                ->validAt($target_date)
+                ->orderBy('start_date', 'desc')
+                ->first();
+            
+            // デバッグ用ログ
+            Log::info('取得された価格情報', [
+                'stock_supplier_price' => $stock_supplier_price ? [
+                    'id' => $stock_supplier_price->id,
+                    'price' => $stock_supplier_price->price,
+                    'start_date' => $stock_supplier_price->start_date,
+                    'end_date' => $stock_supplier_price->end_date,
+                ] : null,
+            ]);
+            
+            // 価格の優先順位: StockSupplierPrice > Stock の基本価格
+            $order_request->price = $stock_supplier_price ? $stock_supplier_price->price : $stock->price;
+            if ($order_request->price !== null) {
+                $order_request->calc_price = $order_request->price * $quantity;
             }
+            
+            // デバッグ用ログ
+            Log::info('最終適用価格', [
+                'order_request_price' => $order_request->price,
+                'order_request_calc_price' => $order_request->calc_price,
+            ]);
+
+
             if ($stock_supplier) {
                 $order_request->supplier_id = $stock_supplier->supplier_id;
                 $order_request->lead_time = $stock_supplier->lead_time;
