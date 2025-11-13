@@ -50,6 +50,7 @@ class AcceptController extends Controller
                 'order_requests.calc_price',
                 'order_requests.price',
                 'order_requests.document_id',
+                'order_requests.lead_time',
                 'documents.evalution_date',
                 'documents.title',
                 'documents.content',
@@ -117,6 +118,28 @@ class AcceptController extends Controller
                 ->toArray();
 
             $order_request->document_images = $document_images;
+
+            // 緊急度取得
+            $order_request->emergency_level = 0; // 0:通常、1:リードタイム間近、2:リードタイム期限切れ
+            $today = strtotime(date('Y-m-d'));
+            if ($order_request->lead_time && $order_request->desire_delivery_date) {
+
+                $desire_delivery_date = strtotime($order_request->desire_delivery_date);
+                $lead_time_date = strtotime('-' . $order_request->lead_time . ' days', $desire_delivery_date);
+
+                $diff_days = ($lead_time_date - $today) / 86400; // 秒→日換算
+
+                // 期限切れまたは当日
+                if ($lead_time_date <= $today) {
+                    $order_request->emergency_level = 2;
+                    // echo "期限切れまたは当日: 発注依頼ID " . $order_request->id . " リードタイム到来日 " . date('Y-m-d', $lead_time_date) . "\n";
+                }
+                // 3日以内に期限到来
+                else if ($diff_days <= 3) {
+                    $order_request->emergency_level = 1;
+                    // echo "期限間近（3日以内）: 発注依頼ID " . $order_request->id . " リードタイム到来日 " . date('Y-m-d', $lead_time_date) . "\n";
+                }
+            }
         }
 
         $user = User::select('id', 'name')->find($user_id);
@@ -124,8 +147,7 @@ class AcceptController extends Controller
         // order_requests.created_atが今年のデータのみ取得するように修正
         // order_requests.calc_priceの合計値と件数を取得
         // users.process_idごとの合計金額と件数を取得
-        $order_request_approvals_query = OrderRequestApproval::
-            where('order_request_approvals.user_id', $user_id)
+        $order_request_approvals_query = OrderRequestApproval::where('order_request_approvals.user_id', $user_id)
             ->where('order_request_approvals.final_flg', 1)
             ->where('order_request_approvals.status', 1) //自分が承認したもの
             ->join('order_requests', 'order_requests.id', '=', 'order_request_approvals.order_request_id')
@@ -133,10 +155,12 @@ class AcceptController extends Controller
             ->join('processes', 'processes.id', '=', 'users.process_id')
             ->whereYear('order_requests.created_at', date('Y'))
             ->where('order_requests.del_flg', 0)
-            ->select('users.process_id',
-            'processes.name as process_name',
-                DB::raw('SUM(order_requests.calc_price) as total_calc_price'), 
-                DB::raw('COUNT(order_requests.id) as order_request_count'))
+            ->select(
+                'users.process_id',
+                'processes.name as process_name',
+                DB::raw('SUM(order_requests.calc_price) as total_calc_price'),
+                DB::raw('COUNT(order_requests.id) as order_request_count')
+            )
             ->groupBy('users.process_id', 'processes.name');
 
         $process_stats = $order_request_approvals_query->get();
@@ -165,18 +189,18 @@ class AcceptController extends Controller
         try {
             $order_request_approval = OrderRequestApproval::find($order_request_approval_id);
             $order_request_approval->status = $flg;
-            
+
             // コメントの履歴管理
             if ($comment && trim($comment) !== "") {
                 // 現在の日付を取得
                 $dateString = date('y/m/d');
-                
+
                 // ステータスに基づいて承認・非承認を判定
                 $statusText = ($flg == 1) ? '承認' : '非承認';
-                
+
                 // 新しいコメント形式
                 $newComment = $dateString . " [" . $statusText . "]\n" . $comment . "\n----------------------";
-                
+
                 // 既存のコメントがある場合は追加、ない場合は新規作成
                 if ($order_request_approval->comment && trim($order_request_approval->comment) !== "") {
                     $order_request_approval->comment = $order_request_approval->comment . "\n" . $newComment;
@@ -184,7 +208,7 @@ class AcceptController extends Controller
                     $order_request_approval->comment = $newComment;
                 }
             }
-            
+
             $order_request_approval->save();
             $order_request_approval_user = User::find($order_request_approval->user_id);
 
@@ -209,13 +233,12 @@ class AcceptController extends Controller
                             Helper::sendNotification($device->token, "在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}が承認されました。");
                         }
                     } else { //次の承認を有効化
-                        if($order_request->accept_flg === 6){
+                        if ($order_request->accept_flg === 6) {
                             $order_request->accept_flg = 1;
                             $order_request->save();
                         }
 
-                        $new_order_request_approval = OrderRequestApproval::
-                        where('order_request_id', $order_request_approval->order_request_id)
+                        $new_order_request_approval = OrderRequestApproval::where('order_request_id', $order_request_approval->order_request_id)
                             ->where('id', '>', $order_request_approval->id)
                             ->where('order_request_id', $order_request_approval->order_request_id)
                             ->first();
