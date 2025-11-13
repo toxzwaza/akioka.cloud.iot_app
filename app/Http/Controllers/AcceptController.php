@@ -12,6 +12,7 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class AcceptController extends Controller
@@ -155,6 +156,11 @@ class AcceptController extends Controller
         $status = true;
         $msg = "";
 
+        Log::info('承認/却下処理開始', [
+            'order_request_approval_id' => $order_request_approval_id,
+            'status' => $flg,
+            'comment_length' => $comment ? strlen($comment) : 0,
+        ]);
 
         try {
             $order_request_approval = OrderRequestApproval::find($order_request_approval_id);
@@ -227,6 +233,14 @@ class AcceptController extends Controller
                         ->orderBy('id', 'desc')
                         ->first();
 
+                    \Log::info('却下処理デバッグ', [
+                        'order_request_approval_id' => $order_request_approval->id,
+                        'final_flg' => $order_request_approval->final_flg,
+                        'previous_approval_exists' => $previous_order_request_approval ? true : false,
+                        'previous_approval_id' => $previous_order_request_approval ? $previous_order_request_approval->id : null,
+                        'current_accept_flg' => $order_request->accept_flg,
+                    ]);
+
                     if ($previous_order_request_approval) {
                         // 一つ前の承認者が存在する場合、その承認者に戻す
 
@@ -242,12 +256,16 @@ class AcceptController extends Controller
 
                         // 発注依頼のステータスを差し戻しにする
                         $order_request->accept_flg = 6;
+                        
+                        \Log::info('差し戻し処理実行', ['new_accept_flg' => 6]);
 
                         // 一つ前の承認者への通知
                         Helper::createNotifyQueue("在庫管理システムからの通知です。", "承認依頼が差し戻されました。\n\n差し戻し者:" . $order_request_approval_user->name . "\nコメント：" . $comment . "\n\n以下のURLからコメントの回答及び、再承認を行ってください。", "https://akioka.cloud/accept/order-request?user_id=" . $previous_order_request_approval->user_id, [$previous_order_request_approval->user_id]);
                     } else {
                         // 一つ前の承認者が存在しない場合（第一承認者が非承認）
                         $order_request->accept_flg = 3;
+                        
+                        \Log::info('完全却下処理実行', ['new_accept_flg' => 3]);
 
                         // 発注担当者への通知
                         $user = User::find($order_request->user_id);
@@ -279,15 +297,267 @@ class AcceptController extends Controller
                     }
 
                     $order_request->save();
+                    
+                    \Log::info('却下処理後のaccept_flg保存完了', [
+                        'order_request_id' => $order_request->id,
+                        'final_accept_flg' => $order_request->accept_flg,
+                    ]);
+                    
                     break;
             }
             $order_request->save();
+            
+            \Log::info('最終save実行完了', [
+                'order_request_id' => $order_request->id,
+                'final_accept_flg' => $order_request->accept_flg,
+            ]);
         } catch (Exception $e) {
             $status = false;
             $msg = $e->getMessage();
         }
 
         return response()->json(['status' => $status, 'msg' => $msg]);
+    }
+
+    /**
+     * 一括承認/却下処理
+     */
+    public function bulkUpdate(Request $request)
+    {
+        $items = $request->items; // [{ order_request_approval_id, status, comment }, ...]
+        
+        $status = true;
+        $msg = "";
+        $successCount = 0;
+        $failedItems = [];
+
+        Log::info('一括処理開始', [
+            'items_count' => count($items),
+            'action' => $items[0]['status'] ?? null,
+        ]);
+
+        try {
+            DB::beginTransaction();
+            
+            foreach ($items as $item) {
+                try {
+                    $order_request_approval_id = $item['order_request_approval_id'];
+                    $flg = $item['status'];
+                    $comment = $item['comment'] ?? '';
+
+                    Log::info('一括処理: 個別アイテム処理開始', [
+                        'order_request_approval_id' => $order_request_approval_id,
+                        'status' => $flg,
+                        'comment_length' => strlen($comment),
+                    ]);
+
+                    $order_request_approval = OrderRequestApproval::find($order_request_approval_id);
+                    
+                    if (!$order_request_approval) {
+                        throw new Exception("承認レコードが見つかりません: ID {$order_request_approval_id}");
+                    }
+                    
+                    $order_request_approval->status = $flg;
+                    
+                    // コメントの履歴管理
+                    if ($comment && trim($comment) !== "") {
+                        $dateString = date('y/m/d');
+                        $statusText = ($flg == 1) ? '承認' : '非承認';
+                        $newComment = $dateString . " [" . $statusText . "]\n" . $comment . "\n----------------------";
+                        
+                        if ($order_request_approval->comment && trim($order_request_approval->comment) !== "") {
+                            $order_request_approval->comment = $order_request_approval->comment . "\n" . $newComment;
+                        } else {
+                            $order_request_approval->comment = $newComment;
+                        }
+                    }
+                    
+                    $order_request_approval->save();
+                    $order_request_approval_user = User::find($order_request_approval->user_id);
+
+                    $order_request = OrderRequest::find($order_request_approval->order_request_id);
+                    $stock = Stock::find($order_request->stock_id);
+
+                    switch ($flg) {
+                        case 1: //承認
+                            if ($order_request_approval->final_flg) {
+                                $order_request->accept_flg = 2;
+                                $order_request->save();
+
+                                // 通知送信（エラーが発生してもメイン処理は継続）
+                                try {
+                                    Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}が承認されました。", "", [$order_request->user_id]);
+
+                                    if ($order_request->device_id) {
+                                        $device = Device::find($order_request->device_id);
+                                        if ($device && $device->token) {
+                                            Helper::sendNotification($device->token, "在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}が承認されました。");
+                                        }
+                                    }
+                                } catch (Exception $notifyError) {
+                                    // 通知送信エラーはログに記録するが、処理は継続
+                                    Log::warning('一括処理: 通知送信失敗（処理は継続）', [
+                                        'order_request_id' => $order_request->id,
+                                        'error' => $notifyError->getMessage(),
+                                    ]);
+                                }
+                            } else {
+                                if($order_request->accept_flg === 6){
+                                    $order_request->accept_flg = 1;
+                                    $order_request->save();
+                                }
+
+                                $new_order_request_approval = OrderRequestApproval::
+                                where('order_request_id', $order_request_approval->order_request_id)
+                                    ->where('id', '>', $order_request_approval->id)
+                                    ->where('order_request_id', $order_request_approval->order_request_id)
+                                    ->first();
+                                $new_order_request_approval->status = 0;
+                                $new_order_request_approval->save();
+
+                                // 通知送信（エラーが発生してもメイン処理は継続）
+                                try {
+                                    Helper::createNotifyQueue("在庫管理システムからの通知です。", "承認依頼を受け付けました。\n\n以下のURLから承認を行ってください。", "https://akioka.cloud/accept/order-request?user_id=" . $new_order_request_approval->user_id, [$new_order_request_approval->user_id]);
+                                } catch (Exception $notifyError) {
+                                    // 通知送信エラーはログに記録するが、処理は継続
+                                    Log::warning('一括処理: 通知送信失敗（処理は継続）', [
+                                        'order_request_id' => $order_request->id,
+                                        'error' => $notifyError->getMessage(),
+                                    ]);
+                                }
+                            }
+                            break;
+                            
+                        case 2: //非承認
+                            $previous_order_request_approval = OrderRequestApproval::where('order_request_id', $order_request_approval->order_request_id)
+                                ->where('id', '<', $order_request_approval->id)
+                                ->orderBy('id', 'desc')
+                                ->first();
+
+                            Log::info('一括処理: 却下処理', [
+                                'order_request_approval_id' => $order_request_approval->id,
+                                'final_flg' => $order_request_approval->final_flg,
+                                'previous_approval_exists' => $previous_order_request_approval ? true : false,
+                                'current_accept_flg' => $order_request->accept_flg,
+                            ]);
+
+                            if ($previous_order_request_approval) {
+                                $previous_order_request_approval->status = 0;
+                                $previous_order_request_approval->save();
+                                $order_request->accept_flg = 6;
+                                
+                                Log::info('一括処理: 差し戻し実行', ['new_accept_flg' => 6]);
+
+                                // 通知送信（エラーが発生してもメイン処理は継続）
+                                try {
+                                    Helper::createNotifyQueue("在庫管理システムからの通知です。", "承認依頼が差し戻されました。\n\n差し戻し者:" . $order_request_approval_user->name . "\nコメント：" . $comment . "\n\n以下のURLからコメントの回答及び、再承認を行ってください。", "https://akioka.cloud/accept/order-request?user_id=" . $previous_order_request_approval->user_id, [$previous_order_request_approval->user_id]);
+                                } catch (Exception $notifyError) {
+                                    // 通知送信エラーはログに記録するが、処理は継続
+                                    Log::warning('一括処理: 通知送信失敗（処理は継続）', [
+                                        'order_request_id' => $order_request->id,
+                                        'error' => $notifyError->getMessage(),
+                                    ]);
+                                }
+                            } else {
+                                $order_request->accept_flg = 3;
+                                
+                                Log::info('一括処理: 完全却下実行', ['new_accept_flg' => 3]);
+
+                                // 通知送信（エラーが発生してもメイン処理は継続）
+                                try {
+                                    $user = User::find($order_request->user_id);
+                                    if ($user && $user->email) {
+                                        Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment, "", [$order_request->user_id]);
+                                    }
+
+                                    $request_user = User::find($order_request->request_user_id);
+                                    if ($request_user && $request_user->email) {
+                                        Helper::createNotifyQueue("在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment, "", [$order_request->request_user_id]);
+                                    }
+
+                                    if ($order_request->device_id) {
+                                        $device = Device::find($order_request->device_id);
+                                        if ($device && $device->token) {
+                                            Helper::createDeviceMessage(
+                                                2,
+                                                $order_request->device_id,
+                                                null,
+                                                $order_request->user_id,
+                                                $order_request_approval_user->id,
+                                                "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment . "\n以下のボタンをクリックして稟議書を修正してください。",
+                                                'https://akioka.cloud/check_order_request?order_request_id=' . $order_request->id
+                                            );
+
+                                            Helper::sendNotification($device->token, "在庫管理システムからの通知です。", "{$stock->name}{$stock->s_name}の承認が却下されました。\n\n却下者:" . $order_request_approval_user->name . "\nコメント：" . $comment);
+                                        }
+                                    }
+                                } catch (Exception $notifyError) {
+                                    // 通知送信エラーはログに記録するが、処理は継続
+                                    Log::warning('一括処理: 通知送信失敗（処理は継続）', [
+                                        'order_request_id' => $order_request->id,
+                                        'error' => $notifyError->getMessage(),
+                                    ]);
+                                }
+                            }
+
+                            $order_request->save();
+                            
+                            Log::info('一括処理: 却下処理完了', [
+                                'order_request_id' => $order_request->id,
+                                'final_accept_flg' => $order_request->accept_flg,
+                            ]);
+                            break;
+                    }
+                    
+                    $order_request->save();
+                    $successCount++;
+                    
+                } catch (Exception $e) {
+                    Log::error('一括処理: 個別アイテム処理失敗', [
+                        'order_request_approval_id' => $order_request_approval_id ?? null,
+                        'error' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+                    
+                    $failedItems[] = [
+                        'order_request_approval_id' => $order_request_approval_id ?? null,
+                        'error' => $e->getMessage(),
+                    ];
+                }
+            }
+            
+            DB::commit();
+            
+            Log::info('一括処理完了', [
+                'success_count' => $successCount,
+                'failed_count' => count($failedItems),
+            ]);
+            
+            if (count($failedItems) > 0) {
+                $msg = "{$successCount}件成功、" . count($failedItems) . "件失敗しました。";
+            } else {
+                $msg = "{$successCount}件の処理が完了しました。";
+            }
+            
+        } catch (Exception $e) {
+            DB::rollBack();
+            $status = false;
+            $msg = $e->getMessage();
+            
+            Log::error('一括処理エラー', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
+
+        return response()->json([
+            'status' => $status,
+            'msg' => $msg,
+            'success_count' => $successCount,
+            'failed_items' => $failedItems,
+        ]);
     }
 
     /**

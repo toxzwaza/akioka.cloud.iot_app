@@ -125,6 +125,8 @@ Route::get('/receive/none_storage/{order_id}', [ReceiveController::class, 'none_
 
 // 承認登録
 Route::put('/accept/order-request', [AcceptController::class, 'update'])->name('accept.order-request.update');
+// 一括承認/却下登録
+Route::put('/accept/order-request/bulk', [AcceptController::class, 'bulkUpdate'])->name('accept.order-request.bulk-update');
 // 発注用承認画面
 Route::get('/accept/order-request', [AcceptController::class, 'index'])->name('accept.order-request');
 // 部署別承認済み物品一覧取得

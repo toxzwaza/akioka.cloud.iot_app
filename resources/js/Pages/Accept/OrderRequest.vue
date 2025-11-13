@@ -53,6 +53,21 @@ const departmentModal = reactive({
   sortDirection: 'asc'
 });
 
+// 一括選択機能
+const bulkSelection = reactive({
+  selectedIds: [],
+  isAllSelected: false
+});
+
+// 一括処理モーダル
+const bulkModal = reactive({
+  isOpen: false,
+  action: '', // 'accept' or 'reject'
+  currentIndex: 0,
+  items: [],
+  comments: {}
+});
+
 // const comment = reactive({
 //   order_request_id: null,
 //   placeholder: "",
@@ -170,7 +185,7 @@ const getRowStyle = (order_request) => {
   };
 };
 
-const sendAccept = (order_request_approval_id, action) => {
+const sendAccept = (order_request_approval_id, action, skipCommentCheck = false) => {
   // すでにローディング中の場合は処理を停止
   if (loading.isLoading) {
     return;
@@ -187,18 +202,22 @@ const sendAccept = (order_request_approval_id, action) => {
   if (order_request_approval_id) {
     switch (action) {
       case "accept": //承認
+        // 承認の場合は確認なしで即実行
+        if (!confirm(`${order_request_approval.name} を承認しますか？`)) {
+          return;
+        }
         msg = "承認が完了しました。";
         status = 1;
         loading.message = "承認処理中...";
         break;
       case "reject": //非承認
-        if (!order_request_approval.comment) {
-          alert("非承認の場合は、コメントを追加してください。");
-          openDescription(order_request_approval);
+        // 却下時はコメント必須（モーダル経由の場合はスキップ）
+        if (!skipCommentCheck && !order_request_approval.comment) {
+          alert("却下の場合は、詳細ボタンからコメントを追加してください。");
           return;
         }
+        msg = "却下しました。";
         status = 2;
-        msg = "承認を却下しました。";
         loading.message = "却下処理中...";
         break;
     }
@@ -215,14 +234,8 @@ const sendAccept = (order_request_approval_id, action) => {
       })
       .then((res) => {
         console.log(res.data);
-        // ローディング終了
-        loading.isLoading = false;
-        loading.currentAction = '';
-        loading.message = '';
-        
-        if (confirm(msg)) {
-          window.location.reload();
-        }
+        // 成功時は自動でリロード
+        window.location.reload();
       })
       .catch((error) => {
         console.error('Error:', error);
@@ -317,6 +330,189 @@ const getSortIcon = (field) => {
     return 'fas fa-sort text-gray-400';
   }
   return departmentModal.sortDirection === 'asc' ? 'fas fa-sort-up text-blue-500' : 'fas fa-sort-down text-blue-500';
+};
+
+// チェックボックス: 全選択/解除
+const toggleAllSelection = () => {
+  if (bulkSelection.isAllSelected) {
+    bulkSelection.selectedIds = [];
+    bulkSelection.isAllSelected = false;
+  } else {
+    bulkSelection.selectedIds = props.order_requests
+      .filter(req => !getRowStyle(req).isDisabled)
+      .map(req => req.order_request_approval_id);
+    bulkSelection.isAllSelected = true;
+  }
+};
+
+// チェックボックス: 個別選択/解除
+const toggleSelection = (order_request_approval_id) => {
+  const index = bulkSelection.selectedIds.indexOf(order_request_approval_id);
+  if (index > -1) {
+    bulkSelection.selectedIds.splice(index, 1);
+  } else {
+    bulkSelection.selectedIds.push(order_request_approval_id);
+  }
+  
+  // 全選択状態を更新
+  const selectableCount = props.order_requests.filter(req => !getRowStyle(req).isDisabled).length;
+  bulkSelection.isAllSelected = bulkSelection.selectedIds.length === selectableCount;
+};
+
+// 一括承認を開始
+const startBulkAccept = () => {
+  if (bulkSelection.selectedIds.length === 0) {
+    alert('承認する項目を選択してください。');
+    return;
+  }
+  
+  // 選択されたアイテムを取得
+  bulkModal.items = props.order_requests.filter(req => 
+    bulkSelection.selectedIds.includes(req.order_request_approval_id)
+  );
+  
+  // すでに入力されているコメントを取得
+  bulkModal.comments = {};
+  bulkModal.items.forEach(item => {
+    bulkModal.comments[item.order_request_approval_id] = item.comment || '';
+  });
+  
+  bulkModal.action = 'accept';
+  bulkModal.currentIndex = 0;
+  bulkModal.isOpen = true;
+};
+
+// 一括却下を開始
+const startBulkReject = () => {
+  if (bulkSelection.selectedIds.length === 0) {
+    alert('却下する項目を選択してください。');
+    return;
+  }
+  
+  // 選択されたアイテムを取得
+  bulkModal.items = props.order_requests.filter(req => 
+    bulkSelection.selectedIds.includes(req.order_request_approval_id)
+  );
+  
+  // すでに入力されているコメントを取得
+  bulkModal.comments = {};
+  bulkModal.items.forEach(item => {
+    bulkModal.comments[item.order_request_approval_id] = item.comment || '';
+  });
+  
+  bulkModal.action = 'reject';
+  bulkModal.currentIndex = 0;
+  bulkModal.isOpen = true;
+};
+
+// モーダル: 次へ
+const bulkModalNext = () => {
+  if (bulkModal.currentIndex < bulkModal.items.length - 1) {
+    bulkModal.currentIndex++;
+  }
+};
+
+// モーダル: 前へ
+const bulkModalPrev = () => {
+  if (bulkModal.currentIndex > 0) {
+    bulkModal.currentIndex--;
+  }
+};
+
+// モーダル: 閉じる
+const closeBulkModal = () => {
+  bulkModal.isOpen = false;
+  bulkModal.action = '';
+  bulkModal.currentIndex = 0;
+  bulkModal.items = [];
+  bulkModal.comments = {};
+};
+
+// 一括処理を実行
+const executeBulkAction = async () => {
+  console.log('一括処理開始', {
+    action: bulkModal.action,
+    itemsCount: bulkModal.items.length,
+    comments: bulkModal.comments
+  });
+
+  // 却下の場合、すべてのコメントが入力されているか確認
+  if (bulkModal.action === 'reject') {
+    const missingComments = bulkModal.items.filter(item => 
+      !bulkModal.comments[item.order_request_approval_id]?.trim()
+    );
+    
+    if (missingComments.length > 0) {
+      console.error('コメント未入力の項目あり', missingComments);
+      alert('すべての項目にコメントを入力してください。');
+      return;
+    }
+  }
+  
+  const confirmMsg = bulkModal.action === 'accept' 
+    ? `選択した${bulkModal.items.length}件を承認しますか？`
+    : `選択した${bulkModal.items.length}件を却下しますか？`;
+  
+  if (!confirm(confirmMsg)) {
+    console.log('ユーザーがキャンセル');
+    return;
+  }
+  
+  // ローディング開始
+  loading.isLoading = true;
+  loading.currentAction = bulkModal.action;
+  loading.message = bulkModal.action === 'accept' ? '一括承認処理中...' : '一括却下処理中...';
+  
+  const status = bulkModal.action === 'accept' ? 1 : 2;
+  
+  // 元のコメントを更新
+  bulkModal.items.forEach(item => {
+    const orderRequest = props.order_requests.find(
+      req => req.order_request_approval_id === item.order_request_approval_id
+    );
+    if (orderRequest) {
+      orderRequest.comment = bulkModal.comments[item.order_request_approval_id];
+    }
+  });
+  
+  try {
+    // 配列データを作成
+    const items = bulkModal.items.map(item => ({
+      order_request_approval_id: item.order_request_approval_id,
+      status: status,
+      comment: bulkModal.comments[item.order_request_approval_id] || '',
+    }));
+    
+    console.log('一括APIリクエスト送信', {
+      itemsCount: items.length,
+      items: items
+    });
+    
+    // 一括処理APIを呼び出し
+    const response = await axios.put(route("accept.order-request.bulk-update"), {
+      items: items
+    });
+    
+    console.log('一括APIレスポンス', response.data);
+    
+    // レスポンスを確認
+    if (response.data.status) {
+      console.log('一括処理成功、リロード実行');
+      // 成功時は自動でリロード
+      window.location.reload();
+    } else {
+      throw new Error(response.data.msg || '処理に失敗しました。');
+    }
+  } catch (error) {
+    console.error('一括処理エラー:', error);
+    console.error('エラー詳細:', error.response?.data);
+    loading.isLoading = false;
+    loading.currentAction = '';
+    loading.message = '';
+    
+    const errorMsg = error.response?.data?.msg || error.message || '処理中にエラーが発生しました。';
+    alert(errorMsg);
+  }
 };
 
 onMounted(() => {
@@ -493,14 +689,51 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- インストラクション -->
+      <!-- インストラクションと一括操作 -->
       <div class="mx-auto px-2 sm:px-4 mb-4 sm:mb-8">
-        <div class="bg-blue-50 border-l-4 border-blue-400 p-3 sm:p-4 rounded-r-lg">
-          <div class="flex items-center">
-            <i class="fas fa-info-circle text-blue-400 mr-2 sm:mr-3 text-sm sm:text-base"></i>
-            <p class="text-blue-800 text-sm sm:text-base">
-              コメントを送信する場合は、<i class="fas fa-comment text-blue-600 mx-1"></i>から追加した後、承認登録を行ってください。
-            </p>
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 p-3 sm:p-4 rounded-r-lg shadow-sm">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
+            <!-- 操作説明 -->
+            <div class="space-y-2 flex-1">
+              <div class="flex items-center">
+                <i class="fas fa-check-circle text-emerald-500 mr-2 sm:mr-3 text-sm sm:text-base"></i>
+                <p class="text-gray-800 text-sm sm:text-base font-medium">
+                  <strong>承認：</strong>テーブルの<span class="inline-flex items-center px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs mx-1">承認</span>ボタンをクリックするだけで完了
+                </p>
+              </div>
+              <div class="flex items-center">
+                <i class="fas fa-times-circle text-red-500 mr-2 sm:mr-3 text-sm sm:text-base"></i>
+                <p class="text-gray-800 text-sm sm:text-base font-medium">
+                  <strong>却下：</strong><i class="fas fa-search text-blue-600 mx-1"></i>詳細ボタンからコメントを追加してから却下してください
+                </p>
+              </div>
+            </div>
+            
+            <!-- 一括操作ボタン -->
+            <div class="flex flex-col sm:flex-row gap-2 lg:ml-4">
+              <div class="bg-white px-3 py-2 rounded-lg border border-gray-200 flex items-center justify-center">
+                <i class="fas fa-check-square text-indigo-500 mr-2"></i>
+                <span class="text-sm font-semibold text-gray-700">
+                  選択中: <span class="text-indigo-600">{{ bulkSelection.selectedIds.length }}</span>件
+                </span>
+              </div>
+              <button
+                @click="startBulkAccept"
+                :disabled="bulkSelection.selectedIds.length === 0 || loading.isLoading"
+                class="inline-flex items-center justify-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+              >
+                <i class="fas fa-check-double mr-2"></i>
+                まとめて承認
+              </button>
+              <button
+                @click="startBulkReject"
+                :disabled="bulkSelection.selectedIds.length === 0 || loading.isLoading"
+                class="inline-flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+              >
+                <i class="fas fa-times-circle mr-2"></i>
+                まとめて却下
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -516,6 +749,14 @@ onMounted(() => {
             >
               <thead>
                 <tr class="bg-gradient-to-r from-gray-50 to-gray-100">
+                  <th class="px-2 sm:px-4 py-3 sm:py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      :checked="bulkSelection.isAllSelected"
+                      @change="toggleAllSelection"
+                      class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2 cursor-pointer"
+                    />
+                  </th>
                   <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
                     <div class="flex items-center">
                       <i class="fas fa-image mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
@@ -636,6 +877,15 @@ onMounted(() => {
                   :key="order_request.id"
                   :class="getRowStyle(order_request).rowClass"
                 >
+                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-center">
+                    <input
+                      type="checkbox"
+                      :checked="bulkSelection.selectedIds.includes(order_request.order_request_approval_id)"
+                      @change="toggleSelection(order_request.order_request_approval_id)"
+                      :disabled="getRowStyle(order_request).isDisabled"
+                      class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                  </td>
                   <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                     <div class="flex items-center justify-center">
                       <img 
@@ -855,7 +1105,7 @@ onMounted(() => {
                           'inline-flex items-center justify-center px-2 sm:px-3 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md transition-colors duration-200 w-full sm:w-auto',
                           getRowStyle(order_request).isDisabled || loading.isLoading
                             ? 'text-gray-400 bg-gray-300 cursor-not-allowed'
-                            : 'text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500'
+                            : 'text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 shadow-sm hover:shadow-md'
                         ]"
                       >
                         <i v-if="loading.isLoading && loading.currentAction === 'accept'" class="fas fa-spinner fa-spin mr-1 text-xs"></i>
@@ -864,24 +1114,18 @@ onMounted(() => {
                         <span class="sm:hidden">{{ loading.isLoading && loading.currentAction === 'accept' ? '処理中' : '承認' }}</span>
                       </button>
                       <button
-                        @click.prevent="
-                          sendAccept(
-                            order_request.order_request_approval_id,
-                            'reject'
-                          )
-                        "
+                        @click.prevent="openDescription(order_request)"
                         :disabled="getRowStyle(order_request).isDisabled || loading.isLoading"
                         :class="[
                           'inline-flex items-center justify-center px-2 sm:px-3 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md transition-colors duration-200 w-full sm:w-auto',
                           getRowStyle(order_request).isDisabled || loading.isLoading
                             ? 'text-gray-400 bg-gray-300 cursor-not-allowed'
-                            : 'text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
+                            : 'text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 shadow-sm hover:shadow-md'
                         ]"
                       >
-                        <i v-if="loading.isLoading && loading.currentAction === 'reject'" class="fas fa-spinner fa-spin mr-1 text-xs"></i>
-                        <i v-else class="fas fa-times mr-1 text-xs"></i>
-                        <span class="hidden sm:inline">{{ loading.isLoading && loading.currentAction === 'reject' ? '処理中...' : '却下' }}</span>
-                        <span class="sm:hidden">{{ loading.isLoading && loading.currentAction === 'reject' ? '処理中' : '却下' }}</span>
+                        <i class="fas fa-times mr-1 text-xs"></i>
+                        <span class="hidden sm:inline">却下</span>
+                        <span class="sm:hidden">却下</span>
                       </button>
                     </div>
                     <!-- 差し戻し状態の説明 -->
@@ -1008,7 +1252,8 @@ onMounted(() => {
               @click.prevent="
                 sendAccept(
                   description_order_request.order_request.order_request_approval_id,
-                  'accept'
+                  'accept',
+                  true
                 )
               "
               :disabled="getRowStyle(description_order_request.order_request).isDisabled || loading.isLoading"
@@ -1027,7 +1272,8 @@ onMounted(() => {
               @click.prevent="
                 sendAccept(
                   description_order_request.order_request.order_request_approval_id,
-                  'reject'
+                  'reject',
+                  true
                 )
               "
               :disabled="getRowStyle(description_order_request.order_request).isDisabled || loading.isLoading"
@@ -1314,6 +1560,150 @@ onMounted(() => {
                 style="min-height: 80vh;"
             frameborder="0"
           ></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 一括処理モーダル -->
+  <div
+    v-if="bulkModal.isOpen"
+    class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 overflow-y-auto"
+    style="z-index: 9998;"
+  >
+    <div class="flex items-start justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+      </div>
+
+      <!-- モーダルコンテンツ -->
+      <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full mx-2 sm:mx-0">
+        <!-- ヘッダー -->
+        <div :class="[
+          'px-4 sm:px-6 py-3 sm:py-4',
+          bulkModal.action === 'accept' ? 'bg-gradient-to-r from-emerald-600 to-green-600' : 'bg-gradient-to-r from-red-600 to-pink-600'
+        ]">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                  <i :class="[
+                    'text-white text-sm sm:text-lg',
+                    bulkModal.action === 'accept' ? 'fas fa-check-double' : 'fas fa-times-circle'
+                  ]"></i>
+                </div>
+              </div>
+              <div class="ml-3 sm:ml-4">
+                <h3 class="text-lg sm:text-xl font-bold text-white">
+                  {{ bulkModal.action === 'accept' ? 'まとめて承認' : 'まとめて却下' }}
+                </h3>
+                <p class="text-white text-opacity-90 text-xs sm:text-sm">
+                  {{ bulkModal.currentIndex + 1 }} / {{ bulkModal.items.length }} 件目
+                </p>
+              </div>
+            </div>
+            <button
+              @click="closeBulkModal"
+              class="text-white hover:text-gray-200 transition-colors duration-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20"
+            >
+              <i class="fas fa-times text-lg sm:text-xl"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- メインコンテンツ -->
+        <div class="bg-white px-4 sm:px-6 py-4 sm:py-6">
+          <div v-if="bulkModal.items[bulkModal.currentIndex]" class="space-y-4">
+            <!-- 現在のアイテム情報 -->
+            <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <div class="flex items-start space-x-4">
+                <img
+                  :src="getImgPath(bulkModal.items[bulkModal.currentIndex].img_path)"
+                  alt="商品画像"
+                  class="h-20 w-20 object-cover rounded-lg border border-gray-300"
+                />
+                <div class="flex-1">
+                  <h4 class="text-lg font-bold text-gray-900 mb-1">
+                    {{ bulkModal.items[bulkModal.currentIndex].name }}
+                  </h4>
+                  <p class="text-sm text-gray-600 mb-2">
+                    品番: <code class="bg-gray-200 px-2 py-1 rounded text-xs">{{ bulkModal.items[bulkModal.currentIndex].s_name }}</code>
+                  </p>
+                  <div class="flex items-center space-x-4 text-sm">
+                    <span class="flex items-center text-gray-700">
+                      <i class="fas fa-cube mr-1 text-blue-500"></i>
+                      数量: {{ bulkModal.items[bulkModal.currentIndex].quantity }}{{ bulkModal.items[bulkModal.currentIndex].unit }}
+                    </span>
+                    <span class="flex items-center text-gray-700">
+                      <i class="fas fa-yen-sign mr-1 text-green-500"></i>
+                      金額: ¥{{ bulkModal.items[bulkModal.currentIndex].calc_price?.toLocaleString() }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- コメント入力 -->
+            <div class="bg-white border border-gray-200 rounded-xl p-4">
+              <div class="flex items-center mb-3">
+                <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-comment text-indigo-600"></i>
+                </div>
+                <h4 class="text-base font-semibold text-gray-900">
+                  {{ bulkModal.action === 'accept' ? 'コメント（任意）' : 'コメント（必須）' }}
+                </h4>
+                <span v-if="bulkModal.action === 'reject'" class="ml-2 text-xs text-red-600 font-medium">
+                  ※ 却下の場合はコメント必須です
+                </span>
+              </div>
+              <textarea
+                v-model="bulkModal.comments[bulkModal.items[bulkModal.currentIndex].order_request_approval_id]"
+                rows="4"
+                :placeholder="`${bulkModal.items[bulkModal.currentIndex].name} のコメントを入力してください`"
+                class="w-full p-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 resize-none"
+                :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': bulkModal.action === 'reject' && !bulkModal.comments[bulkModal.items[bulkModal.currentIndex].order_request_approval_id]?.trim() }"
+              ></textarea>
+            </div>
+
+            <!-- ナビゲーションボタン -->
+            <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+              <button
+                @click="bulkModalPrev"
+                :disabled="bulkModal.currentIndex === 0"
+                class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors duration-200"
+              >
+                <i class="fas fa-chevron-left mr-2"></i>
+                前へ
+              </button>
+              
+              <div class="text-sm text-gray-600 font-medium">
+                {{ bulkModal.currentIndex + 1 }} / {{ bulkModal.items.length }}
+              </div>
+              
+              <button
+                v-if="bulkModal.currentIndex < bulkModal.items.length - 1"
+                @click="bulkModalNext"
+                class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+              >
+                次へ
+                <i class="fas fa-chevron-right ml-2"></i>
+              </button>
+              <button
+                v-else
+                @click="executeBulkAction"
+                :disabled="loading.isLoading"
+                :class="[
+                  'inline-flex items-center px-6 py-2 text-white text-sm font-medium rounded-lg transition-colors duration-200',
+                  bulkModal.action === 'accept' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700',
+                  loading.isLoading && 'opacity-50 cursor-not-allowed'
+                ]"
+              >
+                <i v-if="loading.isLoading" class="fas fa-spinner fa-spin mr-2"></i>
+                <i v-else :class="['mr-2', bulkModal.action === 'accept' ? 'fas fa-check' : 'fas fa-times']"></i>
+                {{ bulkModal.action === 'accept' ? '一括承認を実行' : '一括却下を実行' }}
+              </button>
             </div>
           </div>
         </div>
