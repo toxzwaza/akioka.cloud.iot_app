@@ -129,8 +129,13 @@ class InventoryController extends Controller
         }
 
         // 手配先情報を取得
-        $stock_supplier = StockSupplier::where('stock_id', $stock_id)->first();
-        $stock->stock_supplier = $stock_supplier;
+        $stock_suppliers = StockSupplier::select('suppliers.name as supplier_name', 'stock_suppliers.supplier_id', 'stock_suppliers.lead_time')
+            ->join('suppliers', 'stock_suppliers.supplier_id', 'suppliers.id')
+            ->where('stock_id', $stock_id)
+            ->orderBy('main_flg', 'desc')
+            ->orderBy('stock_suppliers.updated_at', 'desc')
+            ->get();
+        $stock->stock_suppliers = $stock_suppliers;
         return Inertia::render('Stock/Inventory', ['stock' => $stock, 'request_user' => $request_user, 'processes' => $processes, 'users' => $users]);
     }
 

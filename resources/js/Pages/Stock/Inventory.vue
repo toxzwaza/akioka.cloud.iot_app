@@ -323,7 +323,6 @@ onMounted(() => {
     request_user.name = props.request_user.name;
   }
 
-
   stock_storage.value = props.stock.stock_storage;
   initial_orders.value = props.stock.initial_orders;
 
@@ -445,6 +444,20 @@ onMounted(() => {
               :key="alias.id"
               class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-gray-700 dark:text-gray-400 border border-gray-500 ml-2"
               >{{ alias.alias }}</span
+            >
+          </h3>
+          <h3 class="stock_aliases font-mono">
+            得意先:
+            <span
+              v-for="(stock_supplier, index) in props.stock.stock_suppliers"
+              :key="stock_supplier.id"
+              :class="[
+                index === 0 
+                  ? 'bg-green-100 text-green-800 border-green-500 dark:bg-green-900 dark:text-green-300 dark:border-green-600' 
+                  : 'bg-gray-100 text-gray-800 border-gray-500 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-500',
+                'text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm border ml-2'
+              ]"
+              >{{ stock_supplier.supplier_name }}{{ index === 0 ? ' (適用中)' : '' }}</span
             >
           </h3>
 
@@ -752,65 +765,81 @@ onMounted(() => {
           <div class="container mx-auto mr-2">
             <h2 class="array_title text-green-500">発注依頼</h2>
             <div id="archive_container" class="w-full mx-auto overflow-auto">
-              <table class="table-auto w-full text-left whitespace-no-wrap">
+              <table class="table-auto w-full text-left whitespace-no-wrap border-collapse">
                 <thead>
-                  <tr>
+                  <tr class="bg-gray-100 dark:bg-gray-800">
                     <th
-                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600 text-center"
+                    >操作</th>
+                    <th
+                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
                     >
                       状況
                     </th>
                     <th
-                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
                     >
                       発注依頼日
                     </th>
                     <th
-                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
                     >
                       必要個数
                     </th>
                     <th
-                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
                     >
                       現在個数
                     </th>
                     <th
-                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
                     >
                       注文依頼者
                     </th>
                     <th
-                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
                     >
                       注文者
                     </th>
                     <th
-                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
                     >
                       備考
                     </th>
-
-                    <th
-                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
-                    ></th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr
                     v-for="order_request in props.stock.order_requests"
                     :key="order_request.id"
+                    :class="{
+                      'bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 border-l-4 border-red-400': !order_request.status,
+                      'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border-l-4 border-green-400': order_request.status,
+                      'transition-colors duration-150': true
+                    }"
                   >
-                    <td
-                      :class="{
-                        'py-4 font-bold': true,
-                        'text-green-500': order_request.status,
-                        'text-red-500': !order_request.status,
-                      }"
-                    >
-                      {{ order_request.status ? "受理" : "未受理" }}
+                    <td class="py-4 px-4 text-center border-b border-gray-200 dark:border-gray-700">
+                      <button
+                        @click="deleteOrderRequest(order_request.id)"
+                        v-if="!order_request.status"
+                        class="bg-red-500 hover:bg-red-700 text-white font-bold py-2.5 px-5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                      >
+                        🗑️ 取消
+                      </button>
+                      <span v-else class="text-gray-400 dark:text-gray-500 text-sm">取消不可</span>
                     </td>
-                    <td class="py-4">
+                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">
+                      <span
+                        :class="{
+                          'inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold': true,
+                          'bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-100': order_request.status,
+                          'bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-100': !order_request.status,
+                        }"
+                      >
+                        {{ order_request.status ? "✓ 受理済" : "⚠ 未受理" }}
+                      </span>
+                    </td>
+                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">
                       {{
                         new Date(order_request.created_at).toLocaleDateString(
                           "ja-JP",
@@ -822,42 +851,28 @@ onMounted(() => {
                         )
                       }}
                     </td>
-                    <td class="py-4">
+                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700 font-semibold">
                       {{
                         order_request.quantity ? order_request.quantity : "-"
                       }}
                     </td>
-                    <td class="py-4">
+                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700 font-semibold">
                       {{ order_request.now_quantity ?? "-" }}
                     </td>
-                    <td class="py-4">
+                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">
                       {{
                         order_request.request_user_name
                           ? order_request.request_user_name
                           : "-"
                       }}
                     </td>
-                    <td class="py-4">
+                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">
                       {{
                         order_request.user_name ? order_request.user_name : "-"
                       }}
                     </td>
-                    <td class="py-4">
+                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">
                       {{ order_request.description ?? "-" }}
-                    </td>
-
-                    <td
-                      :class="{
-                        'py-4 font-bold text-center': true,
-                      }"
-                    >
-                      <button
-                        @click="deleteOrderRequest(order_request.id)"
-                        v-if="!order_request.status"
-                        class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 text-sm px-4 rounded-full"
-                      >
-                        取消
-                      </button>
                     </td>
                   </tr>
                 </tbody>
@@ -867,31 +882,31 @@ onMounted(() => {
           <div class="container mx-auto ml-2">
             <h2 class="array_title text-red-500">発注履歴</h2>
             <div id="archive_container" class="w-full mx-auto overflow-auto">
-              <table class="table-auto w-full text-left whitespace-no-wrap">
+              <table class="table-auto w-full text-left whitespace-no-wrap border-collapse">
                 <thead>
-                  <tr>
+                  <tr class="bg-gray-100 dark:bg-gray-800">
                     <th
-                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
                     >
                       状況
                     </th>
                     <th
-                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
                     >
                       発注日
                     </th>
                     <th
-                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
                     >
                       依頼者
                     </th>
                     <th
-                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
                     >
                       発注者
                     </th>
                     <th
-                      class="py-4 title-font tracking-wider font-medium text-gray-500 text-md"
+                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
                     >
                       個数
                     </th>
@@ -901,27 +916,35 @@ onMounted(() => {
                   <tr
                     v-for="order in props.stock.initial_orders"
                     :key="order.id"
+                    :class="{
+                      'bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 border-l-4 border-red-400': !order.receipt_flg && !order.receive_flg,
+                      'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border-l-4 border-green-400': order.receipt_flg || order.receive_flg,
+                      'transition-colors duration-150': true
+                    }"
                   >
-                    <td
-                      :class="{
-                        'py-4 font-bold': true,
-                        'text-green-500':
-                          order.receipt_flg || order.receive_flg,
-                        'text-red-500':
-                          !order.receipt_flg && !order.receive_flg,
-                      }"
-                    >
-                      <button @click="checkDeliFile(order.delifile_path)">
-                        {{
-                          order.receipt_flg
-                            ? "納品済(入庫)"
-                            : order.receive_flg
-                            ? "納品済(引渡)"
-                            : "未納品"
-                        }}
+                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">
+                      <button 
+                        @click="checkDeliFile(order.delifile_path)"
+                        class="w-full text-left"
+                      >
+                        <span
+                          :class="{
+                            'inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold': true,
+                            'bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-100': order.receipt_flg || order.receive_flg,
+                            'bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-100': !order.receipt_flg && !order.receive_flg,
+                          }"
+                        >
+                          {{
+                            order.receipt_flg
+                              ? "✓ 納品済(入庫)"
+                              : order.receive_flg
+                              ? "✓ 納品済(引渡)"
+                              : "⚠ 未納品"
+                          }}
+                        </span>
                       </button>
                     </td>
-                    <td class="py-4">
+                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">
                       {{
                         new Date(order.order_date).toLocaleDateString("ja-JP", {
                           year: "numeric",
@@ -931,9 +954,9 @@ onMounted(() => {
                       }}
                     </td>
 
-                    <td class="py-4">{{ order.user_name ?? "-" }}</td>
-                    <td class="py-4">{{ order.order_user_name ?? "-" }}</td>
-                    <td class="py-4">{{ order.quantity ?? "-" }}</td>
+                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">{{ order.user_name ?? "-" }}</td>
+                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">{{ order.order_user_name ?? "-" }}</td>
+                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700 font-semibold">{{ order.quantity ?? "-" }}</td>
                   </tr>
                 </tbody>
               </table>

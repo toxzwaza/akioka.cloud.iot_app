@@ -3,11 +3,15 @@ import StockLayout from "@/Layouts/StockLayout.vue";
 import StockForm from "@/Components/StockForm.vue";
 import { Link } from "@inertiajs/vue3";
 import { getImgPath } from "@/Helper/method";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 
 const props = defineProps({
   stocks: Array,
   search: Array
+})
+
+onMounted( ()=> {
+  console.log(props.stocks[0])
 })
 </script>
 <template>
@@ -50,6 +54,9 @@ const props = defineProps({
                 </p>
                 <p class="font-normal text-gray-700 dark:text-gray-400">
                   格納数:{{ stock.quantity }}
+                </p>
+                <p class="font-normal text-gray-700 dark:text-gray-400">
+                  手配先:{{ stock.supplier_name }}
                 </p>
 
                 <Link
