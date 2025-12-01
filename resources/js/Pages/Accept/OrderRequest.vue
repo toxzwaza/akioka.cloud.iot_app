@@ -405,6 +405,54 @@ const startBulkReject = () => {
   bulkModal.isOpen = true;
 };
 
+// 個別承認を開始
+const startSingleAccept = (order_request) => {
+  // 無効な行の場合は処理しない
+  if (getRowStyle(order_request).isDisabled) {
+    return;
+  }
+  
+  // ローディング中の場合は処理しない
+  if (loading.isLoading) {
+    return;
+  }
+  
+  // 1件だけを配列に入れる
+  bulkModal.items = [order_request];
+  
+  // すでに入力されているコメントを取得
+  bulkModal.comments = {};
+  bulkModal.comments[order_request.order_request_approval_id] = order_request.comment || '';
+  
+  bulkModal.action = 'accept';
+  bulkModal.currentIndex = 0;
+  bulkModal.isOpen = true;
+};
+
+// 個別却下を開始
+const startSingleReject = (order_request) => {
+  // 無効な行の場合は処理しない
+  if (getRowStyle(order_request).isDisabled) {
+    return;
+  }
+  
+  // ローディング中の場合は処理しない
+  if (loading.isLoading) {
+    return;
+  }
+  
+  // 1件だけを配列に入れる
+  bulkModal.items = [order_request];
+  
+  // すでに入力されているコメントを取得
+  bulkModal.comments = {};
+  bulkModal.comments[order_request.order_request_approval_id] = order_request.comment || '';
+  
+  bulkModal.action = 'reject';
+  bulkModal.currentIndex = 0;
+  bulkModal.isOpen = true;
+};
+
 // モーダル: 次へ
 const bulkModalNext = () => {
   if (bulkModal.currentIndex < bulkModal.items.length - 1) {
@@ -449,9 +497,17 @@ const executeBulkAction = async () => {
     }
   }
   
+  // 確認メッセージ（1件の場合は単数形、複数件の場合は複数形）
+  const itemName = bulkModal.items.length === 1 
+    ? bulkModal.items[0].name 
+    : `${bulkModal.items.length}件`;
   const confirmMsg = bulkModal.action === 'accept' 
-    ? `選択した${bulkModal.items.length}件を承認しますか？`
-    : `選択した${bulkModal.items.length}件を却下しますか？`;
+    ? bulkModal.items.length === 1
+      ? `${itemName} を承認しますか？`
+      : `選択した${bulkModal.items.length}件を承認しますか？`
+    : bulkModal.items.length === 1
+      ? `${itemName} を却下しますか？`
+      : `選択した${bulkModal.items.length}件を却下しますか？`;
   
   if (!confirm(confirmMsg)) {
     console.log('ユーザーがキャンセル');
@@ -1119,12 +1175,7 @@ onMounted(() => {
                   <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center">
                     <div class="flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2">
                       <button
-                        @click.prevent="
-                          sendAccept(
-                            order_request.order_request_approval_id,
-                            'accept'
-                          )
-                        "
+                        @click.prevent="startSingleAccept(order_request)"
                         :disabled="getRowStyle(order_request).isDisabled || loading.isLoading"
                         :class="[
                           'inline-flex items-center justify-center px-2 sm:px-3 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md transition-colors duration-200 w-full sm:w-auto',
@@ -1139,7 +1190,7 @@ onMounted(() => {
                         <span class="sm:hidden">{{ loading.isLoading && loading.currentAction === 'accept' ? '処理中' : '承認' }}</span>
                       </button>
                       <button
-                        @click.prevent="openDescription(order_request)"
+                        @click.prevent="startSingleReject(order_request)"
                         :disabled="getRowStyle(order_request).isDisabled || loading.isLoading"
                         :class="[
                           'inline-flex items-center justify-center px-2 sm:px-3 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md transition-colors duration-200 w-full sm:w-auto',
