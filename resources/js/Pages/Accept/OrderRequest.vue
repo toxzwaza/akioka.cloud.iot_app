@@ -1272,7 +1272,7 @@ onMounted(() => {
           </div>
 
           <!-- アクションボタン -->
-          <div class="flex justify-center space-x-4 mb-8 p-4 bg-gray-50 rounded-xl">
+          <!-- <div class="flex justify-center space-x-4 mb-8 p-4 bg-gray-50 rounded-xl">
             <button
               @click.prevent="
                 sendAccept(
@@ -1313,7 +1313,7 @@ onMounted(() => {
               <i v-else class="fas fa-times mr-2"></i>
               {{ loading.isLoading && loading.currentAction === 'reject' ? '却下処理中...' : '却下する' }}
             </button>
-          </div>
+          </div> -->
 
           <!-- コメント入力セクション -->
           <div class="mb-8">
