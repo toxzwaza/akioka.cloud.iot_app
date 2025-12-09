@@ -95,7 +95,7 @@ const orderRequestByStockRequestOrder = (stock) => {
     axios
       .post(route("stock.request.order"), {
         stock_id: stock.stock_id,
-        request_user_id: 81, //現状三谷さん固定
+        request_user_id: 120, //風早さんに変更
       })
       .then((res) => {
         console.log(res.data);

@@ -123,7 +123,7 @@ class StockRequestController extends Controller
                 $inventory_operation_record->stock_id = $stock_id;
                 $inventory_operation_record->stock_storage_id = $stock_storage_id;
                 $inventory_operation_record->quantity = $stock_request_order->quantity;
-                $inventory_operation_record->user_id = 81; //三谷
+                $inventory_operation_record->user_id = 120; //風早さん
                 $inventory_operation_record->save();
             }
         } catch (Exception $e) {
