@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, ref, reactive } from "vue";
+import axios from "axios";
 
 const props = defineProps({
   processes: Array,
@@ -77,13 +78,182 @@ const handleCheck = (event) => {
   form.check = event.target.checked;
 };
 
+// 日本の祝日を計算式で判定（フォールバック用）
+const isJapaneseHolidayByCalculation = (date) => {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  
+  // 固定祝日
+  const fixedHolidays = [
+    { month: 1, day: 1 },      // 元日
+    { month: 2, day: 11 },     // 建国記念の日
+    { month: 4, day: 29 },     // 昭和の日
+    { month: 5, day: 3 },      // 憲法記念日
+    { month: 5, day: 4 },      // みどりの日
+    { month: 5, day: 5 },      // こどもの日
+    { month: 8, day: 11 },     // 山の日
+    { month: 11, day: 3 },     // 文化の日
+    { month: 11, day: 23 },    // 勤労感謝の日
+  ];
+  
+  for (const holiday of fixedHolidays) {
+    if (month === holiday.month && day === holiday.day) {
+      return true;
+    }
+  }
+  
+  // 天皇誕生日
+  if (year >= 2020 && month === 2 && day === 23) {
+    return true; // 令和の天皇誕生日
+  } else if (year >= 1989 && year <= 2018 && month === 12 && day === 23) {
+    return true; // 平成の天皇誕生日
+  }
+  
+  // 春分の日（2000-2099年）
+  const springEquinox = getSpringEquinox(year);
+  if (month === 3 && day === springEquinox) return true;
+  
+  // 秋分の日（2000-2099年）
+  const autumnEquinox = getAutumnEquinox(year);
+  if (month === 9 && day === autumnEquinox) return true;
+  
+  // 移動祝日
+  // 海の日（7月の第3月曜日、2020年は7月23日、2021年は7月22日）
+  if (year === 2020 && month === 7 && day === 23) return true;
+  if (year === 2021 && month === 7 && day === 22) return true;
+  if (year !== 2020 && year !== 2021 && month === 7 && day === getNthMonday(year, 7, 3)) return true;
+  
+  // 敬老の日（9月の第3月曜日）
+  if (month === 9 && day === getNthMonday(year, 9, 3)) return true;
+  
+  // スポーツの日（10月の第2月曜日、2020年は7月24日、2021年は7月23日）
+  if (year === 2020 && month === 7 && day === 24) return true;
+  if (year === 2021 && month === 7 && day === 23) return true;
+  if (year !== 2020 && year !== 2021 && month === 10 && day === getNthMonday(year, 10, 2)) return true;
+  
+  return false;
+};
+
+// 春分の日を計算（2000-2099年）
+const getSpringEquinox = (year) => {
+  if (year >= 2000 && year <= 2099) {
+    const base = Math.floor((year - 2000) * 0.242194) + Math.floor((year - 2000) / 4);
+    return 20 + base;
+  }
+  return 20;
+};
+
+// 秋分の日を計算（2000-2099年）
+const getAutumnEquinox = (year) => {
+  if (year >= 2000 && year <= 2099) {
+    const base = Math.floor((year - 2000) * 0.242194) + Math.floor((year - 2000) / 4);
+    return 23 + base;
+  }
+  return 23;
+};
+
+// 第N月曜日を取得
+const getNthMonday = (year, month, n) => {
+  const firstDay = new Date(year, month - 1, 1);
+  const firstDayOfWeek = firstDay.getDay();
+  const firstMonday = firstDayOfWeek === 0 ? 2 : (9 - firstDayOfWeek) % 7 || 7;
+  return firstMonday + (n - 1) * 7;
+};
+
+// 日本の祝日APIを使用して祝日を判定
+const isJapaneseHoliday = async (dateString) => {
+  if (!dateString) return false;
+  
+  const date = new Date(dateString + "T00:00:00");
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const dateStr = `${year}-${month}-${day}`;
+  
+  try {
+    // 日本の祝日API（無料・メンテナンス不要）
+    const response = await axios.get(`https://holidays-jp.github.io/api/v1/${year}/date.json`);
+    const holidays = response.data;
+    
+    // 指定された日付が祝日かどうかをチェック
+    if (holidays && holidays.hasOwnProperty(dateStr)) {
+      return true;
+    }
+    
+    // APIにデータがない場合は計算式で判定
+    return isJapaneseHolidayByCalculation(date);
+  } catch (error) {
+    console.error("祝日APIの取得に失敗しました:", error);
+    // APIが失敗した場合は計算式で判定
+    return isJapaneseHolidayByCalculation(date);
+  }
+};
+
+// 土日祝を判定する関数
+const isWeekendOrHoliday = async (dateString) => {
+  if (!dateString) return false;
+  
+  const date = new Date(dateString + "T00:00:00");
+  const dayOfWeek = date.getDay();
+  
+  // 土曜日（6）または日曜日（0）
+  if (dayOfWeek === 0 || dayOfWeek === 6) {
+    return true;
+  }
+  
+  // 祝日
+  const isHoliday = await isJapaneseHoliday(dateString);
+  return isHoliday;
+};
+
+// 次の平日を取得する関数
+const getNextWeekday = async (dateString) => {
+  if (!dateString) return null;
+  
+  let date = new Date(dateString + "T00:00:00");
+  let attempts = 0;
+  const maxAttempts = 30; // 無限ループ防止
+  
+  while (attempts < maxAttempts) {
+    const dateStr = date.toISOString().split("T")[0];
+    const isHoliday = await isWeekendOrHoliday(dateStr);
+    
+    if (!isHoliday) {
+      return dateStr;
+    }
+    
+    date.setDate(date.getDate() + 1);
+    attempts++;
+  }
+  
+  return date.toISOString().split("T")[0];
+};
+
+// 希望納期変更時の処理
+const handleDesireDeliveryDateChange = async (event) => {
+  const selectedDate = event.target.value;
+  
+  if (!selectedDate) {
+    return;
+  }
+  
+  const isHoliday = await isWeekendOrHoliday(selectedDate);
+  
+  if (isHoliday) {
+    const nextWeekday = await getNextWeekday(selectedDate);
+    alert("土日祝は選択できません。次の平日に自動設定します。");
+    form.desire_delivery_date = nextWeekday;
+  }
+};
+
 const handleSubmit = () => {
   if (confirm("上位役職者の確認は完了していますか？")) {
     emit("submit", form);
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   process_users.value = props.users;
 
   if (props.stock) {
@@ -99,7 +269,13 @@ onMounted(() => {
         .toISOString()
         .split("T")[0];
 
-      form.desire_delivery_date = shortest_date.value;
+      // 初期値が土日祝の場合は次の平日に設定
+      const isHoliday = await isWeekendOrHoliday(shortest_date.value);
+      if (isHoliday) {
+        form.desire_delivery_date = await getNextWeekday(shortest_date.value);
+      } else {
+        form.desire_delivery_date = shortest_date.value;
+      }
     }
 
     form.price = props.stock.price;
@@ -120,7 +296,17 @@ onMounted(() => {
       form.digest_date = ror.digest_date
       form.quantity = ror.quantity
       // form.quantity_unit = ror.quantity_unit
-      form.desire_delivery_date = ror.desire_delivery_date
+      
+      // 再依頼時の希望納期も土日祝チェック
+      if (ror.desire_delivery_date) {
+        const isHoliday = await isWeekendOrHoliday(ror.desire_delivery_date);
+        if (isHoliday) {
+          form.desire_delivery_date = await getNextWeekday(ror.desire_delivery_date);
+        } else {
+          form.desire_delivery_date = ror.desire_delivery_date;
+        }
+      }
+      
       form.description = ror.description
       form.price = ror.price
       form.calc_price = ror.calc_price
@@ -340,18 +526,19 @@ onMounted(() => {
                   'text-gray-700': form.desire_delivery_date,
                   'text-red-500': !form.desire_delivery_date,
                 }"
-                for="grid-state"
+                for="desire_delivery_date"
               >
                 希望納期
               </label>
               <input
                 class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                id="grid-city"
+                id="desire_delivery_date"
                 type="date"
                 v-model="form.desire_delivery_date"
+                @change="handleDesireDeliveryDateChange"
               />
               <p class="mt-2 text-red-500 text-xs italic">
-                リードタイムの都合上難しい場合がございます。
+                リードタイムの都合上難しい場合がございます。土日祝は選択できません。
               </p>
             </div>
           </div>
