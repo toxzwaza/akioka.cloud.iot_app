@@ -155,7 +155,7 @@ const startQRScanning = () => {
 };
 
 onMounted(() => {
-  console.log(props.search);
+  console.log(props.processes);
 
   form.search.stock_name = props.search?.stock_name ?? "";
   form.search.stock_s_name = props.search?.stock_s_name ?? "";
