@@ -23,7 +23,7 @@ class StockRequestController extends Controller
     public function home()
     {
 
-        $processes = Process::select('id', 'name')->whereIn('id', [1, 2, 3, 4, 15, 16, 17])->get();
+        $processes = Process::select('id', 'name')->whereIn('id', [1, 2, 3, 4, 5, 6, 8, 15, 16, 17])->get();
 
         // 現場依頼対象物品を取得
         $stock_requests =
