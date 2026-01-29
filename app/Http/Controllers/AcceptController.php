@@ -95,6 +95,10 @@ class AcceptController extends Controller
             $query->where('order_request_approvals.user_id', 37);
         } else if ($user_id == 84) { //宮原
             $query->where('order_request_approvals.user_id', 84);
+        } else if ($user_id == 144) { //原
+            $query->where('order_request_approvals.user_id', 144);
+        } else if ($user_id == 18) { //繁田
+            $query->where('order_request_approvals.user_id', 18);
         } else {
             return response("アクセス権限がありません", 403);
         }
