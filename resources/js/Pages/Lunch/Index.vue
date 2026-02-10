@@ -150,32 +150,77 @@ const checkTimeFlagInterval = () => {
 };
 
 const setDutyUsers = (users) => {
+  console.log("🔍 [DEBUG] setDutyUsers 開始");
+  console.log("🔍 [DEBUG] 引数 users:", users);
+  console.log("🔍 [DEBUG] users の型:", typeof users);
+  console.log("🔍 [DEBUG] users が配列か:", Array.isArray(users));
+  console.log("🔍 [DEBUG] users.length:", users?.length);
+  
+  if (!users || !Array.isArray(users)) {
+    console.error("❌ [DEBUG] users が配列ではありません、または undefined/null です");
+    return;
+  }
+  
+  if (users.length === 0) {
+    console.warn("⚠️ [DEBUG] users が空の配列です");
+    return;
+  }
+  
+  // duty_users をリセット
+  duty_users.value = [];
+  console.log("🔍 [DEBUG] duty_users をリセットしました");
+  
   let count = 0;
+  let dutyFoundCount = 0;
+  
   for (let i = 0; i < users.length; i++) {
+    console.log(`🔍 [DEBUG] ループ ${i}:`, {
+      user: users[i],
+      duty_flg: users[i]?.duty_flg,
+      duty_flg_type: typeof users[i]?.duty_flg,
+      duty_flg_strict: users[i]?.duty_flg === 1,
+    });
+    
     if (users[i].duty_flg === 1) {
+      dutyFoundCount++;
+      console.log(`✅ [DEBUG] duty_flg === 1 のユーザーを発見 (${i}番目):`, users[i]);
+      
       duty_users.value.push(users[i]);
+      console.log(`🔍 [DEBUG] duty_users に追加 (1人目):`, users[i]);
+      
       if (users[i + 1]) {
         duty_users.value.push(users[i + 1]);
+        console.log(`🔍 [DEBUG] duty_users に追加 (2人目):`, users[i + 1]);
       } else {
         duty_users.value.push(users[count]);
+        console.log(`🔍 [DEBUG] duty_users に追加 (2人目 - 折り返し):`, users[count]);
         count++;
       }
 
       if (users[i + 2]) {
         duty_users.value.push(users[i + 2]);
+        console.log(`🔍 [DEBUG] duty_users に追加 (3人目):`, users[i + 2]);
       } else {
         duty_users.value.push(users[count]);
+        console.log(`🔍 [DEBUG] duty_users に追加 (3人目 - 折り返し):`, users[count]);
         count++;
       }
 
       if (users[i + 3]) {
         duty_users.value.push(users[i + 3]);
+        console.log(`🔍 [DEBUG] duty_users に追加 (4人目):`, users[i + 3]);
       } else {
         duty_users.value.push(users[count]);
+        console.log(`🔍 [DEBUG] duty_users に追加 (4人目 - 折り返し):`, users[count]);
         count++;
       }
     }
   }
+  
+  console.log("🔍 [DEBUG] setDutyUsers 終了");
+  console.log("🔍 [DEBUG] duty_flg === 1 のユーザー数:", dutyFoundCount);
+  console.log("🔍 [DEBUG] 最終的な duty_users.value:", duty_users.value);
+  console.log("🔍 [DEBUG] duty_users.value.length:", duty_users.value.length);
 };
 
 onMounted(() => {
