@@ -226,6 +226,7 @@ Route::get('/getTempHumiCo2', [DataController::class, 'getTempHumiCo2'])->name('
 
 Route::get('/test', [TestController::class, 'test'])->name('test');
 Route::get('/test/qr-scanner', [TestController::class, 'qrScanner'])->name('test.qr-scanner');
+Route::get('/test/conservation-api', [TestController::class, 'conservationApiTest'])->name('test.conservation-api');
 
 Route::post('/device-login', [DeviceController::class, 'store'])->name('device-login');
 Route::post('/device-update-access', [DeviceController::class, 'updateLastAccess'])->name('device-update-access');

@@ -134,4 +134,17 @@ class TestController extends Controller
     {
         return Inertia::render('Test/QRScanner');
     }
+
+    /**
+     * 別システム連携API（Conservation API）のGUIテストページを表示
+     */
+    public function conservationApiTest()
+    {
+        return Inertia::render('Test/ConservationApiTest', [
+            'apiUrls' => [
+                'stockStoragesSubtract' => route('api.stock-storages.subtract'),
+                'stockStoragesUpdateQuantity' => url('/api/stock-storages'), // PUT /api/stock-storages/{id} のベース
+            ],
+        ]);
+    }
 }
