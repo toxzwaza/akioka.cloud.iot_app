@@ -57,6 +57,52 @@ class OrderRequestController extends Controller
         ]);
     }
 
+    public function deleteFile(Request $request)
+    {
+        $status = true;
+        $message = '';
+
+        $file_path = $request->input('file_path');
+
+        try {
+            // ファイルパスの存在チェック
+            if (!$file_path) {
+                throw new \Exception('ファイルパスが指定されていません。');
+            }
+
+            // セキュリティ対策: order_requestディレクトリ内のファイルのみ削除可能にする
+            if (!str_starts_with($file_path, 'storage/order_request/')) {
+                throw new \Exception('不正なファイルパスです。');
+            }
+
+            // パストラバーサル攻撃対策: 危険な文字が含まれていないか確認
+            if (str_contains($file_path, '..') || str_contains($file_path, '//')) {
+                throw new \Exception('不正なファイルパスです。');
+            }
+
+            // storage/プレフィックスを削除してストレージパスに変換
+            $storage_path = str_replace('storage/', '', $file_path);
+
+            // ファイル存在チェック
+            if (!Storage::disk('public')->exists($storage_path)) {
+                throw new \Exception('ファイルが見つかりません。');
+            }
+
+            // ファイル削除
+            Storage::disk('public')->delete($storage_path);
+
+            $message = 'ファイル削除成功';
+        } catch (\Exception $e) {
+            $status = false;
+            $message = $e->getMessage();
+        }
+
+        return response()->json([
+            'status' => $status,
+            'message' => $message,
+        ]);
+    }
+
     public function reorder(Request $request)
     {
         $status = true;
