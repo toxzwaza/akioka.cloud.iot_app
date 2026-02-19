@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Route;
 
 // 物品依頼 稟議書アップロードAPI
 Route::post('/order_request/upload_file', [OrderRequestController::class, 'uploadFile']);
+// 物品依頼 稟議書削除API
+Route::delete('/order_request/delete_file', [OrderRequestController::class, 'deleteFile']);
 // 納品書 アップロードAPI
 Route::post('/file_upload/deli_file', [ApiController::class, 'deliFileUpload'])->name('deliFileUpload');
 
