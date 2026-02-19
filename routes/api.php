@@ -39,6 +39,10 @@ Route::delete('/stocks/{id}', [ConservationApiController::class, 'stockDestroy']
 Route::post('/stock-storages/subtract', [ConservationApiController::class, 'stockStorageSubtract'])
     ->name('api.stock-storages.subtract');
 
+// 在庫格納先数量の増算（減算取り消し用・単体・配列対応）※ 固定パスのため parameter より前に定義
+Route::post('/stock-storages/add', [ConservationApiController::class, 'stockStorageAdd'])
+    ->name('api.stock-storages.add');
+
 // 棚卸用：在庫格納先の数量を上書き
 Route::put('/stock-storages/{id}', [ConservationApiController::class, 'stockStorageUpdateQuantity'])
     ->name('api.stock-storages.update-quantity');

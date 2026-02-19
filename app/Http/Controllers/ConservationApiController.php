@@ -243,6 +243,85 @@ class ConservationApiController extends Controller
     }
 
     /**
+     * 在庫格納先数量（stock_storages）の増算
+     * 減算処理の取り消し用途。単体または配列で複数件を指定可能。
+     * POST body: { "stock_storage_id": 1, "quantity": 5 }
+     * または [ { "stock_storage_id": 1, "quantity": 5 }, ... ]
+     */
+    public function stockStorageAdd(Request $request): JsonResponse
+    {
+        $items = $request->input();
+        if (! is_array($items)) {
+            return response()->json(['message' => 'Invalid request body'], 422);
+        }
+        // 単体オブジェクトの場合は配列に統一
+        if (array_key_exists('stock_storage_id', $items) && array_key_exists('quantity', $items)) {
+            $items = [$items];
+        }
+
+        $results = [];
+        $hasError = false;
+
+        foreach ($items as $index => $item) {
+            $validator = validator($item, [
+                'stock_storage_id' => 'required|integer|exists:stock_storages,id',
+                'quantity' => 'required|integer|min:1',
+            ], [], [
+                'stock_storage_id' => 'stock_storage_id',
+                'quantity' => 'quantity',
+            ]);
+
+            if ($validator->fails()) {
+                $results[] = [
+                    'index' => $index,
+                    'success' => false,
+                    'error' => $validator->errors()->first(),
+                ];
+                $hasError = true;
+                continue;
+            }
+
+            $stockStorageId = (int) $item['stock_storage_id'];
+            $addQty = (int) $item['quantity'];
+
+            try {
+                $result = DB::transaction(function () use ($stockStorageId, $addQty) {
+                    $storage = StockStorage::where('id', $stockStorageId)->lockForUpdate()->first();
+                    if (! $storage) {
+                        return ['success' => false, 'error' => 'Stock storage not found.'];
+                    }
+                    $current = (int) $storage->quantity;
+                    $newQuantity = $current + $addQty;
+                    $storage->quantity = $newQuantity;
+                    $storage->save();
+
+                    return [
+                        'success' => true,
+                        'stock_storage_id' => $stockStorageId,
+                        'previous_quantity' => $current,
+                        'added' => $addQty,
+                        'new_quantity' => $newQuantity,
+                    ];
+                });
+                $results[] = array_merge(['index' => $index], $result);
+                if (! ($result['success'] ?? true)) {
+                    $hasError = true;
+                }
+            } catch (\Throwable $e) {
+                $results[] = [
+                    'index' => $index,
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                ];
+                $hasError = true;
+            }
+        }
+
+        $status = $hasError ? 207 : 200;
+        return response()->json(['results' => $results], $status);
+    }
+
+    /**
      * 棚卸用：在庫格納先（stock_storages）の数量を上書き
      * PUT /api/stock-storages/{id}  body: { "quantity": 数値 }
      */
