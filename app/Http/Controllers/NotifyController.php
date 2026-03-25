@@ -22,4 +22,21 @@ class NotifyController extends Controller
 
         return response()->json($notifyQueue);
     }
+
+    public function completeNotifyQueue(Request $request)
+    {
+        $validated = $request->validate([
+            'id' => ['required', 'integer', 'exists:notify_queues,id'],
+        ]);
+
+        $updated = NotifyQueue::where('id', $validated['id'])->update([
+            'comp_flg' => 1,
+        ]);
+
+        return response()->json([
+            'success' => $updated > 0,
+            'id' => $validated['id'],
+            'updated' => $updated,
+        ]);
+    }
 }
