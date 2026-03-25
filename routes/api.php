@@ -4,6 +4,7 @@ use App\Http\Controllers\ApiController;
 use App\Http\Controllers\ChatGptController;
 use App\Http\Controllers\ConservationApiController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\NotifyController;
 use App\Http\Controllers\OrderRequestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,9 @@ Route::post('/chatgpt', [ChatGptController::class, 'api'])->name('chatgpt.api');
 
 // 承認用API
 Route::get('/order_request/approval_requests', [ApiController::class, 'approvalRequests'])->name('order_request.approval_requests');
+
+// 社内通知キュー完了更新
+Route::post('/completeNotifyQueue', [NotifyController::class, 'completeNotifyQueue'])->name('api.completeNotifyQueue');
 
 // 別システム連携用 API（ConservationApiController）
 Route::get('/stocks', [ConservationApiController::class, 'stockIndex']);

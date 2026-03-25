@@ -18,7 +18,7 @@ def getUnNotifyData():
 def complete_notify_queue(notify_queue_id):
     try:
         response = requests.post(
-            'https://akioka.cloud/completeNotifyQueue',
+            'https://akioka.cloud/api/completeNotifyQueue',
             json={'id': notify_queue_id},
             timeout=10
         )

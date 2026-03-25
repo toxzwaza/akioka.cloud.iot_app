@@ -182,7 +182,6 @@ Route::get('/getUserAndProcess', [ApiController::class, 'getUserAndProcess'])->n
 Route::get('/getStockByNameAndSName', [ApiController::class, 'getStockByNameAndSName'])->name('getStockByNameAndSName');
 // 未通知データ
 Route::get('/getUnNotifyData', [NotifyController::class, 'getUnNotifyData'])->name('getUnNotifyData');
-Route::post('/completeNotifyQueue', [NotifyController::class, 'completeNotifyQueue'])->name('completeNotifyQueue');
 
 // 在庫格納先アドレス取得
 Route::get('/getStockStorages', [ApiController::class, 'getStockStorages'])->name('getStockStorages');
