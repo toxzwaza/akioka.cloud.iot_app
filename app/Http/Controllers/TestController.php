@@ -114,16 +114,37 @@ class TestController extends Controller
         });
 
         $fileName = 'stocks.csv';
-        $file = fopen($fileName, 'w');
-        fputcsv($file, ['発注先名', '品名', '品番', 'メモ', '価格', '単位１', '単位２', '換算値', '更新日時']);
+        $filePath = storage_path('app/tmp/' . $fileName);
+        $dirPath = dirname($filePath);
+
+        if (!is_dir($dirPath)) {
+            mkdir($dirPath, 0755, true);
+        }
+
+        $file = fopen($filePath, 'w');
+
+        // Windows版Excelでの文字化けを防ぐため、CSVはSJIS-winで出力する
+        $toSjis = function (array $row): array {
+            return array_map(function ($value) {
+                if ($value === null) {
+                    return '';
+                }
+
+                return mb_convert_encoding((string) $value, 'SJIS-win', 'UTF-8');
+            }, $row);
+        };
+
+        fputcsv($file, $toSjis(['発注先名', '品名', '品番', 'メモ', '価格', '単位１', '単位２', '換算値', '更新日時']));
 
         foreach ($csvData as $line) {
-            fputcsv($file, $line);
+            fputcsv($file, $toSjis($line));
         }
 
         fclose($file);
 
-        return response()->download($fileName)->deleteFileAfterSend(true);
+        return response()->download($filePath, $fileName, [
+            'Content-Type' => 'text/csv; charset=Shift_JIS',
+        ])->deleteFileAfterSend(true);
 
     }
 
