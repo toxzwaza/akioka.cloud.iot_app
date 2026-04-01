@@ -47,8 +47,37 @@ class OrderRequestController extends Controller
             // タイムスタンプでファイル名を生成（例: 20250409143000.pdf）
             $timestampedFilename = now()->format('YmdHis') . '.pdf';
 
+            $publicDisk = Storage::disk('public');
+            $orderRequestDir = storage_path('app/public/order_request');
+
+            if (! $publicDisk->exists('order_request')) {
+                $made = $publicDisk->makeDirectory('order_request');
+                if (! $made) {
+                    Log::error('[OrderRequest uploadFile] order_request ディレクトリ作成失敗', [
+                        'order_request_dir' => $orderRequestDir,
+                        'public_root_writable' => is_writable(storage_path('app/public')),
+                    ]);
+                    throw new \Exception('保存用フォルダを作成できませんでした。storage/app/public の権限を確認してください。');
+                }
+            }
+
             // 保存（storage/app/public/order_request に保存）
             $path = $file->storeAs('order_request', $timestampedFilename, 'public');
+
+            if ($path === false) {
+                Log::error('[OrderRequest uploadFile] storeAs が false（保存失敗）', [
+                    'order_request_id' => $order_request_id,
+                    'timestamped_filename' => $timestampedFilename,
+                    'order_request_dir' => $orderRequestDir,
+                    'dir_exists' => is_dir($orderRequestDir),
+                    'public_root' => storage_path('app/public'),
+                    'public_root_writable' => is_writable(storage_path('app/public')),
+                    'dir_writable' => is_dir($orderRequestDir) ? is_writable($orderRequestDir) : null,
+                    'temp_path' => $file->getRealPath(),
+                    'temp_readable' => $file->getRealPath() ? is_readable($file->getRealPath()) : null,
+                ]);
+                throw new \Exception('ファイルの保存に失敗しました。storage/app/public の書き込み権限やディスク容量を確認してください。');
+            }
 
             $fileUrl = 'storage/' . $path;
 
