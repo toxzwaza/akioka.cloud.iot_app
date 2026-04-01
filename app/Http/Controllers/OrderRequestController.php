@@ -6,6 +6,7 @@ use App\Models\OrderRequest;
 use App\Models\StockStorage;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class OrderRequestController extends Controller
@@ -20,10 +21,26 @@ class OrderRequestController extends Controller
         $file = $request->file('upload_file');
         $order_request_id = $request->order_request_id;
 
+        Log::debug('[OrderRequest uploadFile] 開始', [
+            'order_request_id' => $order_request_id,
+            'has_upload_file' => $file !== null,
+            'original_name' => $file?->getClientOriginalName(),
+            'mime' => $file?->getMimeType(),
+            'size' => $file?->getSize(),
+            'is_valid' => $file?->isValid(),
+            'upload_error' => $file ? $file->getError() : null,
+        ]);
 
         try {
             // ファイル存在＆有効性チェック
             if (!$file || !$file->isValid()) {
+                Log::warning('[OrderRequest uploadFile] ファイル無効', [
+                    'order_request_id' => $order_request_id,
+                    'has_file' => $file !== null,
+                    'is_valid' => $file?->isValid(),
+                    'error' => $file?->getError(),
+                    'error_message' => $file?->getErrorMessage(),
+                ]);
                 throw new \Exception('有効なファイルがアップロードされていません。');
             }
 
@@ -35,9 +52,19 @@ class OrderRequestController extends Controller
 
             $fileUrl = 'storage/' . $path;
 
+            Log::debug('[OrderRequest uploadFile] 保存完了', [
+                'order_request_id' => $order_request_id,
+                'stored_path' => $path,
+                'file_url' => $fileUrl,
+            ]);
+
             // 該当データを取得し、パスを保存
             $order_request = OrderRequest::find($order_request_id);
             if (!$order_request) {
+                Log::warning('[OrderRequest uploadFile] OrderRequest 未検出', [
+                    'order_request_id' => $order_request_id,
+                    'file_url' => $fileUrl,
+                ]);
                 throw new \Exception('指定されたIDの稟議書が見つかりません。');
             }
 
@@ -45,10 +72,28 @@ class OrderRequestController extends Controller
             $order_request->save();
 
             $message = 'ファイルアップロード成功';
+
+            Log::info('[OrderRequest uploadFile] 成功', [
+                'order_request_id' => $order_request_id,
+                'file_url' => $fileUrl,
+            ]);
         } catch (\Exception $e) {
             $status = false;
             $message = $e->getMessage();
+
+            Log::error('[OrderRequest uploadFile] 失敗', [
+                'order_request_id' => $order_request_id,
+                'message' => $message,
+                'exception' => $e::class,
+                'trace' => $e->getTraceAsString(),
+            ]);
         }
+
+        Log::debug('[OrderRequest uploadFile] レスポンス', [
+            'status' => $status,
+            'message' => $message,
+            'file_url' => $fileUrl,
+        ]);
 
         return response()->json([
             'status' => $status,
