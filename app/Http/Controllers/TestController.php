@@ -81,49 +81,70 @@ class TestController extends Controller
 
         // return $res;
 
-        // $stocks = Stock::select(
-        //     'stocks.id', 
-        //     'suppliers.name as supplier_name', 
-        //     'stocks.name', 
-        //     'stocks.s_name', 
-        //     'stocks.memo', 
-        //     'stocks.price', 
-        //     'stocks.solo_unit', 
-        //     'stocks.org_unit', 
-        //     'stocks.quantity_per_org',
-        //     'stocks.updated_at'
-        // )
-        // ->join('stock_suppliers', 'stock_suppliers.stock_id', '=', 'stocks.id')
-        // ->join('suppliers', 'suppliers.id', '=', 'stock_suppliers.supplier_id')
-        // ->where('stocks.del_flg', '=', 0)
-        // ->whereNotNull('stocks.price')
-        // ->get();
+        $stocks = Stock::select(
+            'stocks.id', 
+            'suppliers.name as supplier_name', 
+            'stocks.name', 
+            'stocks.s_name', 
+            'stocks.memo', 
+            'stocks.price', 
+            'stocks.solo_unit', 
+            'stocks.org_unit', 
+            'stocks.quantity_per_org',
+            'stocks.updated_at'
+        )
+        ->join('stock_suppliers', 'stock_suppliers.stock_id', '=', 'stocks.id')
+        ->join('suppliers', 'suppliers.id', '=', 'stock_suppliers.supplier_id')
+        ->where('stocks.del_flg', '=', 0)
+        ->whereNotNull('stocks.price')
+        ->get();
 
-        // $csvData = $stocks->map(function($stock) {
-        //     return [
-        //         $stock->supplier_name,
-        //         $stock->name,
-        //         $stock->s_name,
-        //         $stock->memo,
-        //         $stock->price,
-        //         $stock->solo_unit,
-        //         $stock->org_unit,
-        //         $stock->quantity_per_org,
-        //         $stock->updated_at
-        //     ];
-        // });
+        $csvData = $stocks->map(function($stock) {
+            return [
+                $stock->supplier_name,
+                $stock->name,
+                $stock->s_name,
+                $stock->memo,
+                $stock->price,
+                $stock->solo_unit,
+                $stock->org_unit,
+                $stock->quantity_per_org,
+                $stock->updated_at
+            ];
+        });
 
-        // $fileName = 'stocks.csv';
-        // $file = fopen($fileName, 'w');
-        // fputcsv($file, ['発注先名', '品名', '品番', 'メモ', '価格', '単位１', '単位２', '換算値', '更新日時']);
+        $fileName = 'stocks.csv';
+        $filePath = storage_path('app/tmp/' . $fileName);
+        $dirPath = dirname($filePath);
 
-        // foreach ($csvData as $line) {
-        //     fputcsv($file, $line);
-        // }
+        if (!is_dir($dirPath)) {
+            mkdir($dirPath, 0755, true);
+        }
 
-        // fclose($file);
+        $file = fopen($filePath, 'w');
 
-        // return response()->download($fileName)->deleteFileAfterSend(true);
+        // Windows版Excelでの文字化けを防ぐため、CSVはSJIS-winで出力する
+        $toSjis = function (array $row): array {
+            return array_map(function ($value) {
+                if ($value === null) {
+                    return '';
+                }
+
+                return mb_convert_encoding((string) $value, 'SJIS-win', 'UTF-8');
+            }, $row);
+        };
+
+        fputcsv($file, $toSjis(['発注先名', '品名', '品番', 'メモ', '価格', '単位１', '単位２', '換算値', '更新日時']));
+
+        foreach ($csvData as $line) {
+            fputcsv($file, $toSjis($line));
+        }
+
+        fclose($file);
+
+        return response()->download($filePath, $fileName, [
+            'Content-Type' => 'text/csv; charset=Shift_JIS',
+        ])->deleteFileAfterSend(true);
 
     }
 
