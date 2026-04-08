@@ -557,49 +557,43 @@ onMounted(async () => {
     )
   );
 
-  if (props.order_request.new_stock_flg) {
-    form.new_approval = 1;
-    form.user_id = props.order_request.request_user_id;
-    
-    // 希望納期が土日祝の場合は次の平日に設定
-    if (props.order_request.desire_delivery_date) {
-      const isHoliday = await isWeekendOrHoliday(props.order_request.desire_delivery_date);
-      if (isHoliday) {
-        form.desire_delivery_date = await getNextWeekday(props.order_request.desire_delivery_date);
-      } else {
-        form.desire_delivery_date = props.order_request.desire_delivery_date;
+  if (props.order_request) {
+    if (props.order_request.new_stock_flg) {
+      form.new_approval = 1;
+      form.user_id = props.order_request.request_user_id;
+
+      // 希望納期が土日祝の場合は次の平日に設定
+      if (props.order_request.desire_delivery_date) {
+        const isHoliday = await isWeekendOrHoliday(props.order_request.desire_delivery_date);
+        if (isHoliday) {
+          form.desire_delivery_date = await getNextWeekday(props.order_request.desire_delivery_date);
+        } else {
+          form.desire_delivery_date = props.order_request.desire_delivery_date;
+        }
       }
+
+      form.calc_price = props.order_request.calc_price;
+      form.title = props.order_request.title;
+      form.content = props.order_request.content;
+      form.main_reason = props.order_request.main_reason;
+      form.sub_reason = props.order_request.sub_reason;
+
+      // 新規品の場合、order_requestのデータで物品を自動追加
+      if (props.order_request.stock_name && props.order_request.stock_s_name && props.order_request.stock_supplier_name && props.order_request.price && props.order_request.quantity) {
+        form.approval_stocks.push({
+          name: props.order_request.stock_name,
+          s_name: props.order_request.stock_s_name,
+          supplier_name: props.order_request.stock_supplier_name,
+          price: props.order_request.price,
+          quantity: props.order_request.quantity,
+          calc_price: props.order_request.price * props.order_request.quantity,
+        });
+      }
+    } else {
+      form.new_approval = 0;
     }
-    
-    form.calc_price = props.order_request.calc_price;
-    form.title = props.order_request.title;
-    form.content = props.order_request.content;
-    form.main_reason = props.order_request.main_reason;
-    form.sub_reason = props.order_request.sub_reason;
-    
-    // 新規品の場合、order_requestのデータで物品を自動追加
-    if (props.order_request.stock_name && props.order_request.stock_s_name && props.order_request.stock_supplier_name && props.order_request.price && props.order_request.quantity) {
-      form.approval_stocks.push({
-        name: props.order_request.stock_name,
-        s_name: props.order_request.stock_s_name,
-        supplier_name: props.order_request.stock_supplier_name,
-        price: props.order_request.price,
-        quantity: props.order_request.quantity,
-        calc_price: props.order_request.price * props.order_request.quantity,
-      });
-      console.log('自動追加')
-    }
-  } else {
-    form.new_approval = 0;
+    form.before_order_request_id = props.order_request.id;
   }
-  form.before_order_request_id = props.order_request.id;
-  console.log('props.order_request:', props.order_request);
-  console.log('new_stock_flg:', props.order_request.new_stock_flg);
-  console.log('name:', props.order_request.name);
-  console.log('s_name:', props.order_request.s_name);
-  console.log('stock_supplier_name:', props.order_request.stock_supplier_name);
-  console.log('price:', props.order_request.price);
-  console.log('quantity:', props.order_request.quantity);
 });
 </script>
 <template>
