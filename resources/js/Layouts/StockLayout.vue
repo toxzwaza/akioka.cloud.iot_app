@@ -21,101 +21,98 @@ const reloadPage = () => {
 
 <template>
   <Head :title="props.title" />
-  <header id="main_header">
-    <nav class="flex items-center justify-between bg-blue-500 py-2 px-4">
-      <div class="flex items-center flex-shrink-0 text-white mr-6">
-        <Link class="flex items-center" :href="route('stock.home')">
-          <i id="home_icon" class="fas fa-home"></i>
-          <!-- <span class="ml-2 font-semibold text-xl tracking-tight">備品倉庫</span> -->
+  <header class="sticky top-0 z-40">
+    <nav class="flex items-center justify-between bg-gradient-to-r from-primary-700 to-primary-800 px-6 py-4 shadow-header">
+      <!-- Left: Home + Nav -->
+      <div class="flex items-center gap-6">
+        <Link :href="route('stock.home')" class="flex items-center gap-3 text-white hover:text-primary-200 transition-colors">
+          <div class="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center">
+            <i class="fas fa-warehouse text-xl"></i>
+          </div>
+          <span class="font-bold text-lg tracking-tight hidden md:inline">Akioka Cloud</span>
         </Link>
 
-        <!-- <div class="ml-4">
-          <a
-            href="#"
-            class="inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
-            >ログイン</a
-          >
-        </div> -->
-      </div>
-      <div class="w-full flex justify-between items-center">
-        <div class="w-1/2 flex items-center justify-center">
-          <!-- ナビゲーション -->
+        <div class="flex items-center gap-2">
           <Link
-            class="nav_image"
-            :class="{ 'opacity-50': route().current().endsWith('search') }"
             :href="route('stock.search')"
-            ><img src="/images/stocks/icons/search.png" alt="検索画面"
-          /></Link>
+            class="nav-link"
+            :class="{ 'nav-link-active': route().current()?.endsWith('search') || route().current()?.endsWith('search.result') }"
+          >
+            <i class="fas fa-search text-base"></i>
+            <span>探す</span>
+          </Link>
           <Link
-            class="nav_image"
-            :class="{ 'opacity-50': route().current().endsWith('shipment') }"
             :href="route('stock.shipment')"
-            ><img src="/images/stocks/icons/shipment.png" alt="出庫画面"
-          /></Link>
+            class="nav-link"
+            :class="{ 'nav-link-active': route().current()?.endsWith('shipment') }"
+          >
+            <i class="fas fa-dolly text-base"></i>
+            <span>出庫</span>
+          </Link>
           <Link
-            class="nav_image"
-            :class="{ 'opacity-50': route().current().includes('receive') }"
             :href="route('stock.receive.home')"
-            ><img src="/images/stocks/icons/receive.png" alt="納品画面"
-          /></Link>
-          <Link
-            class="nav_image"
-            :class="{ 'opacity-50': route().current().includes('retention') }"
-            :href="route('stock.retention.home')"
-            ><img src="/images/stocks/icons/retention.png" alt="納品画面"
-          /></Link>
-          <!-- <Link class="nav_image" :class="{'opacity-50': route().current().endsWith('order') }" :href="route('stock.order.create')"><img src="/images/stocks/icons/order.png" alt="発注画面" /></Link> -->
+            class="nav-link"
+            :class="{ 'nav-link-active': route().current()?.includes('receive') }"
+          >
+            <i class="fas fa-truck-loading text-base"></i>
+            <span>納品</span>
+          </Link>
         </div>
-        <div>
-          <button
-            @click="beforeButton"
-            class="btn inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
-          >
-            <i class="arrow-icon fas fa-arrow-left"></i>
-          </button>
-          <button
-            @click="forwardButton"
-            class="arrow-icon btn ml-2 inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
-          >
-            <i class="fas fa-arrow-right"></i>
-          </button>
-          <button
-            @click="reloadPage"
-            class="ml-6 arrow-icon btn inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
-          >
-            <i class="fas fa-sync-alt"></i>
-          </button>
-        </div>
+      </div>
+
+      <!-- Right: History buttons -->
+      <div class="flex items-center gap-2">
+        <button @click="beforeButton" class="w-12 h-12 flex items-center justify-center rounded-xl text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 transition-all">
+          <i class="fas fa-chevron-left text-base"></i>
+        </button>
+        <button @click="forwardButton" class="w-12 h-12 flex items-center justify-center rounded-xl text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 transition-all">
+          <i class="fas fa-chevron-right text-base"></i>
+        </button>
+        <button @click="reloadPage" class="w-12 h-12 flex items-center justify-center rounded-xl text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 transition-all ml-2">
+          <i class="fas fa-sync-alt text-base"></i>
+        </button>
       </div>
     </nav>
   </header>
 
-  <main id="main_container" :class="{ padding_container: props.padding }">
+  <main id="main_container" :class="{ 'p-0': props.padding }">
     <slot name="content" />
   </main>
 </template>
 <style lang="scss" scoped>
-#main_header {
-  height: auto;
-  & #home_icon {
-    font-size: 2rem;
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  transition: all 0.2s;
+  white-space: nowrap;
+  min-height: 44px;
+
+  &:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
   }
-  & .arrow-icon {
-    font-size: 1.2rem;
+
+  &:active {
+    background-color: rgba(255, 255, 255, 0.25);
   }
-}
-#main_container {
-  height: 90vh;
-  overflow-y: scroll;
-  background-color: #f5f5f5;
-  padding: 4%;
-  &.padding_container {
-    padding: 0;
+
+  &.nav-link-active {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.2);
+    box-shadow: inset 0 -2px 0 0 white;
   }
 }
 
-.nav_image {
-  width: 6rem;
-  margin-right: 1rem;
+#main_container {
+  min-height: calc(100vh - 60px);
+  overflow-y: auto;
+  background-color: #f8fafc;
+  padding: 1.5rem;
 }
 </style>

@@ -162,7 +162,7 @@ const getRowStyle = (order_request) => {
           isDisabled: false,
           isWaitingResponse: true,
           rowClass: 'bg-orange-50 hover:bg-orange-100 transition-colors duration-200 border-l-4 border-orange-400',
-          textClass: 'text-gray-900'
+          textClass: 'text-slate-900'
         };
       }
       // 現在のユーザーの承認ステータスがnullの場合はグレーアウト
@@ -170,8 +170,8 @@ const getRowStyle = (order_request) => {
         return {
           isDisabled: true,
           isWaitingResponse: false,
-          rowClass: 'bg-gray-100 hover:bg-gray-200 transition-colors duration-200',
-          textClass: 'text-gray-500'
+          rowClass: 'bg-slate-100 hover:bg-slate-200 transition-colors duration-200',
+          textClass: 'text-slate-500'
         };
       }
     }
@@ -180,8 +180,8 @@ const getRowStyle = (order_request) => {
   return {
     isDisabled: false,
     isWaitingResponse: false,
-    rowClass: 'hover:bg-gray-50 transition-colors duration-200',
-    textClass: 'text-gray-900'
+    rowClass: 'hover:bg-slate-50 transition-colors duration-200',
+    textClass: 'text-slate-900'
   };
 };
 
@@ -327,7 +327,7 @@ const sortItems = (field) => {
 // ソートアイコンを取得
 const getSortIcon = (field) => {
   if (departmentModal.sortField !== field) {
-    return 'fas fa-sort text-gray-400';
+    return 'fas fa-sort text-slate-400';
   }
   return departmentModal.sortDirection === 'asc' ? 'fas fa-sort-up text-blue-500' : 'fas fa-sort-down text-blue-500';
 };
@@ -585,7 +585,7 @@ onMounted(() => {
       ></div>
       
       <!-- ヘッダーセクション -->
-      <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-6 sm:py-12 mb-4 sm:mb-8">
+      <div class="page-header bg-gradient-to-r from-indigo-600 to-indigo-700 text-white py-6 sm:py-12 mb-4 sm:mb-8">
         <div class="container mx-auto px-4">
           <div class="text-center">
             <div class="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-white bg-opacity-20 rounded-full mb-3 sm:mb-4">
@@ -602,7 +602,7 @@ onMounted(() => {
       <div class="mx-auto px-2 sm:px-4 mb-4 sm:mb-8">
         <div class="flex gap-3 sm:gap-6 overflow-x-auto pb-4" style="scrollbar-width: thin; scrollbar-color: #cbd5e1 #f1f5f9;">
           <!-- 全体合計カード -->
-          <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:transform hover:-translate-y-1 flex-shrink-0 w-64 sm:w-80">
+          <div class="card overflow-hidden hover:shadow-xl transition-all duration-300 hover:transform hover:-translate-y-1 flex-shrink-0 w-64 sm:w-80">
             <!-- ヘッダー -->
             <div class="bg-gradient-to-r from-emerald-500 to-teal-600 px-4 sm:px-6 py-3 sm:py-4">
               <div class="flex items-center justify-between">
@@ -632,7 +632,7 @@ onMounted(() => {
                       <i class="fas fa-yen-sign text-emerald-600 text-xs sm:text-sm"></i>
                     </div>
                     <div>
-                      <div class="text-xs sm:text-sm font-medium text-gray-600">総合計金額</div>
+                      <div class="text-xs sm:text-sm font-medium text-slate-600">総合計金額</div>
                       <div class="text-lg sm:text-xl font-bold text-emerald-600">
                         ¥{{ props.process_stats.reduce((sum, stat) => sum + parseInt(stat.total_calc_price), 0).toLocaleString() }}
                       </div>
@@ -647,7 +647,7 @@ onMounted(() => {
                       <i class="fas fa-chart-line text-blue-600 text-xs sm:text-sm"></i>
                     </div>
                     <div>
-                      <div class="text-xs sm:text-sm font-medium text-gray-600">平均金額</div>
+                      <div class="text-xs sm:text-sm font-medium text-slate-600">平均金額</div>
                       <div class="text-base sm:text-lg font-semibold text-blue-600">
                         ¥{{ Math.round(props.process_stats.reduce((sum, stat) => sum + parseInt(stat.total_calc_price), 0) / props.process_stats.reduce((sum, stat) => sum + stat.order_request_count, 0)).toLocaleString() }}
                       </div>
@@ -657,9 +657,9 @@ onMounted(() => {
               </div>
               
               <!-- フッター -->
-              <div class="mt-4 pt-4 border-t border-gray-100">
+              <div class="mt-4 pt-4 border-t border-slate-100">
                 <div class="flex items-center justify-center">
-                  <div class="flex items-center text-sm text-gray-500">
+                  <div class="flex items-center text-sm text-slate-500">
                     <i class="fas fa-check-circle text-emerald-500 mr-2"></i>
                     <span>全部署承認済み</span>
                   </div>
@@ -672,7 +672,7 @@ onMounted(() => {
           <div
             v-for="stat in props.process_stats"
             :key="stat.process_id"
-            class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:transform hover:-translate-y-1 flex-shrink-0 w-64 sm:w-80"
+            class="card overflow-hidden hover:shadow-xl transition-all duration-300 hover:transform hover:-translate-y-1 flex-shrink-0 w-64 sm:w-80"
           >
             <!-- ヘッダー -->
             <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-4 sm:px-6 py-3 sm:py-4">
@@ -703,7 +703,7 @@ onMounted(() => {
                       <i class="fas fa-yen-sign text-emerald-600 text-xs sm:text-sm"></i>
                     </div>
                     <div>
-                      <div class="text-xs sm:text-sm font-medium text-gray-600">合計金額</div>
+                      <div class="text-xs sm:text-sm font-medium text-slate-600">合計金額</div>
                       <div class="text-lg sm:text-xl font-bold text-emerald-600">
                         ¥{{ parseInt(stat.total_calc_price).toLocaleString() }}
                       </div>
@@ -718,7 +718,7 @@ onMounted(() => {
                       <i class="fas fa-chart-line text-blue-600 text-xs sm:text-sm"></i>
                     </div>
                     <div>
-                      <div class="text-xs sm:text-sm font-medium text-gray-600">平均金額</div>
+                      <div class="text-xs sm:text-sm font-medium text-slate-600">平均金額</div>
                       <div class="text-base sm:text-lg font-semibold text-blue-600">
                         ¥{{ Math.round(parseInt(stat.total_calc_price) / stat.order_request_count).toLocaleString() }}
                       </div>
@@ -728,11 +728,11 @@ onMounted(() => {
               </div>
               
               <!-- フッター -->
-              <div class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100">
+              <div class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-100">
                 <div class="flex items-center justify-center">
                   <button
                     @click="showDepartmentDetails(stat)"
-                    class="w-full inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    class="btn-primary w-full inline-flex items-center justify-center text-xs sm:text-sm"
                   >
                     <i class="fas fa-list mr-1 sm:mr-2"></i>
                     <span class="hidden sm:inline">詳細を見る</span>
@@ -747,36 +747,36 @@ onMounted(() => {
 
       <!-- インストラクションと一括操作 -->
       <div class="mx-auto px-2 sm:px-4 mb-4 sm:mb-8">
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 p-3 sm:p-4 rounded-r-lg shadow-sm">
+        <div class="bg-gradient-to-r from-indigo-50 to-indigo-100 border-l-4 border-indigo-500 p-3 sm:p-4 rounded-r-lg shadow-sm">
           <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
             <!-- 操作説明 -->
             <div class="space-y-2 flex-1">
               <div class="flex items-center">
                 <i class="fas fa-check-circle text-emerald-500 mr-2 sm:mr-3 text-sm sm:text-base"></i>
-                <p class="text-gray-800 text-sm sm:text-base font-medium">
+                <p class="text-slate-800 text-sm sm:text-base font-medium">
                   <strong>承認：</strong>テーブルの<span class="inline-flex items-center px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs mx-1">承認</span>ボタンをクリックするだけで完了
                 </p>
               </div>
               <div class="flex items-center">
-                <i class="fas fa-times-circle text-red-500 mr-2 sm:mr-3 text-sm sm:text-base"></i>
-                <p class="text-gray-800 text-sm sm:text-base font-medium">
-                  <strong>却下：</strong><i class="fas fa-search text-blue-600 mx-1"></i>詳細ボタンからコメントを追加してから却下してください
+                <i class="fas fa-times-circle text-rose-500 mr-2 sm:mr-3 text-sm sm:text-base"></i>
+                <p class="text-slate-800 text-sm sm:text-base font-medium">
+                  <strong>却下：</strong><i class="fas fa-search text-indigo-600 mx-1"></i>詳細ボタンからコメントを追加してから却下してください
                 </p>
               </div>
             </div>
             
             <!-- 一括操作ボタン -->
             <div class="flex flex-col sm:flex-row gap-2 lg:ml-4">
-              <div class="bg-white px-3 py-2 rounded-lg border border-gray-200 flex items-center justify-center">
+              <div class="bg-white px-3 py-2 rounded-lg border border-slate-200 flex items-center justify-center">
                 <i class="fas fa-check-square text-indigo-500 mr-2"></i>
-                <span class="text-sm font-semibold text-gray-700">
+                <span class="text-sm font-semibold text-slate-700">
                   選択中: <span class="text-indigo-600">{{ bulkSelection.selectedIds.length }}</span>件
                 </span>
               </div>
               <button
                 @click="startBulkAccept"
                 :disabled="bulkSelection.selectedIds.length === 0 || loading.isLoading"
-                class="inline-flex items-center justify-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+                class="btn-success inline-flex items-center justify-center text-sm disabled:bg-slate-300 disabled:cursor-not-allowed"
               >
                 <i class="fas fa-check-double mr-2"></i>
                 まとめて承認
@@ -784,7 +784,7 @@ onMounted(() => {
               <button
                 @click="startBulkReject"
                 :disabled="bulkSelection.selectedIds.length === 0 || loading.isLoading"
-                class="inline-flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+                class="btn-danger inline-flex items-center justify-center text-sm disabled:bg-slate-300 disabled:cursor-not-allowed"
               >
                 <i class="fas fa-times-circle mr-2"></i>
                 まとめて却下
@@ -797,149 +797,149 @@ onMounted(() => {
       <!-- メインコンテンツ -->
       <section class="mx-auto px-2 sm:px-4 pb-16 sm:pb-20">
         <!-- テーブルコンテナ -->
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="card overflow-hidden">
           <div class="overflow-x-auto">
             <table
               id="order_request_table"
-              class="w-full"
+              class="table-modern w-full"
             >
               <thead>
-                <tr class="bg-gradient-to-r from-gray-50 to-gray-100">
-                  <th class="px-2 sm:px-4 py-3 sm:py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                <tr class="bg-gradient-to-r from-slate-50 to-slate-100">
+                  <th class="px-2 sm:px-4 py-3 sm:py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">
                     <input
                       type="checkbox"
                       :checked="bulkSelection.isAllSelected"
                       @change="toggleAllSelection"
-                      class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2 cursor-pointer"
+                      class="w-4 h-4 text-indigo-600 bg-slate-100 border-slate-300 rounded focus:ring-indigo-500 focus:ring-2 cursor-pointer"
                     />
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">
                     <div class="flex items-center">
-                      <i class="fas fa-image mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-image mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       <span class="hidden sm:inline">緊急度</span>
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">
                     <div class="flex items-center">
-                      <i class="fas fa-image mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-image mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       <span class="hidden sm:inline">画像</span>
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">
                     <div class="flex items-center">
-                      <i class="fas fa-tags mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-tags mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       <span class="hidden sm:inline">分類</span>
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">
                     <div class="flex items-center">
-                      <i class="fas fa-calendar-alt mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-calendar-alt mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       <span class="hidden sm:inline">最終発注日</span>
                       <span class="sm:hidden">発注日</span>
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">
                     <span class="hidden sm:inline">品名</span>
                     <span class="sm:hidden">品名</span>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">
                     <span class="hidden sm:inline">品番</span>
                     <span class="sm:hidden">品番</span>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">
                     <span class="hidden sm:inline">必要数量</span>
                     <span class="sm:hidden">数量</span>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap hidden sm:table-cell">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap hidden sm:table-cell">
                     <span>現在数量</span>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">
                     <div class="flex items-center">
-                      <i class="fas fa-yen-sign mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-yen-sign mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       <span class="hidden sm:inline">単価</span>
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">
                     <div class="flex items-center">
-                      <i class="fas fa-calculator mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-calculator mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       <span class="hidden sm:inline">金額</span>
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap hidden sm:table-cell">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap hidden sm:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-building mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-building mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       発注先
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap hidden sm:table-cell">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap hidden sm:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-building mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-building mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       リードタイム
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap hidden md:table-cell">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap hidden md:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-user mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-user mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       依頼者
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap hidden md:table-cell">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap hidden md:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-user-tie mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-user-tie mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       担当者
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap hidden lg:table-cell">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap hidden lg:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-calendar-plus mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-calendar-plus mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       依頼日
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap hidden lg:table-cell">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap hidden lg:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-calendar-check mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-calendar-check mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       消化予定日
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap hidden lg:table-cell">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap hidden lg:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-calendar-day mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-calendar-day mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       希望納期
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap hidden xl:table-cell">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap hidden xl:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-comment mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-comment mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       依頼者備考
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap hidden xl:table-cell">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap hidden xl:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-comment-dots mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-comment-dots mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       発注者備考
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap hidden lg:table-cell">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap hidden lg:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-file-alt mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-file-alt mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       添付ファイル
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">
                     <div class="flex items-center justify-center">
-                      <i class="fas fa-search mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-search mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       <span class="hidden sm:inline">詳細確認</span>
                     </div>
                   </th>
-                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
+                  <th class="px-2 sm:px-6 py-3 sm:py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                     <div class="flex items-center justify-center">
-                      <i class="fas fa-stamp mr-1 sm:mr-2 text-gray-400 text-xs sm:text-sm"></i>
+                      <i class="fas fa-stamp mr-1 sm:mr-2 text-slate-400 text-xs sm:text-sm"></i>
                       <span class="hidden sm:inline">承認登録</span>
                     </div>
                   </th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-200">
+              <tbody class="divide-y divide-slate-200">
                 <tr
                   v-for="order_request in order_requests"
                   :key="order_request.id"
@@ -951,14 +951,14 @@ onMounted(() => {
                       :checked="bulkSelection.selectedIds.includes(order_request.order_request_approval_id)"
                       @change="toggleSelection(order_request.order_request_approval_id)"
                       :disabled="getRowStyle(order_request).isDisabled"
-                      class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                      class="w-4 h-4 text-indigo-600 bg-slate-100 border-slate-300 rounded focus:ring-indigo-500 focus:ring-2 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                     />
                   </td>
                   <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                     <div class="flex items-center justify-center">
-                      <span v-if="order_request.emergency_level == 2" class="bg-pink-100 text-pink-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-pink-900 dark:text-pink-300">緊急</span>
-                      <span v-else-if="order_request.emergency_level == 1" class="bg-orange-100 text-orange-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-orange-900 dark:text-orange-300">期限間近</span>
-                      <span v-else class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-gray-900 dark:text-gray-300">期限内</span>
+                      <span v-if="order_request.emergency_level == 2" class="badge-danger">緊急</span>
+                      <span v-else-if="order_request.emergency_level == 1" class="badge-warning">期限間近</span>
+                      <span v-else class="badge-primary">期限内</span>
                     </div>
                   </td>
                   <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
@@ -966,14 +966,14 @@ onMounted(() => {
                       <img 
                         :src="getImgPath(order_request.img_path)" 
                         alt="商品画像"
-                        class="h-12 w-12 sm:h-16 sm:w-16 object-cover rounded-lg shadow-sm border border-gray-200" 
+                        class="h-12 w-12 sm:h-16 sm:w-16 object-cover rounded-lg shadow-sm border border-slate-200" 
                       />
                     </div>
                   </td>
                   <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                     <span
                       v-if="order_request.new_stock_flg"
-                      class="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200"
+                      class="badge-success"
                     >
                       <i class="fas fa-plus-circle mr-1 text-xs"></i>
                       <span class="hidden sm:inline">新規品</span>
@@ -981,16 +981,16 @@ onMounted(() => {
                     </span>
                     <span
                       v-else
-                      class="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200"
+                      class="badge-warning"
                     >
                       <i class="fas fa-box mr-1 text-xs"></i>
                       <span class="hidden sm:inline">既存品</span>
                       <span class="sm:hidden">既</span>
                     </span>
                   </td>
-                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-600">
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-600">
                     <div class="flex items-center">
-                      <i class="fas fa-calendar-alt mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                      <i class="fas fa-calendar-alt mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                       <span class="text-xs sm:text-sm">{{
                         order_request.digest_date
                           ? new Date(order_request.last_order_date)
@@ -1004,7 +1004,7 @@ onMounted(() => {
                       }}</span>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-6 py-3 sm:py-4 text-sm text-gray-900">
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 text-sm text-slate-900">
                     <div class="font-medium truncate max-w-xs" :title="order_request.name">
                     <span v-if="order_request.name.length > 20">
                       {{ order_request.name.substring(0, 20) + "..." }}
@@ -1014,10 +1014,10 @@ onMounted(() => {
                     </span>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-600">
-                    <code class="bg-gray-100 px-1 sm:px-2 py-1 rounded text-xs">{{ order_request.s_name ?? "-" }}</code>
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-600">
+                    <code class="bg-slate-100 px-1 sm:px-2 py-1 rounded text-xs">{{ order_request.s_name ?? "-" }}</code>
                   </td>
-                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-900">
                     <div class="flex items-center">
                       <i class="fas fa-cube mr-1 sm:mr-2 text-blue-400 text-xs"></i>
                       <span class="font-semibold text-xs sm:text-sm">{{
@@ -1027,9 +1027,9 @@ onMounted(() => {
                       }}</span>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-600 hidden sm:table-cell">
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-600 hidden sm:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-boxes mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                      <i class="fas fa-boxes mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                       <span class="text-xs sm:text-sm">{{
                         `${order_request.now_quantity ?? "-"}${
                           order_request.now_quantity_unit ?? "-"
@@ -1038,32 +1038,32 @@ onMounted(() => {
                     </div>
                   </td>
 
-                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-900">
                     <div class="flex items-center font-semibold">
                       <i class="fas fa-yen-sign mr-1 sm:mr-2 text-green-500 text-xs"></i>
                       <span class="text-xs sm:text-sm">{{ order_request.price?.toLocaleString() }}</span>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div class="flex items-center font-bold text-blue-600">
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-900">
+                    <div class="flex items-center font-bold text-indigo-600">
                       <i class="fas fa-calculator mr-1 sm:mr-2 text-xs"></i>
                       <span class="text-xs sm:text-sm">¥{{ order_request.calc_price?.toLocaleString() }}</span>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 hidden sm:table-cell">
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-900 hidden sm:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-building mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                      <i class="fas fa-building mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                       <span class="text-xs sm:text-sm truncate max-w-xs" :title="order_request.supplier_name">{{ order_request.supplier_name }}</span>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 hidden sm:table-cell">
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-900 hidden sm:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-building mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                      <i class="fas fa-building mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                       <span class="text-xs sm:text-sm truncate max-w-xs" :title="order_request.supplier_name">{{ order_request.lead_time }}</span>
                     </div>
                   </td>
 
-                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-900 hidden md:table-cell">
                     <div class="flex items-center">
                       <div class="flex-shrink-0 h-6 w-6 sm:h-8 sm:w-8">
                         <div class="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-blue-100 flex items-center justify-center">
@@ -1071,11 +1071,11 @@ onMounted(() => {
                         </div>
                       </div>
                       <div class="ml-2 sm:ml-3">
-                        <div class="text-xs sm:text-sm font-medium text-gray-900 truncate max-w-xs" :title="order_request.request_user_name">{{ order_request.request_user_name }}</div>
+                        <div class="text-xs sm:text-sm font-medium text-slate-900 truncate max-w-xs" :title="order_request.request_user_name">{{ order_request.request_user_name }}</div>
                       </div>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-900 hidden md:table-cell">
                     <div class="flex items-center">
                       <div class="flex-shrink-0 h-6 w-6 sm:h-8 sm:w-8">
                         <div class="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-purple-100 flex items-center justify-center">
@@ -1083,13 +1083,13 @@ onMounted(() => {
                         </div>
                       </div>
                       <div class="ml-2 sm:ml-3">
-                        <div class="text-xs sm:text-sm font-medium text-gray-900 truncate max-w-xs" :title="order_request.user_name">{{ order_request.user_name }}</div>
+                        <div class="text-xs sm:text-sm font-medium text-slate-900 truncate max-w-xs" :title="order_request.user_name">{{ order_request.user_name }}</div>
                       </div>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-600 hidden lg:table-cell">
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-600 hidden lg:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-calendar-plus mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                      <i class="fas fa-calendar-plus mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                       <span class="text-xs sm:text-sm">{{
                         new Date(order_request.created_at)
                           .toLocaleDateString("ja-JP", {
@@ -1101,9 +1101,9 @@ onMounted(() => {
                       }}</span>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-600 hidden lg:table-cell">
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-600 hidden lg:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-calendar-check mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                      <i class="fas fa-calendar-check mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                       <span class="text-xs sm:text-sm">{{
                         order_request.digest_date
                           ? new Date(order_request.digest_date)
@@ -1117,9 +1117,9 @@ onMounted(() => {
                       }}</span>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-600 hidden lg:table-cell">
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-600 hidden lg:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-calendar-day mr-1 sm:mr-2 text-red-400 text-xs"></i>
+                      <i class="fas fa-calendar-day mr-1 sm:mr-2 text-rose-400 text-xs"></i>
                       <span class="text-xs sm:text-sm">{{
                         order_request.desire_delivery_date
                           ? new Date(order_request.desire_delivery_date)
@@ -1133,22 +1133,22 @@ onMounted(() => {
                       }}</span>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-6 py-3 sm:py-4 text-sm text-gray-600 max-w-xs hidden xl:table-cell">
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 text-sm text-slate-600 max-w-xs hidden xl:table-cell">
                     <div class="truncate" :title="order_request.description">
-                      <i class="fas fa-comment mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                      <i class="fas fa-comment mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                       <span class="text-xs sm:text-sm">{{ order_request.description ?? "-" }}</span>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-6 py-3 sm:py-4 text-sm text-gray-600 max-w-xs hidden xl:table-cell">
+                  <td class="px-2 sm:px-6 py-3 sm:py-4 text-sm text-slate-600 max-w-xs hidden xl:table-cell">
                     <div class="truncate" :title="order_request.sub_description">
-                      <i class="fas fa-comment-dots mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                      <i class="fas fa-comment-dots mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                       <span class="text-xs sm:text-sm">{{ order_request.sub_description ?? "-" }}</span>
                     </div>
                   </td>
                   <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center hidden lg:table-cell">
                     <span
                       v-if="order_request.file_path || order_request.document_id"
-                      class="inline-flex items-center px-1 sm:px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      class="badge-success"
                     >
                       <i class="fas fa-check mr-1 text-xs"></i>
                       <span class="hidden sm:inline">あり</span>
@@ -1156,7 +1156,7 @@ onMounted(() => {
                     </span>
                     <span
                       v-else
-                      class="inline-flex items-center px-1 sm:px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                      class="badge-primary"
                     >
                       <i class="fas fa-minus mr-1 text-xs"></i>
                       <span class="hidden sm:inline">未登録</span>
@@ -1166,7 +1166,7 @@ onMounted(() => {
                   <td class="px-2 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center">
                     <button
                       @click="openDescription(order_request)"
-                      class="inline-flex items-center px-2 sm:px-4 py-2 border-2 border-blue-600 text-xs sm:text-sm font-medium rounded-lg text-blue-600 bg-white hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                      class="btn-secondary inline-flex items-center text-xs sm:text-sm"
                     >
                       <i class="fas fa-search mr-1 sm:mr-2 text-xs"></i>
                       <span class="hidden sm:inline">詳細</span>
@@ -1178,10 +1178,10 @@ onMounted(() => {
                         @click.prevent="startSingleAccept(order_request)"
                         :disabled="getRowStyle(order_request).isDisabled || loading.isLoading"
                         :class="[
-                          'inline-flex items-center justify-center px-2 sm:px-3 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md transition-colors duration-200 w-full sm:w-auto',
+                          'inline-flex items-center justify-center px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200 w-full sm:w-auto',
                           getRowStyle(order_request).isDisabled || loading.isLoading
-                            ? 'text-gray-400 bg-gray-300 cursor-not-allowed'
-                            : 'text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 shadow-sm hover:shadow-md'
+                            ? 'text-slate-400 bg-slate-300 cursor-not-allowed'
+                            : 'btn-success'
                         ]"
                       >
                         <i v-if="loading.isLoading && loading.currentAction === 'accept'" class="fas fa-spinner fa-spin mr-1 text-xs"></i>
@@ -1193,10 +1193,10 @@ onMounted(() => {
                         @click.prevent="startSingleReject(order_request)"
                         :disabled="getRowStyle(order_request).isDisabled || loading.isLoading"
                         :class="[
-                          'inline-flex items-center justify-center px-2 sm:px-3 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md transition-colors duration-200 w-full sm:w-auto',
+                          'inline-flex items-center justify-center px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200 w-full sm:w-auto',
                           getRowStyle(order_request).isDisabled || loading.isLoading
-                            ? 'text-gray-400 bg-gray-300 cursor-not-allowed'
-                            : 'text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 shadow-sm hover:shadow-md'
+                            ? 'text-slate-400 bg-slate-300 cursor-not-allowed'
+                            : 'btn-danger'
                         ]"
                       >
                         <i class="fas fa-times mr-1 text-xs"></i>
@@ -1206,7 +1206,7 @@ onMounted(() => {
                     </div>
                     <!-- 差し戻し状態の説明 -->
                     <div v-if="getRowStyle(order_request).isDisabled" class="mt-2">
-                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
                         <i class="fas fa-pause mr-1"></i>
                         承認停止中
                       </span>
@@ -1231,32 +1231,32 @@ onMounted(() => {
   <!-- 全画面ローディングオーバーレイ -->
   <div
     v-if="loading.isLoading"
-    class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+    class="modal-overlay"
     style="z-index: 9999;"
   >
-    <div class="bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full mx-4">
+    <div class="modal-content max-w-sm w-full mx-4 p-8">
       <div class="text-center">
         <!-- スピナー -->
         <div class="relative mb-6">
-          <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+          <div class="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto"></div>
           <div class="absolute inset-0 flex items-center justify-center">
-            <i class="fas fa-check text-blue-600 text-lg" v-if="loading.currentAction === 'accept'"></i>
-            <i class="fas fa-times text-red-600 text-lg" v-else-if="loading.currentAction === 'reject'"></i>
+            <i class="fas fa-check text-indigo-600 text-lg" v-if="loading.currentAction === 'accept'"></i>
+            <i class="fas fa-times text-rose-600 text-lg" v-else-if="loading.currentAction === 'reject'"></i>
           </div>
         </div>
-        
+
         <!-- メッセージ -->
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">
+        <h3 class="text-lg font-semibold text-slate-900 mb-2">
           {{ loading.message }}
         </h3>
-        <p class="text-sm text-gray-600">
+        <p class="text-sm text-slate-600">
           しばらくお待ちください...
         </p>
-        
+
         <!-- プログレスバー -->
         <div class="mt-6">
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div class="bg-blue-600 h-2 rounded-full animate-pulse" style="width: 70%;"></div>
+          <div class="w-full bg-slate-200 rounded-full h-2">
+            <div class="bg-indigo-600 h-2 rounded-full animate-pulse" style="width: 70%;"></div>
           </div>
         </div>
       </div>
@@ -1266,18 +1266,18 @@ onMounted(() => {
   <!-- 詳細ダイアログモーダル -->
   <div
     v-if="description_order_request.comment.order_request_id"
-    class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 overflow-y-auto"
+    class="modal-overlay overflow-y-auto"
     id="description_container"
   >
     <div class="flex items-start justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
       <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        <div class="absolute inset-0 bg-slate-500 opacity-75"></div>
       </div>
 
       <!-- モーダルコンテンツ -->
-      <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full">
+      <div class="modal-content inline-block align-bottom text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full">
         <!-- ヘッダー -->
-        <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+        <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4">
           <div class="flex items-center justify-between">
             <div class="flex items-center">
               <div class="flex-shrink-0">
@@ -1292,7 +1292,7 @@ onMounted(() => {
             </div>
                 <button
               @click="description_order_request.comment.order_request_id = 0"
-              class="text-white hover:text-gray-200 transition-colors duration-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20"
+              class="text-white hover:text-slate-200 transition-colors duration-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20"
             >
               <i class="fas fa-times text-xl"></i>
                 </button>
@@ -1302,12 +1302,12 @@ onMounted(() => {
         <!-- メインコンテンツ -->
         <div class="bg-white px-6 py-6 max-h-screen-80 overflow-y-auto" style="max-height: 80vh;">
           <!-- 状態表示 -->
-          <div v-if="getRowStyle(description_order_request.order_request).isDisabled" class="mb-6 p-4 bg-gray-100 border border-gray-200 rounded-xl">
+          <div v-if="getRowStyle(description_order_request.order_request).isDisabled" class="mb-6 p-4 bg-slate-100 border border-slate-200 rounded-xl">
             <div class="flex items-center">
-              <i class="fas fa-info-circle text-gray-500 mr-3"></i>
+              <i class="fas fa-info-circle text-slate-500 mr-3"></i>
               <div>
-                <div class="text-sm font-medium text-gray-700">承認停止中</div>
-                <div class="text-xs text-gray-500">この発注依頼は差し戻されており、あなたの承認権限は現在停止中です。</div>
+                <div class="text-sm font-medium text-slate-700">承認停止中</div>
+                <div class="text-xs text-slate-500">この発注依頼は差し戻されており、あなたの承認権限は現在停止中です。</div>
               </div>
             </div>
           </div>
@@ -1323,7 +1323,7 @@ onMounted(() => {
           </div>
 
           <!-- アクションボタン -->
-          <!-- <div class="flex justify-center space-x-4 mb-8 p-4 bg-gray-50 rounded-xl">
+          <!-- <div class="flex justify-center space-x-4 mb-8 p-4 bg-slate-50 rounded-xl">
             <button
               @click.prevent="
                 sendAccept(
@@ -1336,7 +1336,7 @@ onMounted(() => {
               :class="[
                 'flex-1 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl transition-all duration-200',
                 getRowStyle(description_order_request.order_request).isDisabled || loading.isLoading
-                  ? 'text-gray-400 bg-gray-300 cursor-not-allowed'
+                  ? 'text-slate-400 bg-slate-300 cursor-not-allowed'
                   : 'text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 hover:transform hover:scale-105'
               ]"
             >
@@ -1356,7 +1356,7 @@ onMounted(() => {
               :class="[
                 'flex-1 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl transition-all duration-200',
                 getRowStyle(description_order_request.order_request).isDisabled || loading.isLoading
-                  ? 'text-gray-400 bg-gray-300 cursor-not-allowed'
+                  ? 'text-slate-400 bg-slate-300 cursor-not-allowed'
                   : 'text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 hover:transform hover:scale-105'
               ]"
             >
@@ -1368,18 +1368,18 @@ onMounted(() => {
 
           <!-- コメント入力セクション -->
           <div class="mb-8">
-            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div class="card p-6">
               <div class="flex items-center mb-4">
-                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                  <i class="fas fa-comment text-blue-600"></i>
+                <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-comment text-indigo-600"></i>
                 </div>
-                <h4 class="text-lg font-semibold text-gray-900">コメント追加</h4>
+                <h4 class="section-title">コメント追加</h4>
               </div>
 
               <textarea
                 id="message"
                 rows="4"
-                class="w-full p-4 text-sm text-gray-900 bg-gray-50 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none"
+                class="form-input-modern w-full resize-none"
                 :placeholder="description_order_request.comment.placeholder"
                 v-model="description_order_request.comment.msg"
                 @change="save_comment"
@@ -1392,10 +1392,10 @@ onMounted(() => {
           <!-- 承認フロー -->
           <div class="mb-8">
             <div class="flex items-center mb-6">
-              <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                <i class="fas fa-route text-purple-600"></i>
+              <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-route text-indigo-600"></i>
               </div>
-              <h4 class="text-lg font-semibold text-gray-900">承認フロー</h4>
+              <h4 class="section-title">承認フロー</h4>
             </div>
             
             <div class="flex items-center justify-start overflow-x-auto pb-4" id="approval_container">
@@ -1410,7 +1410,7 @@ onMounted(() => {
                        'border-emerald-200 bg-emerald-50': approval.status === 1,
                        'border-red-200 bg-red-50': approval.status === 2,
                        'border-blue-200 bg-blue-50': approval.status === 0,
-                       'border-gray-200': approval.status === null
+                       'border-slate-200': approval.status === null
                      }">
                   
                   <!-- ステータスアイコンとヘッダー -->
@@ -1420,19 +1420,19 @@ onMounted(() => {
                            'bg-emerald-100': approval.status === 1,
                            'bg-red-100': approval.status === 2,
                            'bg-blue-100': approval.status === 0,
-                           'bg-gray-100': approval.status === null
+                           'bg-slate-100': approval.status === null
                          }">
                       <i class="text-lg"
                          :class="{
                            'fas fa-check text-emerald-600': approval.status === 1,
                            'fas fa-times text-red-600': approval.status === 2,
                            'fas fa-clock text-blue-600': approval.status === 0,
-                           'fas fa-user text-gray-400': approval.status === null
+                           'fas fa-user text-slate-400': approval.status === null
                          }"></i>
                     </div>
                     <div>
-                      <div class="font-bold text-gray-900">{{ approval.name }}</div>
-                      <div class="text-xs text-gray-500"
+                      <div class="font-bold text-slate-900">{{ approval.name }}</div>
+                      <div class="text-xs text-slate-500"
                            :class="{
                              'text-emerald-600': approval.status === 1,
                              'text-red-600': approval.status === 2,
@@ -1449,7 +1449,7 @@ onMounted(() => {
                   </div>
 
                   <!-- 日時 -->
-                  <div class="text-xs text-gray-500 mb-2" v-if="approval.updated_at">
+                  <div class="text-xs text-slate-500 mb-2" v-if="approval.updated_at">
                     <i class="fas fa-calendar-alt mr-1"></i>
                       {{ new Date(approval.updated_at).getFullYear() }}年{{
                         new Date(approval.updated_at).getMonth() + 1
@@ -1460,8 +1460,8 @@ onMounted(() => {
                     </div>
 
                   <!-- コメント -->
-                  <div class="text-sm text-gray-700 bg-white p-3 rounded-lg border border-gray-100 h-64 max-h-64 overflow-y-auto">
-                    <i class="fas fa-quote-left text-gray-400 mr-2"></i>
+                  <div class="text-sm text-slate-700 bg-white p-3 rounded-lg border border-slate-100 h-64 max-h-64 overflow-y-auto">
+                    <i class="fas fa-quote-left text-slate-400 mr-2"></i>
                     <p v-if="approval.comment" v-html="approval.comment.replace(/\n/g, '<br>')">
                     </p>
                     <p v-else>コメントはありません。</p>
@@ -1470,7 +1470,7 @@ onMounted(() => {
 
                 <!-- 矢印（最後の要素以外） -->
                 <div v-if="index < description_order_request.order_request.order_request_approvals.length - 1" 
-                     class="mx-4 text-gray-400">
+                     class="mx-4 text-slate-400">
                   <i class="fas fa-arrow-right text-2xl"></i>
                 </div>
                   </div>
@@ -1482,48 +1482,48 @@ onMounted(() => {
           <!-- 基本情報 -->
           <div class="mb-8">
             <div class="flex items-center mb-6">
-              <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                <i class="fas fa-info-circle text-green-600"></i>
+              <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-info-circle text-emerald-600"></i>
               </div>
-              <h4 class="text-lg font-semibold text-gray-900">基本情報</h4>
+              <h4 class="section-title">基本情報</h4>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <!-- 左側 -->
               <div class="space-y-6">
                 <!-- 商品画像 -->
-                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div class="card p-6">
                   <div class="flex items-center mb-4">
-                    <i class="fas fa-image text-gray-400 mr-2"></i>
-                    <span class="text-sm font-semibold text-gray-600 uppercase tracking-wide">商品画像</span>
+                    <i class="fas fa-image text-slate-400 mr-2"></i>
+                    <span class="form-label">商品画像</span>
                   </div>
                   <div class="flex justify-center">
                     <img
                       :src="getImgPath(description_order_request.order_request.img_path)"
                       alt="商品画像"
-                      class="max-w-full h-48 object-contain rounded-lg border border-gray-200"
+                      class="max-w-full h-48 object-contain rounded-lg border border-slate-200"
                     />
                   </div>
                 </div>
 
                 <!-- 価格情報 -->
-                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div class="card p-6">
                   <div class="flex items-center mb-4">
-                    <i class="fas fa-yen-sign text-gray-400 mr-2"></i>
-                    <span class="text-sm font-semibold text-gray-600 uppercase tracking-wide">価格情報</span>
+                    <i class="fas fa-yen-sign text-slate-400 mr-2"></i>
+                    <span class="form-label">価格情報</span>
                   </div>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">単価</label>
-                      <div class="mt-1 text-lg font-semibold text-gray-900 flex items-center">
-                        <i class="fas fa-yen-sign text-green-500 mr-2"></i>
+                      <label class="form-label">単価</label>
+                      <div class="mt-1 text-lg font-semibold text-slate-900 flex items-center">
+                        <i class="fas fa-yen-sign text-emerald-500 mr-2"></i>
                         {{ description_order_request.order_request.price.toLocaleString() }}
                   </div>
                 </div>
                     <div>
-                      <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">合計金額</label>
-                      <div class="mt-1 text-lg font-bold text-blue-600 flex items-center">
-                        <i class="fas fa-calculator text-blue-500 mr-2"></i>
+                      <label class="form-label">合計金額</label>
+                      <div class="mt-1 text-lg font-bold text-indigo-600 flex items-center">
+                        <i class="fas fa-calculator text-indigo-500 mr-2"></i>
                         ¥{{ description_order_request.order_request.calc_price.toLocaleString() }}
                   </div>
                     </div>
@@ -1534,10 +1534,10 @@ onMounted(() => {
               <!-- 右側 -->
               <div class="space-y-6">
                 <!-- 担当者情報 -->
-                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div class="card p-6">
                   <div class="flex items-center mb-4">
-                    <i class="fas fa-users text-gray-400 mr-2"></i>
-                    <span class="text-sm font-semibold text-gray-600 uppercase tracking-wide">担当者情報</span>
+                    <i class="fas fa-users text-slate-400 mr-2"></i>
+                    <span class="form-label">担当者情報</span>
                   </div>
                   <div class="space-y-4">
                     <div class="flex items-center">
@@ -1545,8 +1545,8 @@ onMounted(() => {
                         <i class="fas fa-user text-blue-600"></i>
                       </div>
                       <div>
-                        <div class="text-xs font-medium text-gray-500">依頼者</div>
-                        <div class="font-semibold text-gray-900">{{ description_order_request.order_request.request_user_name }}</div>
+                        <div class="text-xs font-medium text-slate-500">依頼者</div>
+                        <div class="font-semibold text-slate-900">{{ description_order_request.order_request.request_user_name }}</div>
                       </div>
                     </div>
                     <div class="flex items-center">
@@ -1554,28 +1554,28 @@ onMounted(() => {
                         <i class="fas fa-user-tie text-purple-600"></i>
                       </div>
                       <div>
-                        <div class="text-xs font-medium text-gray-500">担当者</div>
-                        <div class="font-semibold text-gray-900">{{ description_order_request.order_request.user_name }}</div>
+                        <div class="text-xs font-medium text-slate-500">担当者</div>
+                        <div class="font-semibold text-slate-900">{{ description_order_request.order_request.user_name }}</div>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <!-- 商品情報 -->
-                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div class="card p-6">
                   <div class="flex items-center mb-4">
-                    <i class="fas fa-box text-gray-400 mr-2"></i>
-                    <span class="text-sm font-semibold text-gray-600 uppercase tracking-wide">商品情報</span>
+                    <i class="fas fa-box text-slate-400 mr-2"></i>
+                    <span class="form-label">商品情報</span>
                   </div>
                   <div class="space-y-3">
                 <div>
-                      <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">品名</label>
-                      <div class="mt-1 text-sm font-medium text-gray-900">{{ description_order_request.order_request.name }}</div>
+                      <label class="form-label">品名</label>
+                      <div class="mt-1 text-sm font-medium text-slate-900">{{ description_order_request.order_request.name }}</div>
                     </div>
                     <div>
-                      <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">品番</label>
+                      <label class="form-label">品番</label>
                       <div class="mt-1">
-                        <code class="bg-gray-100 px-2 py-1 rounded text-xs">{{ description_order_request.order_request.s_name }}</code>
+                        <code class="bg-slate-100 px-2 py-1 rounded text-xs">{{ description_order_request.order_request.s_name }}</code>
                       </div>
                     </div>
                   </div>
@@ -1585,23 +1585,23 @@ onMounted(() => {
 
             <!-- 備考情報 -->
             <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+              <div class="card p-6">
                 <div class="flex items-center mb-4">
-                  <i class="fas fa-comment text-gray-400 mr-2"></i>
-                  <span class="text-sm font-semibold text-gray-600 uppercase tracking-wide">依頼者備考</span>
+                  <i class="fas fa-comment text-slate-400 mr-2"></i>
+                  <span class="form-label">依頼者備考</span>
                     </div>
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                  <p class="text-sm text-gray-700">{{ description_order_request.order_request.description || "-" }}</p>
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <p class="text-sm text-slate-700">{{ description_order_request.order_request.description || "-" }}</p>
                 </div>
               </div>
 
-              <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+              <div class="card p-6">
                 <div class="flex items-center mb-4">
-                  <i class="fas fa-comment-dots text-gray-400 mr-2"></i>
-                  <span class="text-sm font-semibold text-gray-600 uppercase tracking-wide">発注者備考</span>
+                  <i class="fas fa-comment-dots text-slate-400 mr-2"></i>
+                  <span class="form-label">発注者備考</span>
                 </div>
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                  <p class="text-sm text-gray-700">{{ description_order_request.order_request.sub_description || "-" }}</p>
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <p class="text-sm text-slate-700">{{ description_order_request.order_request.sub_description || "-" }}</p>
                 </div>
               </div>
                     </div>
@@ -1613,9 +1613,9 @@ onMounted(() => {
               <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
                 <i class="fas fa-file-contract text-indigo-600"></i>
                 </div>
-              <h4 class="text-lg font-semibold text-gray-900">稟議書</h4>
+              <h4 class="section-title">稟議書</h4>
               </div>
-            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="card overflow-hidden">
               <ApprovalDocument :approval_document="description_order_request.approval_document" />
             </div>
           </div>
@@ -1623,12 +1623,12 @@ onMounted(() => {
           <!-- PDF ビューワー -->
           <div v-if="description_order_request.viewerUrl != ''" class="mb-8">
             <div class="flex items-center mb-6">
-              <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                <i class="fas fa-file-pdf text-red-600"></i>
+              <div class="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-file-pdf text-rose-600"></i>
               </div>
-              <h4 class="text-lg font-semibold text-gray-900">添付ファイル</h4>
+              <h4 class="section-title">添付ファイル</h4>
             </div>
-            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="card overflow-hidden">
           <iframe
             ref="pdfViewer"
             :src="description_order_request.viewerUrl"
@@ -1646,16 +1646,16 @@ onMounted(() => {
   <!-- 一括処理モーダル -->
   <div
     v-if="bulkModal.isOpen"
-    class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 overflow-y-auto"
+    class="modal-overlay overflow-y-auto"
     style="z-index: 9998;"
   >
     <div class="flex items-start justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
       <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        <div class="absolute inset-0 bg-slate-500 opacity-75"></div>
       </div>
 
       <!-- モーダルコンテンツ -->
-      <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full mx-2 sm:mx-0">
+      <div class="modal-content inline-block align-bottom text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full mx-2 sm:mx-0">
         <!-- ヘッダー -->
         <div :class="[
           'px-4 sm:px-6 py-3 sm:py-4',
@@ -1682,7 +1682,7 @@ onMounted(() => {
             </div>
             <button
               @click="closeBulkModal"
-              class="text-white hover:text-gray-200 transition-colors duration-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20"
+              class="text-white hover:text-slate-200 transition-colors duration-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20"
             >
               <i class="fas fa-times text-lg sm:text-xl"></i>
             </button>
@@ -1693,26 +1693,26 @@ onMounted(() => {
         <div class="bg-white px-4 sm:px-6 py-4 sm:py-6">
           <div v-if="bulkModal.items[bulkModal.currentIndex]" class="space-y-4">
             <!-- 現在のアイテム情報 -->
-            <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
               <div class="flex items-start space-x-4">
                 <img
                   :src="getImgPath(bulkModal.items[bulkModal.currentIndex].img_path)"
                   alt="商品画像"
-                  class="h-20 w-20 object-cover rounded-lg border border-gray-300"
+                  class="h-20 w-20 object-cover rounded-lg border border-slate-300"
                 />
                 <div class="flex-1">
-                  <h4 class="text-lg font-bold text-gray-900 mb-1">
+                  <h4 class="text-lg font-bold text-slate-900 mb-1">
                     {{ bulkModal.items[bulkModal.currentIndex].name }}
                   </h4>
-                  <p class="text-sm text-gray-600 mb-2">
-                    品番: <code class="bg-gray-200 px-2 py-1 rounded text-xs">{{ bulkModal.items[bulkModal.currentIndex].s_name }}</code>
+                  <p class="text-sm text-slate-600 mb-2">
+                    品番: <code class="bg-slate-200 px-2 py-1 rounded text-xs">{{ bulkModal.items[bulkModal.currentIndex].s_name }}</code>
                   </p>
                   <div class="flex items-center space-x-4 text-sm">
-                    <span class="flex items-center text-gray-700">
+                    <span class="flex items-center text-slate-700">
                       <i class="fas fa-cube mr-1 text-blue-500"></i>
                       数量: {{ bulkModal.items[bulkModal.currentIndex].quantity }}{{ bulkModal.items[bulkModal.currentIndex].unit }}
                     </span>
-                    <span class="flex items-center text-gray-700">
+                    <span class="flex items-center text-slate-700">
                       <i class="fas fa-yen-sign mr-1 text-green-500"></i>
                       金額: ¥{{ bulkModal.items[bulkModal.currentIndex].calc_price?.toLocaleString() }}
                     </span>
@@ -1722,15 +1722,15 @@ onMounted(() => {
             </div>
 
             <!-- コメント入力 -->
-            <div class="bg-white border border-gray-200 rounded-xl p-4">
+            <div class="card p-4">
               <div class="flex items-center mb-3">
                 <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
                   <i class="fas fa-comment text-indigo-600"></i>
                 </div>
-                <h4 class="text-base font-semibold text-gray-900">
+                <h4 class="text-base font-semibold text-slate-900">
                   {{ bulkModal.action === 'accept' ? 'コメント（任意）' : 'コメント（必須）' }}
                 </h4>
-                <span v-if="bulkModal.action === 'reject'" class="ml-2 text-xs text-red-600 font-medium">
+                <span v-if="bulkModal.action === 'reject'" class="ml-2 text-xs text-rose-600 font-medium">
                   ※ 却下の場合はコメント必須です
                 </span>
               </div>
@@ -1738,30 +1738,30 @@ onMounted(() => {
                 v-model="bulkModal.comments[bulkModal.items[bulkModal.currentIndex].order_request_approval_id]"
                 rows="4"
                 :placeholder="`${bulkModal.items[bulkModal.currentIndex].name} のコメントを入力してください`"
-                class="w-full p-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 resize-none"
-                :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': bulkModal.action === 'reject' && !bulkModal.comments[bulkModal.items[bulkModal.currentIndex].order_request_approval_id]?.trim() }"
+                class="form-input-modern w-full resize-none"
+                :class="{ 'border-rose-300 focus:ring-rose-500 focus:border-rose-500': bulkModal.action === 'reject' && !bulkModal.comments[bulkModal.items[bulkModal.currentIndex].order_request_approval_id]?.trim() }"
               ></textarea>
             </div>
 
             <!-- ナビゲーションボタン -->
-            <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+            <div class="flex items-center justify-between pt-4 border-t border-slate-200">
               <button
                 @click="bulkModalPrev"
                 :disabled="bulkModal.currentIndex === 0"
-                class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                class="btn-secondary inline-flex items-center text-sm disabled:bg-slate-300 disabled:cursor-not-allowed"
               >
                 <i class="fas fa-chevron-left mr-2"></i>
                 前へ
               </button>
-              
-              <div class="text-sm text-gray-600 font-medium">
+
+              <div class="text-sm text-slate-600 font-medium">
                 {{ bulkModal.currentIndex + 1 }} / {{ bulkModal.items.length }}
               </div>
-              
+
               <button
                 v-if="bulkModal.currentIndex < bulkModal.items.length - 1"
                 @click="bulkModalNext"
-                class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                class="btn-primary inline-flex items-center text-sm"
               >
                 次へ
                 <i class="fas fa-chevron-right ml-2"></i>
@@ -1772,7 +1772,7 @@ onMounted(() => {
                 :disabled="loading.isLoading"
                 :class="[
                   'inline-flex items-center px-6 py-2 text-white text-sm font-medium rounded-lg transition-colors duration-200',
-                  bulkModal.action === 'accept' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700',
+                  bulkModal.action === 'accept' ? 'btn-success' : 'btn-danger',
                   loading.isLoading && 'opacity-50 cursor-not-allowed'
                 ]"
               >
@@ -1790,17 +1790,17 @@ onMounted(() => {
   <!-- 部署詳細モーダル -->
   <div
     v-if="departmentModal.isOpen"
-    class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 overflow-y-auto"
+    class="modal-overlay overflow-y-auto"
   >
     <div class="flex items-start justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
       <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        <div class="absolute inset-0 bg-slate-500 opacity-75"></div>
       </div>
 
       <!-- モーダルコンテンツ -->
-      <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full mx-2 sm:mx-0">
+      <div class="modal-content inline-block align-bottom text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full mx-2 sm:mx-0">
         <!-- ヘッダー -->
-        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 sm:px-6 py-3 sm:py-4">
+        <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-4 sm:px-6 py-3 sm:py-4">
           <div class="flex items-center justify-between">
             <div class="flex items-center">
               <div class="flex-shrink-0">
@@ -1815,7 +1815,7 @@ onMounted(() => {
             </div>
             <button
               @click="closeDepartmentModal"
-              class="text-white hover:text-gray-200 transition-colors duration-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20"
+              class="text-white hover:text-slate-200 transition-colors duration-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20"
             >
               <i class="fas fa-times text-lg sm:text-xl"></i>
             </button>
@@ -1823,23 +1823,23 @@ onMounted(() => {
         </div>
 
         <!-- 統計情報 -->
-        <div class="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+        <div class="bg-slate-50 px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <div class="text-center">
               <div class="text-lg sm:text-2xl font-bold text-indigo-600">{{ departmentModal.departmentItems.length }}</div>
-              <div class="text-xs sm:text-sm text-gray-600">承認件数</div>
+              <div class="text-xs sm:text-sm text-slate-600">承認件数</div>
             </div>
             <div class="text-center">
               <div class="text-lg sm:text-2xl font-bold text-emerald-600">
                 ¥{{ departmentModal.departmentItems.reduce((sum, item) => sum + parseInt(item.calc_price || 0), 0).toLocaleString() }}
               </div>
-              <div class="text-xs sm:text-sm text-gray-600">合計金額</div>
+              <div class="text-xs sm:text-sm text-slate-600">合計金額</div>
             </div>
             <div class="text-center">
               <div class="text-lg sm:text-2xl font-bold text-blue-600">
                 ¥{{ departmentModal.departmentItems.length > 0 ? Math.round(departmentModal.departmentItems.reduce((sum, item) => sum + parseInt(item.calc_price || 0), 0) / departmentModal.departmentItems.length).toLocaleString() : 0 }}
               </div>
-              <div class="text-xs sm:text-sm text-gray-600">平均金額</div>
+              <div class="text-xs sm:text-sm text-slate-600">平均金額</div>
             </div>
           </div>
         </div>
@@ -1848,142 +1848,142 @@ onMounted(() => {
         <div class="bg-white px-2 sm:px-6 py-4 sm:py-6 max-h-screen-80 overflow-y-auto" style="max-height: 60vh;">
           <!-- 物品一覧テーブル -->
           <div v-if="departmentModal.departmentItems.length > 0" class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg department-modal-table">
+            <table class="table-modern min-w-full department-modal-table">
               <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
-                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">
                     <div class="flex items-center">
-                      <i class="fas fa-image mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                      <i class="fas fa-image mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                       <span class="hidden sm:inline">画像</span>
                     </div>
                   </th>
-                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap cursor-pointer hover:bg-gray-100 transition-colors duration-200" @click="sortItems('name')">
+                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap cursor-pointer hover:bg-slate-100 transition-colors duration-200" @click="sortItems('name')">
                     <div class="flex items-center justify-between">
                       <div class="flex items-center">
-                        <i class="fas fa-tag mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                        <i class="fas fa-tag mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                         <span class="hidden sm:inline">品名</span>
                       </div>
                       <i :class="getSortIcon('name')" class="text-xs ml-1"></i>
                     </div>
                   </th>
-                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap cursor-pointer hover:bg-gray-100 transition-colors duration-200" @click="sortItems('s_name')">
+                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap cursor-pointer hover:bg-slate-100 transition-colors duration-200" @click="sortItems('s_name')">
                     <div class="flex items-center justify-between">
                       <div class="flex items-center">
-                        <i class="fas fa-barcode mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                        <i class="fas fa-barcode mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                         <span class="hidden sm:inline">品番</span>
                       </div>
                       <i :class="getSortIcon('s_name')" class="text-xs ml-1"></i>
                     </div>
                   </th>
-                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">
                     <div class="flex items-center">
-                      <i class="fas fa-cube mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                      <i class="fas fa-cube mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                       <span class="hidden sm:inline">数量</span>
                     </div>
                   </th>
-                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">
                     <div class="flex items-center">
-                      <i class="fas fa-yen-sign mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                      <i class="fas fa-yen-sign mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                       <span class="hidden sm:inline">単価</span>
                     </div>
                   </th>
-                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap">
+                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">
                     <div class="flex items-center">
-                      <i class="fas fa-calculator mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                      <i class="fas fa-calculator mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                       <span class="hidden sm:inline">金額</span>
                     </div>
                   </th>
-                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap hidden sm:table-cell cursor-pointer hover:bg-gray-100 transition-colors duration-200" @click="sortItems('supplier_name')">
+                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap hidden sm:table-cell cursor-pointer hover:bg-slate-100 transition-colors duration-200" @click="sortItems('supplier_name')">
                     <div class="flex items-center justify-between">
                       <div class="flex items-center">
-                        <i class="fas fa-building mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                        <i class="fas fa-building mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                         発注先
                       </div>
                       <i :class="getSortIcon('supplier_name')" class="text-xs ml-1"></i>
                     </div>
                   </th>
-                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap hidden md:table-cell cursor-pointer hover:bg-gray-100 transition-colors duration-200" @click="sortItems('request_user_name')">
+                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap hidden md:table-cell cursor-pointer hover:bg-slate-100 transition-colors duration-200" @click="sortItems('request_user_name')">
                     <div class="flex items-center justify-between">
                       <div class="flex items-center">
-                        <i class="fas fa-folder mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                        <i class="fas fa-folder mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                         依頼者
                       </div>
                       <i :class="getSortIcon('request_user_name')" class="text-xs ml-1"></i>
                     </div>
                   </th>
-                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200 whitespace-nowrap hidden md:table-cell cursor-pointer hover:bg-gray-100 transition-colors duration-200" @click="sortItems('classification_name')">
+                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap hidden md:table-cell cursor-pointer hover:bg-slate-100 transition-colors duration-200" @click="sortItems('classification_name')">
                     <div class="flex items-center justify-between">
                       <div class="flex items-center">
-                        <i class="fas fa-folder mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                        <i class="fas fa-folder mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                         カテゴリー
                       </div>
                       <i :class="getSortIcon('classification_name')" class="text-xs ml-1"></i>
                     </div>
                   </th>
-                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
+                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                     <div class="flex items-center">
-                      <i class="fas fa-calendar-check mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                      <i class="fas fa-calendar-check mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                       <span class="hidden sm:inline">承認日</span>
                     </div>
                   </th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
+              <tbody class="bg-white divide-y divide-slate-200">
                 <tr v-for="item in departmentModal.departmentItems" :key="item.id" class="hover:bg-blue-50 transition-colors duration-200">
-                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap border-r border-gray-100">
+                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap border-r border-slate-100">
                     <div class="flex items-center justify-center">
                       <img 
                         :src="getImgPath(item.img_path)" 
                         alt="商品画像"
-                        class="h-10 w-10 sm:h-14 sm:w-14 object-cover rounded-lg shadow-sm border border-gray-200"
+                        class="h-10 w-10 sm:h-14 sm:w-14 object-cover rounded-lg shadow-sm border border-slate-200"
                       />
                     </div>
                   </td>
-                  <td class="px-2 sm:px-4 py-3 sm:py-4 text-sm text-gray-900 border-r border-gray-100">
-                    <div class="font-medium text-gray-900 max-w-xs truncate text-xs sm:text-sm" :title="item.name">{{ item.name }}</div>
+                  <td class="px-2 sm:px-4 py-3 sm:py-4 text-sm text-slate-900 border-r border-slate-100">
+                    <div class="font-medium text-slate-900 max-w-xs truncate text-xs sm:text-sm" :title="item.name">{{ item.name }}</div>
                   </td>
-                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-600 border-r border-gray-100">
+                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-600 border-r border-slate-100">
                     <code class="bg-blue-100 text-blue-800 px-1 sm:px-2 py-1 rounded text-xs font-mono">{{ item.s_name || "-" }}</code>
                   </td>
-                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-100">
+                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-900 border-r border-slate-100">
                     <div class="flex items-center">
                       <i class="fas fa-cube mr-1 sm:mr-2 text-blue-400 text-xs"></i>
                       <span class="font-semibold text-xs sm:text-sm">{{ `${item.quantity || ""}${item.unit || ""}` }}</span>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-100">
+                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-900 border-r border-slate-100">
                     <div class="flex items-center font-semibold">
                       <i class="fas fa-yen-sign mr-1 sm:mr-2 text-green-500 text-xs"></i>
                       <span class="text-xs sm:text-sm">¥{{ parseInt(item.price || 0).toLocaleString() }}</span>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 font-bold border-r border-gray-100">
+                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-900 font-bold border-r border-slate-100">
                     <div class="flex items-center text-emerald-600">
                       <i class="fas fa-calculator mr-1 sm:mr-2 text-xs"></i>
                       <span class="text-xs sm:text-sm">¥{{ parseInt(item.calc_price || 0).toLocaleString() }}</span>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-600 border-r border-gray-100 hidden sm:table-cell">
+                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-600 border-r border-slate-100 hidden sm:table-cell">
                     <div class="flex items-center">
-                      <i class="fas fa-building mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                      <i class="fas fa-building mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                       <span class="max-w-xs truncate text-xs sm:text-sm" :title="item.supplier_name">{{ item.supplier_name }}</span>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-600 border-r border-gray-100 hidden md:table-cell">
+                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-600 border-r border-slate-100 hidden md:table-cell">
                     <div class="flex items-center">
                       <i class="fas fa-user mr-1 sm:mr-2 text-blue-400 text-xs"></i>
                       <span class="max-w-xs truncate text-xs sm:text-sm" :title="item.request_user_name">{{ item.request_user_name || "-" }}</span>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-600 border-r border-gray-100 hidden md:table-cell">
+                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-600 border-r border-slate-100 hidden md:table-cell">
                     <div class="flex items-center">
                       <i class="fas fa-folder mr-1 sm:mr-2 text-purple-400 text-xs"></i>
                       <span class="max-w-xs truncate text-xs sm:text-sm" :title="item.classification_name">{{ item.classification_name || "-" }}</span>
                     </div>
                   </td>
-                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-600">
+                  <td class="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-sm text-slate-600">
                     <div class="flex items-center">
-                      <i class="fas fa-calendar-check mr-1 sm:mr-2 text-gray-400 text-xs"></i>
+                      <i class="fas fa-calendar-check mr-1 sm:mr-2 text-slate-400 text-xs"></i>
                       <span class="text-xs sm:text-sm">{{ new Date(item.updated_at).toLocaleDateString("ja-JP") }}</span>
                     </div>
                   </td>
@@ -1994,20 +1994,20 @@ onMounted(() => {
           
           <!-- データなしの場合 -->
           <div v-else class="text-center py-12">
-            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fas fa-box-open text-gray-400 text-2xl"></i>
+            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-box-open text-slate-400 text-2xl"></i>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">承認済み物品がありません</h3>
-            <p class="text-gray-500">この部署の承認済み物品はまだありません。</p>
+            <h3 class="text-lg font-medium text-slate-900 mb-2">承認済み物品がありません</h3>
+            <p class="text-slate-500">この部署の承認済み物品はまだありません。</p>
           </div>
         </div>
 
         <!-- フッター -->
-        <div class="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200">
+        <div class="bg-slate-50 px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-200">
           <div class="flex justify-end">
             <button
               @click="closeDepartmentModal"
-              class="inline-flex items-center px-3 sm:px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              class="btn-secondary inline-flex items-center text-xs sm:text-sm"
             >
               <i class="fas fa-times mr-1 sm:mr-2 text-xs"></i>
               閉じる
@@ -2019,12 +2019,296 @@ onMounted(() => {
   </div>
 </template>
 <style scoped lang="scss">
-// テーブル全体のスタイル
-#order_request_table {
+// =============================================
+// Design System: Utility Classes
+// =============================================
+
+// Card
+.card {
+  background-color: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f1f5f9; // slate-100
+}
+
+// Page Header
+.page-header {
+  border-radius: 0;
+}
+
+// Section Titles
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b; // slate-800
+}
+
+.section-subtitle {
+  font-size: 0.875rem;
+  color: #64748b; // slate-500
+}
+
+// Form Elements
+.form-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b; // slate-500
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-input-modern {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #1e293b; // slate-800
+  background-color: #f8fafc; // slate-50
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0; // slate-200
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #6366f1; // indigo-500
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    background-color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.form-select-modern {
+  @extend .form-input-modern;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+// Buttons
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  background-color: #4f46e5; // indigo-600
+  border-radius: 0.5rem;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  &:hover:not(:disabled) {
+    background-color: #4338ca; // indigo-700
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4f46e5; // indigo-600
+  background-color: #fff;
+  border: 2px solid #4f46e5;
+  border-radius: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover:not(:disabled) {
+    background-color: #4f46e5;
+    color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+.btn-success {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  background-color: #059669; // emerald-600
+  border-radius: 0.5rem;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  &:hover:not(:disabled) {
+    background-color: #047857; // emerald-700
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  background-color: #e11d48; // rose-600
+  border-radius: 0.5rem;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  &:hover:not(:disabled) {
+    background-color: #be123c; // rose-700
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+// Badges
+.badge-primary {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #4f46e5; // indigo-600
+  background-color: #eef2ff; // indigo-50
+  border: 1px solid #c7d2fe; // indigo-200
+  border-radius: 9999px;
+}
+
+.badge-success {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #059669; // emerald-600
+  background-color: #ecfdf5; // emerald-50
+  border: 1px solid #a7f3d0; // emerald-200
+  border-radius: 9999px;
+}
+
+.badge-warning {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #d97706; // amber-600
+  background-color: #fffbeb; // amber-50
+  border: 1px solid #fde68a; // amber-200
+  border-radius: 9999px;
+}
+
+.badge-danger {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #e11d48; // rose-600
+  background-color: #fff1f2; // rose-50
+  border: 1px solid #fecdd3; // rose-200
+  border-radius: 9999px;
+}
+
+// Table
+.table-modern {
   border-collapse: separate;
   border-spacing: 0;
+
+  thead th {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b; // slate-500
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: linear-gradient(to right, #f8fafc, #f1f5f9); // slate-50 to slate-100
+    border-bottom: 2px solid #e2e8f0; // slate-200
+  }
+
+  tbody td {
+    border-bottom: 1px solid #f1f5f9; // slate-100
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+// Modals
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.5); // slate-900 / 50%
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background-color: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+// =============================================
+// Component-specific styles
+// =============================================
+
+// テーブル全体のスタイル (sticky columns)
+#order_request_table {
   // 固定列の幅（調整可）
-  --col-1: 80px;   // 緊急度
+  --col-1: 80px;   // チェックボックス + 緊急度
   --col-2: 100px;  // 画像
   --col-3: 100px;  // 分類
   --col-4: 120px;  // 最終発注日
@@ -2047,31 +2331,31 @@ onMounted(() => {
   thead th:nth-child(5), tbody td:nth-child(5) { position: sticky; left: calc(var(--col-1) + var(--col-2) + var(--col-3) + var(--col-4)); }
   thead th:nth-child(6), tbody td:nth-child(6) { position: sticky; left: calc(var(--col-1) + var(--col-2) + var(--col-3) + var(--col-4) + var(--col-5)); }
 
-  // 固定セルの背景を不透明化（透け防止）。ヘッダー/ボディのデフォルト背景
+  // 固定セルの背景を不透明化（透け防止）
   thead th:nth-child(-n+6), tbody td:nth-child(-n+6) {
     background-color: #fff;
     background-clip: padding-box;
   }
 
   // 行ホバー時・状態別の背景同期（固定列にも反映）
-  tbody tr:hover td:nth-child(-n+6) { background-color: #f9fafb; } // gray-50
+  tbody tr:hover td:nth-child(-n+6) { background-color: #f8fafc; } // slate-50
   tbody tr.bg-orange-50 td:nth-child(-n+6) { background-color: #fff7ed; } // orange-50
   tbody tr.bg-orange-50:hover td:nth-child(-n+6) { background-color: #ffedd5; } // orange-100
-  tbody tr.bg-gray-100 td:nth-child(-n+6) { background-color: #f3f4f6; } // gray-100
-  tbody tr.bg-gray-100:hover td:nth-child(-n+6) { background-color: #e5e7eb; } // gray-200
+  tbody tr.bg-slate-100 td:nth-child(-n+6) { background-color: #f1f5f9; } // slate-100
+  tbody tr.bg-slate-100:hover td:nth-child(-n+6) { background-color: #e2e8f0; } // slate-200
 
-  // 前面に出すためのz-index（ヘッダーはボディより上）
+  // 前面に出すためのz-index
   tbody td:nth-child(-n+6) { z-index: 3; }
   thead th:nth-child(-n+6) { z-index: 5; }
 
   // 固定領域の右側を視認しやすくする影
-  thead th:nth-child(6), tbody td:nth-child(6) { box-shadow: 2px 0 0 #e5e7eb; }
-  
+  thead th:nth-child(6), tbody td:nth-child(6) { box-shadow: 2px 0 0 #e2e8f0; } // slate-200
+
   // レスポンシブ対応
   @media screen and (max-width: 1200px) {
     font-size: 0.875rem;
   }
-  
+
   @media screen and (max-width: 800px) {
     font-size: 0.75rem;
   }
@@ -2084,82 +2368,47 @@ onMounted(() => {
 }
 
 @keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-// ホバーエフェクト
-.hover\:bg-gray-50:hover {
-  background-color: #f9fafb;
-}
-
-// フォーカス状態のスタイル改善
-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 // スクロールバーのカスタマイズ
 .overflow-x-auto {
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 #f1f5f9;
-  
+
   &::-webkit-scrollbar {
     height: 8px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: #f1f5f9;
     border-radius: 4px;
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 4px;
-    
+
     &:hover {
       background: #94a3b8;
     }
   }
 }
 
-// 影のカスタマイズ
-.shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-// ボタンのホバーエフェクト改善
-button {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  &:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
-  }
-  
-  &:active:not(:disabled) {
-    transform: translateY(0);
-  }
-  
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-    transform: none;
-    box-shadow: none;
-  }
+// ボタン共通 disabled
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 // アイコンのアニメーション
 i.fas {
   transition: transform 0.2s ease;
-  
+
   &:hover {
     transform: scale(1.1);
   }
@@ -2167,8 +2416,7 @@ i.fas {
 
 // モーダルのアニメーション
 #description_container {
-  backdrop-filter: blur(4px);
-  
+  .modal-content,
   .inline-block {
     animation: modalSlideIn 0.3s ease-out;
   }
@@ -2190,53 +2438,16 @@ i.fas {
   &::-webkit-scrollbar {
     height: 6px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: #f1f5f9;
     border-radius: 3px;
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 3px;
-    
-    &:hover {
-      background: #94a3b8;
-    }
-  }
-}
 
-// カードのホバーエフェクト
-.hover\:shadow-md:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-// フォーム要素のフォーカス状態
-textarea:focus {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  border-color: #3b82f6;
-}
-
-// モーダルのz-index管理
-.z-50 {
-  z-index: 50;
-}
-
-// 統計カードの横スクロール
-.overflow-x-auto {
-  &::-webkit-scrollbar {
-    height: 8px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 4px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-    
     &:hover {
       background: #94a3b8;
     }
@@ -2247,49 +2458,49 @@ textarea:focus {
 .department-modal-table {
   border-collapse: separate;
   border-spacing: 0;
-  
+
   th {
     position: sticky;
     top: 0;
     z-index: 10;
-    background: linear-gradient(to right, #f9fafb, #f3f4f6);
+    background: linear-gradient(to right, #f8fafc, #f1f5f9);
   }
-  
+
   tr:hover {
-    background-color: #eff6ff;
+    background-color: #eef2ff; // indigo-50
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
-  
+
   td {
-    border-right: 1px solid #e5e7eb;
+    border-right: 1px solid #e2e8f0; // slate-200
     transition: all 0.2s ease;
   }
-  
+
   td:last-child {
     border-right: none;
   }
-  
+
   // レスポンシブ対応
   @media screen and (max-width: 1200px) {
     font-size: 0.875rem;
-    
+
     th, td {
       padding: 0.75rem 0.5rem;
     }
   }
-  
+
   @media screen and (max-width: 800px) {
     font-size: 0.75rem;
-    
+
     th, td {
       padding: 0.5rem 0.25rem;
     }
   }
-  
+
   @media screen and (max-width: 640px) {
     font-size: 0.625rem;
-    
+
     th, td {
       padding: 0.375rem 0.125rem;
     }
@@ -2298,23 +2509,19 @@ textarea:focus {
 
 // スマートフォン用の追加スタイル
 @media screen and (max-width: 640px) {
-  // テーブルの横スクロール改善
   .overflow-x-auto {
     -webkit-overflow-scrolling: touch;
   }
-  
-  // ボタンのタッチエリア拡大
+
   button {
     min-height: 44px;
     min-width: 44px;
   }
-  
-  // モーダルのマージン調整
+
   .inline-block {
     margin: 0.5rem;
   }
-  
-  // 統計カードの幅調整
+
   .flex-shrink-0 {
     min-width: 240px;
   }
@@ -2323,13 +2530,13 @@ textarea:focus {
 // ソート可能なヘッダーのスタイル
 .cursor-pointer {
   user-select: none;
-  
+
   &:hover {
-    background-color: #f9fafb;
+    background-color: #f8fafc; // slate-50
   }
-  
+
   &:active {
-    background-color: #f3f4f6;
+    background-color: #f1f5f9; // slate-100
   }
 }
 

@@ -123,17 +123,16 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="px-2 py-2 bg-gray-300">
+  <div class="bg-slate-100 rounded-xl p-3">
     <!-- 登録済みの略名を簡易表示 -->
-    <div>
+    <div class="flex flex-wrap gap-1">
       <span
         @click="selectToggle(alias.id)"
         v-for="alias in aliases"
         :key="alias.id"
         :class="{
-          'bg-gray-200 text-gray-800 text-xs me-2 px-2.5 py-0.5 rounded-sm dark:bg-gray-700 dark:text-gray-300 transition-all duration-300': true,
-          'bg-green-100 text-green-800 text-md font-bold me-2 px-2.5 py-0.5 rounded-sm dark:bg-green-900 dark:text-green-300':
-            alias.selected,
+          'bg-slate-100 text-slate-600 text-xs me-2 px-2.5 py-0.5 rounded-full cursor-pointer transition-all duration-300': true,
+          'badge-success font-bold text-sm': alias.selected,
         }"
         >{{ alias.alias }}</span
       >
@@ -143,7 +142,7 @@ onMounted(() => {
       class="mt-2 flex justify-start py-2 mb-2"
     >
       <input
-        class="appearance-none block w-1/2 bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+        class="form-input-modern w-1/2"
         type="text"
         name="alias"
         id=""
@@ -151,18 +150,18 @@ onMounted(() => {
       />
       <button
         @click="editAlias"
-        class="ml-2 text-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        class="btn-primary ml-2 text-sm"
       >
         編集
       </button>
     </div>
-    <div v-else class="mt-2  mb-2">
-      <p class="text-xs mt-4 text-gray-600">
+    <div v-else class="mt-2 mb-2">
+      <p class="text-xs mt-4 text-slate-400">
         編集したい場合は、登録済みの略名から編集したい略名を選択してください。
       </p>
       <div class="flex justify-start py-2">
         <input
-          class="appearance-none block w-1/2 bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          class="form-input-modern w-1/2"
           type="text"
           name="alias"
           id=""
@@ -170,7 +169,7 @@ onMounted(() => {
         />
         <button
           @click="createAlias"
-          class="ml-2 text-sm bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          class="btn-success ml-2 text-sm"
         >
           新規追加
         </button>
@@ -180,7 +179,7 @@ onMounted(() => {
     <div v-if="getSelectedAlias()" class="button_container flex justify-start">
       <button
         @click="deleteAlias"
-        class="mr-2 text-sm bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+        class="btn-danger mr-2 text-sm"
       >
         削除
       </button>

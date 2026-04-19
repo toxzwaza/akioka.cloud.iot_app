@@ -1,6 +1,5 @@
 <script setup>
 import MainLayout from "@/Layouts/Calc/MainLayout.vue";
-// import LineMessage from "@/Components/LineMessage.vue";
 import Login from "@/Components/Calc/Login.vue";
 
 import { ref, reactive, onMounted } from "vue";
@@ -16,39 +15,29 @@ defineProps({
 onMounted(() => {});
 </script>
 <template>
-  <MainLayout :url="'stock.home'" :title="'棚卸し登録'" :login_user="login_user">
+  <MainLayout :url="'stock.home'" :title="'Inventory'" :login_user="login_user">
     <template #content>
-      <!-- ログインフォーム -->
       <Login v-if="!login_user" :users="users" :locations="locations" />
 
-
-      <!-- 検索ページへのリダイレクト案内 -->
       <div
         v-if="login_user"
-        class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-8 text-center mb-6 hover:shadow-md transition-shadow"
+        class="card-hover p-8 text-center"
       >
-        <div class="flex justify-center items-center flex-col text-blue-700">
-          <div class="bg-blue-100 rounded-full p-4 mb-4">
-            <i class="fas fa-search text-3xl text-blue-600"></i>
+        <div class="flex justify-center items-center flex-col">
+          <div class="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center mb-4">
+            <i class="fas fa-search text-2xl text-primary-600"></i>
           </div>
-          <h3 class="text-xl font-bold mb-2">製品検索を開始</h3>
-          <p class="text-sm text-gray-600 mb-4">棚卸対象の製品を検索して登録を開始します</p>
+          <h3 class="text-xl font-bold text-slate-800 mb-2">Start Product Search</h3>
+          <p class="text-sm text-slate-400 mb-6">Search and register products for inventory count</p>
           <Link
             :href="route('calc.search')"
-            class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+            class="btn-primary btn-lg"
           >
             <i class="fas fa-search"></i>
-            製品検索ページへ
+            Go to Search
           </Link>
         </div>
       </div>
-
-      <!-- <LineMessage /> -->
     </template>
   </MainLayout>
 </template>
-
-
-
-<style>
-</style>

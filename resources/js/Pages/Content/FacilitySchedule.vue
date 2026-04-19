@@ -88,7 +88,7 @@ onMounted(() => {
 <template>
   <main id="main_container">
     <div class="room_1">
-      <div class="content">
+      <div class="card room-card content">
         <div class="top_content">
           <h1 class="facility_name">応接室</h1>
           <h2 :class="{ use_status: true, active: schedule_now_1 }">
@@ -125,24 +125,24 @@ onMounted(() => {
           </p>
         </div>
         <div class="bottom_content">
-          <section class="text-gray-600 body-font">
+          <section class="body-font">
             <div class="container mx-auto">
               <div class="w-full mx-auto overflow-auto">
-                <table class="table-auto w-full text-left whitespace-no-wrap">
+                <table class="table-modern table-auto w-full text-left whitespace-no-wrap">
                   <thead>
                     <tr>
                       <th
-                        class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl"
+                        class="px-4 py-3 title-font tracking-wider font-medium text-sm rounded-tl rounded-bl"
                       >
                         予定名称
                       </th>
                       <th
-                        class="w-48 px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                        class="w-48 px-4 py-3 title-font tracking-wider font-medium text-sm"
                       >
                         開始時間
                       </th>
                       <th
-                        class="w-48 px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                        class="w-48 px-4 py-3 title-font tracking-wider font-medium text-sm"
                       >
                         終了時間
                       </th>
@@ -186,7 +186,7 @@ onMounted(() => {
       </div>
     </div>
     <div class="room_2">
-      <div class="content">
+      <div class="card room-card content">
         <div class="top_content">
           <h1 class="facility_name">社長室</h1>
           <h2 :class="{ use_status: true, active: schedule_now_2 }">
@@ -223,24 +223,24 @@ onMounted(() => {
           </p>
         </div>
         <div class="bottom_content">
-          <section class="text-gray-600 body-font">
+          <section class="body-font">
             <div class="container mx-auto">
               <div class="w-full mx-auto overflow-auto">
-                <table class="table-auto w-full text-left whitespace-no-wrap">
+                <table class="table-modern table-auto w-full text-left whitespace-no-wrap">
                   <thead>
                     <tr>
                       <th
-                        class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl"
+                        class="px-4 py-3 title-font tracking-wider font-medium text-sm rounded-tl rounded-bl"
                       >
                         タイトル
                       </th>
                       <th
-                        class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                        class="px-4 py-3 title-font tracking-wider font-medium text-sm"
                       >
                         開始時間
                       </th>
                       <th
-                        class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                        class="px-4 py-3 title-font tracking-wider font-medium text-sm"
                       >
                         終了時間
                       </th>
@@ -286,22 +286,77 @@ onMounted(() => {
   </main>
 </template>
 <style lang="scss" scoped>
+/* Design System Utilities */
+.card {
+  background-color: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  border: 1px solid #f1f5f9;
+}
+
+.table-modern {
+  thead {
+    tr {
+      background-color: #f1f5f9;
+      th {
+        color: #475569;
+        font-weight: 600;
+        letter-spacing: 0.025em;
+      }
+    }
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: #f8fafc;
+    }
+  }
+}
+
+.badge-success {
+  display: inline-block;
+  background-color: #ecfdf5;
+  color: #059669;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+}
+
+.badge-danger {
+  display: inline-block;
+  background-color: #fff1f2;
+  color: #e11d48;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+}
+
 #main_container {
   font-family: 'IPAexGothic','Noto Sans CJK JP', 'Arial', sans-serif;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(224, 224, 224, 0.733);
+  background-color: #f1f5f9;
   display: flex;
   justify-content: space-around;
   align-items: start;
+  padding: 12px;
 
-  // padding: 10px;
   & > div {
     width: 48%;
     height: 100%;
 
     box-sizing: border-box;
     padding: 0 12px;
+
+    & .room-card {
+      padding: 16px;
+    }
+
     & .content {
       position: relative;
       height: 100%;
@@ -310,26 +365,26 @@ onMounted(() => {
       & .top_content {
         position: absolute;
         top: 2%;
-        width: 100%;
+        width: calc(100% - 32px);
 
         & .facility_name {
           font-size: 80px;
           font-weight: bold;
           margin: 10px 0;
-          color: rgb(75, 75, 75);
+          color: #334155;
         }
         & .use_status {
           font-size: 68px;
           width: 100%;
-          background-color: rgb(20, 219, 79);
+          background-color: #10b981;
           text-align: center;
           font-weight: bold;
           color: white;
-          border-radius: 4px;
+          border-radius: 0.75rem;
           padding: 8px 0;
 
           &.active {
-            background-color: rgb(255, 43, 107);
+            background-color: #f43f5e;
           }
         }
       }
@@ -337,22 +392,23 @@ onMounted(() => {
       & .middle_content {
         position: absolute;
         top: 32%;
-        width: 100%;
+        width: calc(100% - 32px);
 
         & .datetime {
           font-size: 40px;
-          color: rgb(75, 75, 75);
+          color: #475569;
           font-weight: bold;
         }
         & .title {
           font-size: 60px;
-          color: rgb(255, 43, 114);
-          background-color: white;
+          color: #4f46e5;
+          background-color: #eef2ff;
           padding-left: 1em;
           font-weight: bold;
           max-width: 100%;
           overflow: hidden;
           white-space: nowrap;
+          border-radius: 0.5rem;
         }
 
         & .participants {
@@ -362,12 +418,13 @@ onMounted(() => {
 
           & span:first-child {
             margin-top: 6px;
+            color: #64748b;
           }
 
           & .user_name {
             font-size: 40px;
             margin-left: 10px;
-            color: rgb(255, 43, 114);
+            color: #4f46e5;
           }
         }
       }
@@ -375,21 +432,27 @@ onMounted(() => {
       & .bottom_content {
         position: absolute;
         top: 58%;
-        width: 100%;
+        width: calc(100% - 32px);
 
         & .active {
-          border: 4px solid rgb(255, 43, 114);
+          border: 3px solid #4f46e5;
+          background-color: #eef2ff;
           box-sizing: border-box;
+          border-radius: 0.5rem;
         }
         & .already {
-          opacity: 0.6;
-          background-color: rgb(202, 202, 202);
+          opacity: 0.5;
+          background-color: #f1f5f9;
         }
 
         & table {
           font-size: 32px;
+          border-radius: 0.75rem;
+          overflow: hidden;
 
           & td {
+            color: #334155;
+
             &.datetime {
               font-size: 40px;
             }

@@ -54,116 +54,85 @@ onMounted(() => {
 <template>
   <ReceiveLayout :title="'納品登録'">
     <template #content>
-      <section class="text-gray-600 body-font">
-        <div class="container py-12 mx-auto">
-          <div class="flex flex-col text-center w-full mb-8">
-            <h1
-              class="sm:text-4xl text-3xl font-medium title-font mb-2 text-blue-600"
-            >
+      <section class="bg-slate-50 min-h-screen py-8 px-4">
+        <div class="max-w-7xl mx-auto">
+          <div class="page-header text-center mb-8">
+            <h1 class="section-title text-primary-600">
               引き渡し登録
             </h1>
-            <p class="lg:w-2/3 mx-auto leading-relaxed text-base">
+            <p class="section-subtitle max-w-2xl mx-auto">
               引き渡し登録を完了すると、サイネージディスプレイの表示が解除されます。<br />
               物品引き渡し時に登録を行ってください。
             </p>
           </div>
-          <div class="w-1/2 mx-auto mb-8">
-            <div class="p-2">
-              <div class="relative">
-                <label for="email" class="leading-7 text-sm text-gray-600"
-                  >検索</label
-                >
-                <input
-                  @change="searchOrders($event.target.value)"
-                  type="email"
-                  id="email"
-                  name="email"
-                  class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                  placeholder="注文No"
-                />
-              </div>
+
+          <!-- 検索 -->
+          <div class="card max-w-2xl mx-auto mb-8 p-6">
+            <div>
+              <label class="form-label">検索</label>
+              <input
+                @change="searchOrders($event.target.value)"
+                type="text"
+                class="form-input-modern"
+                placeholder="注文No"
+              />
             </div>
           </div>
-          <div class="w-full mx-auto overflow-auto">
-            <table class="table-auto w-full text-left whitespace-no-wrap">
-              <thead>
-                <tr>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl"
-                  >
-                    注文No
-                  </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl"
-                  >
-                    画像
-                  </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    注文者
-                  </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    注文日
-                  </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    注文先
-                  </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    品名:品番
-                  </th>
-                  <th
-                    class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                  >
-                    数量
-                  </th>
-                  <th
-                    class="w-10 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tr rounded-br"
-                  ></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="order in initial_orders" :key="order.id" class="">
-                  <td class="px-4 py-6">{{ order.order_no }}</td>
-                  <td class="w-24 px-4 py-6">
-                    <img
-                      @click="modalImage($event.target)"
-                      :src="
-                        order.img_path && order.img_path.includes('https://')
-                          ? order.img_path
-                          : 'https://akioka.cloud/' + order.img_path
-                      "
-                      alt=""
-                    />
-                  </td>
-                  <td class="px-4 py-6">{{ order.order_user }}</td>
-                  <td class="px-4 py-6">
-                    {{ new Date(order.order_date).toLocaleDateString("ja-JP") }}
-                  </td>
-                  <td class="px-4 py-6">{{ order.com_name }}</td>
-                  <td class="px-4 py-6">
-                    {{ order.name + " : " + order.s_name }}
-                  </td>
-                  <td class="px-4 py-6">
-                    {{ order.quantity + order.order_unit }}
-                  </td>
-                  <td class="w-10 text-center">
-                    <Link
-                      :href="route('stock.receive.updateReceipt', {'id' : order.id })"
-                      class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded text-sm whitespace-nowrap"
-                    >
-                      引渡済
-                    </Link>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+
+          <!-- テーブル -->
+          <div class="card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="table-modern">
+                <thead>
+                  <tr>
+                    <th>注文No</th>
+                    <th>画像</th>
+                    <th>注文者</th>
+                    <th>注文日</th>
+                    <th>注文先</th>
+                    <th>品名:品番</th>
+                    <th>数量</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="order in initial_orders" :key="order.id">
+                    <td class="font-medium text-slate-800">{{ order.order_no }}</td>
+                    <td class="w-24">
+                      <img
+                        @click="modalImage($event.target)"
+                        :src="
+                          order.img_path && order.img_path.includes('https://')
+                            ? order.img_path
+                            : 'https://akioka.cloud/' + order.img_path
+                        "
+                        alt=""
+                        class="rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                      />
+                    </td>
+                    <td>{{ order.order_user }}</td>
+                    <td>
+                      {{ new Date(order.order_date).toLocaleDateString("ja-JP") }}
+                    </td>
+                    <td>{{ order.com_name }}</td>
+                    <td>
+                      {{ order.name + " : " + order.s_name }}
+                    </td>
+                    <td>
+                      {{ order.quantity + order.order_unit }}
+                    </td>
+                    <td class="text-center whitespace-nowrap">
+                      <Link
+                        :href="route('stock.receive.updateReceipt', {'id' : order.id })"
+                        class="btn-primary text-sm"
+                      >
+                        引渡済
+                      </Link>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>

@@ -389,73 +389,75 @@ onMounted(() => {
 <template>
   <StockLayout :title="'在庫詳細'">
     <template #content>
-      <div v-if="previewImage.img_path" id="previewImage" class="py-4 px-8">
-        <!-- 画像変更時のダイアログボックス -->
-        <div class="flex justify-between items-center my-4">
-          <p class="">
-            {{
-              previewImage.msg
-                ? previewImage.msg
-                : "こちらの画像で更新します。よろしいですか？"
-            }}
-          </p>
-          <div class="button_container">
-            <button
-              @click="previewImage.img_path = null"
-              class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded mr-2"
-            >
-              戻る
-            </button>
-            <button
-              v-if="previewImage.update_button"
-              @click="uploadFile"
-              class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"
-            >
-              更新
-            </button>
+      <div v-if="previewImage.img_path" class="modal-overlay" @click.self="previewImage.img_path = null">
+        <div class="modal-content" style="width: 80vw; height: 80vh;">
+          <!-- 画像変更時のダイアログボックス -->
+          <div class="flex justify-between items-center my-4 px-6 pt-4">
+            <p class="text-lg font-semibold text-primary-600">
+              {{
+                previewImage.msg
+                  ? previewImage.msg
+                  : "こちらの画像で更新します。よろしいですか？"
+              }}
+            </p>
+            <div class="button_container flex gap-2">
+              <button
+                @click="previewImage.img_path = null"
+                class="btn-ghost"
+              >
+                戻る
+              </button>
+              <button
+                v-if="previewImage.update_button"
+                @click="uploadFile"
+                class="btn-success"
+              >
+                更新
+              </button>
+            </div>
           </div>
-        </div>
-        <div class="img_container">
-          <img :src="previewImage.img_path" />
+          <div class="img_container px-6 pb-6" style="height: calc(100% - 80px);">
+            <img :src="previewImage.img_path" class="w-full h-full object-contain" />
+          </div>
         </div>
       </div>
       <div :class="{ flex: true, 'opacity-20': previewImage.img_path }">
         <div id="left_container" class="w-1/2">
-          <h2 class="stock_id text-gray-700 text-sm font-mono">
+          <h2 class="text-slate-500 text-sm font-mono mb-1">
             ID: {{ props.stock.id }}
           </h2>
 
-          <h1 class="stock_name font-mono">
+          <h1 class="stock_name font-mono text-primary-600">
             {{ `${props.stock.name}` }}
             <a
               :href="`http://monokanri-manage.local/stock/stocks/show/${props.stock.id}`"
               target="blank"
-              ><i class="fas fa-edit ml-2 cursor-pointer"></i
+              ><i class="fas fa-edit ml-2 cursor-pointer text-slate-400 hover:text-primary-600 transition-colors"></i
             ></a>
           </h1>
 
-          <h2 class="stock_s_name font-mono">品番: {{ props.stock.s_name }}</h2>
+          <h2 class="stock_s_name font-mono text-slate-500">品番: {{ props.stock.s_name }}</h2>
 
           <!-- 略名 -->
-          <h3 class="stock_aliases font-mono">
+          <h3 class="stock_aliases font-mono text-slate-600">
             略名:
             <span
               v-for="alias in props.stock.aliases"
               :key="alias.id"
-              class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-gray-700 dark:text-gray-400 border border-gray-500 ml-2"
+              class="badge-primary ml-2"
               >{{ alias.alias }}</span
             >
           </h3>
-          <h3 class="stock_aliases font-mono">
+          <h3 class="stock_aliases font-mono text-slate-600">
             得意先:
             <span
               v-for="(stock_supplier, index) in props.stock.stock_suppliers"
               :key="stock_supplier.id"
               :class="[
-                index === 0 
-                  ? 'bg-green-100 text-green-800 border-green-500 dark:bg-green-900 dark:text-green-300 dark:border-green-600' 
-                  : 'bg-gray-100 text-gray-800 border-gray-500 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-500',
-                'text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm border ml-2'
+                index === 0
+                  ? 'badge-success'
+                  : 'bg-slate-100 text-slate-600 text-xs font-medium px-2.5 py-0.5 rounded-full',
+                'ml-2'
               ]"
               >{{ stock_supplier.supplier_name }}{{ index === 0 ? ' (適用中)' : '' }}</span
             >
@@ -463,30 +465,32 @@ onMounted(() => {
 
           <!-- 画像変更ボタン -->
           <div class="file_container flex flex-col mt-6 mb-2">
-            <div id="setting_img" class="flex justify-between items-center">
-              <div class="open_camera_button">
-                <img src="/images/stocks/open_camera_button.png" alt="" />
+            <div id="setting_img" class="flex justify-between items-center gap-3">
+              <div class="open_camera_button btn-secondary relative overflow-hidden">
+                <span class="flex items-center gap-2"><i class="fas fa-camera"></i> サムネイル撮影</span>
                 <input
                   type="file"
                   capture="camera"
                   @change="(e) => handleFileChange(e, 'thumbnail')"
                   accept="image/*"
+                  class="absolute inset-0 opacity-0 cursor-pointer"
                 />
               </div>
 
-              <div class="open_camera_button">
-                <img src="/images/stocks/create_etc_button.png" alt="" />
+              <div class="open_camera_button btn-secondary relative overflow-hidden">
+                <span class="flex items-center gap-2"><i class="fas fa-image"></i> その他画像追加</span>
                 <input
                   type="file"
                   capture="camera"
                   @change="(e) => handleFileChange(e, 'etc')"
                   accept="image/*"
+                  class="absolute inset-0 opacity-0 cursor-pointer"
                 />
               </div>
             </div>
 
             <!-- スライドショー -->
-            <div class="swiper-container">
+            <div class="swiper-container card p-3 mt-3">
               <div class="swiper">
                 <div class="swiper-wrapper">
                   <div
@@ -542,24 +546,24 @@ onMounted(() => {
           <!-- 格納先が登録されている場合 -->
           <section v-if="stock_storage" id="one_address" class="px-4">
             <div class="flex flex-col">
-              <h1 id="location_name" class="text-center mb-4">
+              <h1 id="location_name" class="text-center mb-4 text-slate-600">
                 {{ stock_storage.location_name }}
               </h1>
               <div class="flex justify-around">
-                <h1 id="address" class="">{{ stock_storage.address }}</h1>
-                <h1 id="quantity" class="">{{ stock_storage.quantity }}個</h1>
+                <h1 id="address" class="text-slate-700">{{ stock_storage.address }}</h1>
+                <h1 id="quantity" class="text-slate-500">{{ stock_storage.quantity }}個</h1>
               </div>
             </div>
             <div>
               <details class="manage_details">
-                <summary class="text-white pl-4 mt-4">数量編集</summary>
-                <div class="px-2 py-2 bg-gray-300">
-                  <p class="text-sm text-red-500 mt-2 mb-1">
+                <summary class="text-white pl-4 mt-4 bg-primary-600 rounded-xl py-2 px-4 cursor-pointer">数量編集</summary>
+                <div class="px-3 py-3 bg-slate-100 rounded-b-xl">
+                  <p class="text-sm text-rose-500 mt-2 mb-1">
                     数量を入力して、確定ボタンを押してください。
                   </p>
                   <div class="flex items-center justify-start py-2 mb-2">
                     <input
-                      class="appearance-none block w-1/2 bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 text-center font-bold text-xl pointer-events-none"
+                      class="form-input-modern w-1/2 text-center font-bold text-xl pointer-events-none"
                       type="number"
                       name="change_quantity"
                       id=""
@@ -569,7 +573,7 @@ onMounted(() => {
                     <button
                       @click="changeQuantity"
                       v-if="change_quantity || change_quantity == '0'"
-                      class="ml-4 text-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                      class="btn-primary ml-4 text-sm"
                     >
                       確定
                     </button>
@@ -578,74 +582,74 @@ onMounted(() => {
                   <div class="ten-keypad">
                     <div class="grid grid-cols-3 gap-2">
                       <button
-                        class="ten-key-button"
+                        class="ten-key-button bg-slate-100 hover:bg-slate-200 rounded-xl"
                         @click="handleTenKeyInput(1)"
                       >
                         1
                       </button>
                       <button
-                        class="ten-key-button"
+                        class="ten-key-button bg-slate-100 hover:bg-slate-200 rounded-xl"
                         @click="handleTenKeyInput(2)"
                       >
                         2
                       </button>
                       <button
-                        class="ten-key-button"
+                        class="ten-key-button bg-slate-100 hover:bg-slate-200 rounded-xl"
                         @click="handleTenKeyInput(3)"
                       >
                         3
                       </button>
                       <button
-                        class="ten-key-button"
+                        class="ten-key-button bg-slate-100 hover:bg-slate-200 rounded-xl"
                         @click="handleTenKeyInput(4)"
                       >
                         4
                       </button>
                       <button
-                        class="ten-key-button"
+                        class="ten-key-button bg-slate-100 hover:bg-slate-200 rounded-xl"
                         @click="handleTenKeyInput(5)"
                       >
                         5
                       </button>
                       <button
-                        class="ten-key-button"
+                        class="ten-key-button bg-slate-100 hover:bg-slate-200 rounded-xl"
                         @click="handleTenKeyInput(6)"
                       >
                         6
                       </button>
                       <button
-                        class="ten-key-button"
+                        class="ten-key-button bg-slate-100 hover:bg-slate-200 rounded-xl"
                         @click="handleTenKeyInput(7)"
                       >
                         7
                       </button>
                       <button
-                        class="ten-key-button"
+                        class="ten-key-button bg-slate-100 hover:bg-slate-200 rounded-xl"
                         @click="handleTenKeyInput(8)"
                       >
                         8
                       </button>
                       <button
-                        class="ten-key-button"
+                        class="ten-key-button bg-slate-100 hover:bg-slate-200 rounded-xl"
                         @click="handleTenKeyInput(9)"
                       >
                         9
                       </button>
                       <button
-                        class="ten-key-button"
+                        class="ten-key-button bg-slate-100 hover:bg-slate-200 rounded-xl"
                         @click="handleTenKeyDelete"
                         title="削除"
                       >
                         <i class="fas fa-backspace"></i>
                       </button>
                       <button
-                        class="ten-key-button"
+                        class="ten-key-button bg-slate-100 hover:bg-slate-200 rounded-xl"
                         @click="handleTenKeyInput(0)"
                       >
                         0
                       </button>
                       <button
-                        class="ten-key-button"
+                        class="ten-key-button bg-slate-100 hover:bg-slate-200 rounded-xl"
                         @click="change_quantity = null"
                         title="クリア"
                       >
@@ -656,10 +660,10 @@ onMounted(() => {
                 </div>
               </details>
               <details class="manage_details">
-                <summary class="text-white pl-4 mt-4">
+                <summary class="text-white pl-4 mt-4 bg-primary-600 rounded-xl py-2 px-4 cursor-pointer">
                   格納先・アドレス編集
                 </summary>
-                <div class="px-2 py-2 bg-gray-300">
+                <div class="px-3 py-3 bg-slate-100 rounded-b-xl">
                   <PickStorageAddress
                     @updateLocation="handleUpdateLocation"
                     :quantity="stock_storage.quantity"
@@ -668,7 +672,7 @@ onMounted(() => {
                 </div>
               </details>
               <details class="alias_details">
-                <summary class="text-white pl-4 mt-4">
+                <summary class="text-white pl-4 mt-4 bg-primary-600 rounded-xl py-2 px-4 cursor-pointer">
                   略名登録・編集・削除
                 </summary>
                 <EditAlias
@@ -693,22 +697,18 @@ onMounted(() => {
                     stock_storage_address_id: stock_storage.id,
                   })
                 "
-                ><img src="/images/stocks/icons/shipment.png" alt="出庫画面"
-              /></Link>
-
-              <!-- <button @click="orderStock">
-                <img src="/images/stocks/icons/order.png" alt="発注画面" />
-              </button> -->
+                class="btn-primary inline-flex items-center gap-2 text-lg px-8 py-4"
+                ><i class="fas fa-truck"></i> 出庫</Link>
             </div>
 
             <!-- 滞留情報を表示 -->
             <div>
               <span
                 :class="{
-                  'rounded py-4 text-white block text-4xl font-bold text-center font-mono': true,
-                  'bg-red-400': retention.retention_flg == 2,
-                  'bg-orange-400': retention.retention_flg == 1,
-                  'bg-green-400': !retention.retention_flg,
+                  'rounded-xl py-4 text-white block text-4xl font-bold text-center font-mono': true,
+                  'bg-rose-500': retention.retention_flg == 2,
+                  'bg-amber-500': retention.retention_flg == 1,
+                  'bg-emerald-500': !retention.retention_flg,
                 }"
                 >{{
                   retention.retention_flg == 2
@@ -719,23 +719,23 @@ onMounted(() => {
                 }}</span
               >
 
-              <p v-if="retention.retention_flg" class="text-gray-700 mt-2">
+              <p v-if="retention.retention_flg" class="text-slate-700 mt-2">
                 {{ `${changeDateFormat(retention.start_date)} より` }}
-                <span class="text-red-500 text-lg font-bold"
+                <span class="text-rose-500 text-lg font-bold"
                   >{{ `${retention.dif_month}` }}カ月</span
                 >
                 滞留しています。
                 <br />
               </p>
-              <p v-else class="text-gray-700 mt-2">
+              <p v-else class="text-slate-700 mt-2">
                 この物品は滞留していません。
               </p>
             </div>
           </section>
 
           <!-- 格納先が登録されていない場合 -->
-          <section v-else class="bg-gray-50 p-2 rounded">
-            <h1 class="text-xl mb-4 text-gray-600 font-bold">
+          <section v-else class="card p-6">
+            <h1 class="section-title mb-4">
               ロケーション登録
             </h1>
             <PickStorageAddress
@@ -758,88 +758,56 @@ onMounted(() => {
         <section
           id="order_container"
           :class="{
-            'w-full mt-8 text-gray-600 body-font flex justify-between items-center': true,
+            'w-full mt-8 text-slate-600 body-font flex justify-between items-start gap-4': true,
             'opacity-20': previewImage.img_path,
           }"
         >
-          <div class="container mx-auto mr-2">
-            <h2 class="array_title text-green-500">発注依頼</h2>
-            <div id="archive_container" class="w-full mx-auto overflow-auto">
-              <table class="table-auto w-full text-left whitespace-no-wrap border-collapse">
+          <div class="card overflow-hidden flex-1">
+            <div class="p-4">
+              <h2 class="section-title text-emerald-600 mb-3"><i class="fas fa-clipboard-list mr-2"></i>発注依頼</h2>
+            </div>
+            <div class="overflow-auto">
+              <table class="table-modern w-full">
                 <thead>
-                  <tr class="bg-gray-100 dark:bg-gray-800">
-                    <th
-                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600 text-center"
-                    >操作</th>
-                    <th
-                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
-                    >
-                      状況
-                    </th>
-                    <th
-                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
-                    >
-                      発注依頼日
-                    </th>
-                    <th
-                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
-                    >
-                      必要個数
-                    </th>
-                    <th
-                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
-                    >
-                      現在個数
-                    </th>
-                    <th
-                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
-                    >
-                      注文依頼者
-                    </th>
-                    <th
-                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
-                    >
-                      注文者
-                    </th>
-                    <th
-                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
-                    >
-                      備考
-                    </th>
+                  <tr>
+                    <th class="text-center">操作</th>
+                    <th>状況</th>
+                    <th>発注依頼日</th>
+                    <th>必要個数</th>
+                    <th>現在個数</th>
+                    <th>注文依頼者</th>
+                    <th>注文者</th>
+                    <th>備考</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr
                     v-for="order_request in props.stock.order_requests"
                     :key="order_request.id"
-                    :class="{
-                      'bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 border-l-4 border-red-400': !order_request.status,
-                      'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border-l-4 border-green-400': order_request.status,
-                      'transition-colors duration-150': true
-                    }"
+                    class="hover:bg-slate-50 transition-colors duration-150"
                   >
-                    <td class="py-4 px-4 text-center border-b border-gray-200 dark:border-gray-700">
+                    <td class="text-center">
                       <button
                         @click="deleteOrderRequest(order_request.id)"
                         v-if="!order_request.status"
-                        class="bg-red-500 hover:bg-red-700 text-white font-bold py-2.5 px-5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                        class="btn-danger text-sm"
                       >
-                        🗑️ 取消
+                        <i class="fas fa-trash-alt mr-1"></i> 取消
                       </button>
-                      <span v-else class="text-gray-400 dark:text-gray-500 text-sm">取消不可</span>
+                      <span v-else class="text-slate-400 text-sm">取消不可</span>
                     </td>
-                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">
+                    <td>
                       <span
                         :class="{
-                          'inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold': true,
-                          'bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-100': order_request.status,
-                          'bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-100': !order_request.status,
+                          'badge-success': order_request.status,
+                          'badge-danger': !order_request.status,
                         }"
                       >
-                        {{ order_request.status ? "✓ 受理済" : "⚠ 未受理" }}
+                        <i :class="order_request.status ? 'fas fa-check mr-1' : 'fas fa-exclamation-triangle mr-1'"></i>
+                        {{ order_request.status ? "受理済" : "未受理" }}
                       </span>
                     </td>
-                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">
+                    <td>
                       {{
                         new Date(order_request.created_at).toLocaleDateString(
                           "ja-JP",
@@ -851,27 +819,27 @@ onMounted(() => {
                         )
                       }}
                     </td>
-                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700 font-semibold">
+                    <td class="font-semibold">
                       {{
                         order_request.quantity ? order_request.quantity : "-"
                       }}
                     </td>
-                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700 font-semibold">
+                    <td class="font-semibold">
                       {{ order_request.now_quantity ?? "-" }}
                     </td>
-                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">
+                    <td>
                       {{
                         order_request.request_user_name
                           ? order_request.request_user_name
                           : "-"
                       }}
                     </td>
-                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">
+                    <td>
                       {{
                         order_request.user_name ? order_request.user_name : "-"
                       }}
                     </td>
-                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">
+                    <td>
                       {{ order_request.description ?? "-" }}
                     </td>
                   </tr>
@@ -879,72 +847,50 @@ onMounted(() => {
               </table>
             </div>
           </div>
-          <div class="container mx-auto ml-2">
-            <h2 class="array_title text-red-500">発注履歴</h2>
-            <div id="archive_container" class="w-full mx-auto overflow-auto">
-              <table class="table-auto w-full text-left whitespace-no-wrap border-collapse">
+          <div class="card overflow-hidden flex-1">
+            <div class="p-4">
+              <h2 class="section-title text-rose-600 mb-3"><i class="fas fa-history mr-2"></i>発注履歴</h2>
+            </div>
+            <div class="overflow-auto">
+              <table class="table-modern w-full">
                 <thead>
-                  <tr class="bg-gray-100 dark:bg-gray-800">
-                    <th
-                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
-                    >
-                      状況
-                    </th>
-                    <th
-                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
-                    >
-                      発注日
-                    </th>
-                    <th
-                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
-                    >
-                      依頼者
-                    </th>
-                    <th
-                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
-                    >
-                      発注者
-                    </th>
-                    <th
-                      class="py-4 px-4 title-font tracking-wider font-medium text-gray-500 text-md border-b-2 border-gray-300 dark:border-gray-600"
-                    >
-                      個数
-                    </th>
+                  <tr>
+                    <th>状況</th>
+                    <th>発注日</th>
+                    <th>依頼者</th>
+                    <th>発注者</th>
+                    <th>個数</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr
                     v-for="order in props.stock.initial_orders"
                     :key="order.id"
-                    :class="{
-                      'bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 border-l-4 border-red-400': !order.receipt_flg && !order.receive_flg,
-                      'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border-l-4 border-green-400': order.receipt_flg || order.receive_flg,
-                      'transition-colors duration-150': true
-                    }"
+                    class="hover:bg-slate-50 transition-colors duration-150"
                   >
-                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">
-                      <button 
+                    <td>
+                      <button
                         @click="checkDeliFile(order.delifile_path)"
                         class="w-full text-left"
                       >
                         <span
                           :class="{
-                            'inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold': true,
-                            'bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-100': order.receipt_flg || order.receive_flg,
-                            'bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-100': !order.receipt_flg && !order.receive_flg,
+                            'badge-success': order.receipt_flg || order.receive_flg,
+                            'badge-warning': !order.receipt_flg && !order.receive_flg,
                           }"
                         >
+                          <i :class="(order.receipt_flg || order.receive_flg) ? 'fas fa-check mr-1' : 'fas fa-exclamation-triangle mr-1'"></i>
                           {{
                             order.receipt_flg
-                              ? "✓ 納品済(入庫)"
+                              ? "納品済(入庫)"
                               : order.receive_flg
-                              ? "✓ 納品済(引渡)"
-                              : "⚠ 未納品"
+                              ? "納品済(引渡)"
+                              : "未納品"
                           }}
                         </span>
                       </button>
                     </td>
-                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">
+                    <td>
                       {{
                         new Date(order.order_date).toLocaleDateString("ja-JP", {
                           year: "numeric",
@@ -954,9 +900,9 @@ onMounted(() => {
                       }}
                     </td>
 
-                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">{{ order.user_name ?? "-" }}</td>
-                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700">{{ order.order_user_name ?? "-" }}</td>
-                    <td class="py-4 px-4 border-b border-gray-200 dark:border-gray-700 font-semibold">{{ order.quantity ?? "-" }}</td>
+                    <td>{{ order.user_name ?? "-" }}</td>
+                    <td>{{ order.order_user_name ?? "-" }}</td>
+                    <td class="font-semibold">{{ order.quantity ?? "-" }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -967,10 +913,10 @@ onMounted(() => {
         <!-- 出庫・入庫変動グラフを表示 -->
         <section
           id="chart_container"
-          class="w-full mt-8 text-gray-600 body-font flex justify-between items-center"
+          class="w-full mt-8 text-slate-600 body-font flex justify-between items-start gap-4"
         >
-          <div class="container mx-auto mr-2">
-            <h3 class="font-bold text-gray-500">
+          <div class="card p-4 flex-1">
+            <h3 class="font-bold text-slate-500 mb-2">
               月平均入庫数 : {{ receive_average + props.stock.solo_unit }}
             </h3>
             <Chart
@@ -980,8 +926,8 @@ onMounted(() => {
               :average="receive_average"
             />
           </div>
-          <div class="container mx-auto ml-2">
-            <h3 class="font-bold text-gray-500">
+          <div class="card p-4 flex-1">
+            <h3 class="font-bold text-slate-500 mb-2">
               月平均出庫数 : {{ shipment_average + props.stock.solo_unit }}
             </h3>
             <Chart
@@ -997,34 +943,7 @@ onMounted(() => {
   </StockLayout>
 </template>
 <style scoped lang="scss">
-#previewImage {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2;
-  height: 80vh;
-  width: 80vw;
-  background-color: rgb(255, 255, 255);
-  border-radius: 5px;
-  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-  & p {
-    font-size: 1.1rem;
-    font-family: serif;
-    color: #109ff3;
-    font-weight: bold;
-  }
-
-  & .img_container {
-    width: 100%;
-    height: 80%;
-    & img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-  }
-}
+/* Preview image now uses modal-overlay/modal-content global classes */
 
 #left_container {
   & h1 {
@@ -1037,44 +956,18 @@ onMounted(() => {
   & .stock_name {
     font-size: 2rem;
     font-weight: bold;
-    color: #109ff3;
+    /* color handled by text-primary-600 utility */
   }
   & .stock_s_name {
     font-size: 1.6rem;
-    color: gray;
   }
   & .stock_aliases {
     font-size: 1.2rem;
-    color: gray;
   }
   & .file_container {
     width: 95%;
     & .open_camera_button {
-      height: 5vh;
       width: 45%;
-      position: relative;
-
-      & img {
-        position: absolute;
-        top: 0;
-        left: 0;
-
-        height: 100%;
-        width: 100%;
-        object-fit: contain;
-      }
-
-      & input[type="file"] {
-        position: absolute;
-        top: 0;
-        left: 0;
-
-        height: 100%;
-        width: 100%;
-        object-fit: cover;
-        opacity: 0;
-        z-index: 2;
-      }
     }
   }
 }
@@ -1085,22 +978,12 @@ onMounted(() => {
       font-weight: bold;
       font-size: 2.6rem;
 
-      &#location_name {
-        color: #646464;
-      }
-      &#address {
-        color: rgb(83, 83, 83);
-      }
-      &#quantity {
-        font-weight: normal;
-        color: rgb(102, 102, 102);
-      }
       &#reorder_point {
         display: flex;
         justify-content: center;
         align-items: baseline;
         color: rgb(44, 44, 44);
-        border-bottom: 2px dashed rgba(126, 126, 126, 0.575);
+        border-bottom: 2px dashed rgba(148, 163, 184, 0.5);
 
         & span {
           display: inline-block;
@@ -1112,7 +995,7 @@ onMounted(() => {
           }
           &.value {
             font-size: 3rem;
-            color: rgb(255, 51, 51);
+            color: #e11d48;
             width: 20%;
           }
         }
@@ -1122,120 +1005,54 @@ onMounted(() => {
     & .manage_details,
     .alias_details {
       & summary {
-        border-radius: 5px;
-        background-color: rgb(59 130 246);
         font-family: monospace;
-        padding: 1% 2%;
+        list-style: none;
+      }
+      & summary::-webkit-details-marker {
+        display: none;
       }
       &[open] {
         & summary {
-          border-radius: 5px 5px 0 0;
+          border-radius: 0.75rem 0.75rem 0 0;
         }
-      }
-      & > div {
-        border-radius: 0 0 5px 5px;
       }
     }
   }
 
   & #button_container {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-
-    height: 80px;
-
-    & a,
-    button {
-      display: block;
-      width: 30%;
-      & img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-      }
-    }
+    gap: 1rem;
   }
 }
 
 #order_container {
-  height: 45vh;
+  min-height: 45vh;
 
-  & > div {
-    height: 100%;
-    overflow-y: auto;
-
-    background-color: rgb(255, 255, 255);
-    padding: 1rem;
-    border-radius: 5px;
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-
-    & .array_title {
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
-
-    & #archive_container {
-      overflow-x: auto;
-
-      // スクロールバー
-      &::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      &::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-      }
-
-      &::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, #4a90e2, #007aff);
-        border-radius: 10px;
-      }
-
-      &::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(180deg, #007aff, #005bb5);
-      }
-
-      ////
-
-      & table {
-        table-layout: auto;
-        width: 100%;
-        & tr:nth-child(even) {
-          background-color: #f9f9f9;
-        }
-        & tr:nth-child(odd) {
-          background-color: #ffffff;
-        }
-        & td,
-        th {
-          padding: 0.8rem 0.6rem;
-          text-align: left;
-          white-space: nowrap;
-        }
-      }
-    }
+  // スクロールバー
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #6366f1, #4f46e5);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #4f46e5, #4338ca);
   }
 }
 
 #chart_container {
-  & > div {
-    background-color: rgb(255, 255, 255);
-    padding: 1rem;
-    border-radius: 5px;
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-
-    & .array_title {
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
-
-    & canvas {
-      height: 100%;
-      width: 100%;
-      object-fit: cover;
-    }
+  & canvas {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
   }
 }
 
@@ -1246,6 +1063,8 @@ onMounted(() => {
 .swiper {
   width: 100%;
   height: 400px;
+  border-radius: 0.75rem;
+  overflow: hidden;
 }
 
 .swiper-slide img {
@@ -1275,7 +1094,7 @@ onMounted(() => {
       position: absolute;
       bottom: 5px;
       right: 5px;
-      background: #ff4444;
+      background: #e11d48;
       color: white;
       border: none;
       border-radius: 50%;
@@ -1289,7 +1108,7 @@ onMounted(() => {
       z-index: 10;
 
       &:hover {
-        background: #cc0000;
+        background: #be123c;
         transform: scale(1.1);
       }
 
@@ -1301,8 +1120,8 @@ onMounted(() => {
 
   & .swiper-slide-active {
     opacity: 1;
-    border: 3px solid #109ff3;
-    border-radius: 6px;
+    border: 3px solid #4f46e5;
+    border-radius: 0.75rem;
   }
 }
 
@@ -1310,20 +1129,18 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: 0.5rem;
 }
 
 .ten-keypad {
   margin-top: 1rem;
 
   .ten-key-button {
-    background-color: #f3f4f6;
-    border: 2px solid #d1d5db;
-    border-radius: 8px;
+    border: 1px solid #e2e8f0;
     padding: 0.75rem;
     font-size: 1.25rem;
     font-weight: bold;
-    color: #374151;
+    color: #334155;
     cursor: pointer;
     transition: all 0.2s ease;
     min-height: 3rem;
@@ -1332,22 +1149,19 @@ onMounted(() => {
     justify-content: center;
 
     &:hover {
-      background-color: #e5e7eb;
-      border-color: #9ca3af;
       transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
     }
 
     &:active {
-      background-color: #d1d5db;
+      background-color: #cbd5e1;
       transform: translateY(0);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
 
     &:focus {
       outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
     }
   }
 }

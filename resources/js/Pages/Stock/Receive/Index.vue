@@ -234,28 +234,28 @@ onMounted(() => {
 <template>
   <ReceiveLayout :title="'納品登録'">
     <template #content>
-      <section class="text-gray-600 body-font">
-        <div class="container py-12 mx-auto">
+      <section class="bg-slate-50 min-h-screen py-8 px-4">
+        <div class="max-w-7xl mx-auto">
           <!-- タイトル -->
-          <div class="flex flex-col text-center w-full mb-8">
-            <h1 class="text-3xl font-medium title-font mb-2 text-green-600">
+          <div class="page-header text-center mb-8">
+            <h1 class="section-title text-primary-600">
               納品登録
             </h1>
-            <p class="lg:w-2/3 mx-auto leading-relaxed text-base">
+            <p class="section-subtitle max-w-2xl mx-auto">
               以下の画面より納品書登録を行います。<br />
-              品名・品番が一致するデータがない場合、背景色が青色で表示されます。<br />
+              品名・品番が一致するデータがない場合、背景色が赤色で表示されます。<br />
               一致するデータがない場合、納品登録画面にて作成する必要があります。
             </p>
           </div>
 
           <!-- 絞り込み -->
-          <div class="w-1/2 mx-auto mb-8">
-            <div class="p-2 flex justify-start">
-              <div class="w-1/3 relative mr-2">
-                <label class="leading-7 text-sm text-gray-600">絞込み</label>
+          <div class="card max-w-2xl mx-auto mb-8 p-6">
+            <div class="flex flex-wrap gap-4">
+              <div class="flex-1 min-w-[200px]">
+                <label class="form-label">絞込み</label>
                 <select
                   @change="handleChangeSupplier($event.target.value)"
-                  class="w-full bg-gray-100 rounded border border-gray-300 focus:border-indigo-500"
+                  class="form-select-modern"
                 >
                   <option value="">全ての取引先</option>
                   <option
@@ -268,13 +268,13 @@ onMounted(() => {
                 </select>
               </div>
 
-              <div class="w-1/2 relative ml-2">
-                <label class="leading-7 text-sm text-gray-600">検索</label>
+              <div class="flex-1 min-w-[200px]">
+                <label class="form-label">検索</label>
                 <input
                   @input="searchOrders"
                   v-model="searchText"
                   type="text"
-                  class="w-full bg-gray-100 rounded border border-gray-300 focus:border-indigo-500"
+                  class="form-input-modern"
                   placeholder="品名・品番"
                 />
               </div>
@@ -282,98 +282,102 @@ onMounted(() => {
           </div>
 
           <!-- テーブル -->
-          <div class="w-full mx-auto overflow-auto">
-            <table class="table-auto w-full text-left whitespace-no-wrap">
-              <thead>
-                <tr>
-                  <th class="px-4 py-3 bg-gray-100">選択</th>
-                  <th class="px-4 py-3 bg-gray-100">注文No</th>
-                  <th class="px-4 py-3 bg-gray-100">画像</th>
-                  <th class="px-4 py-3 bg-gray-100">注文者</th>
-                  <th class="px-4 py-3 bg-gray-100">注文日</th>
-                  <th class="px-4 py-3 bg-gray-100">希望納期</th>
-                  <th class="px-4 py-3 bg-gray-100">注文先</th>
-                  <th class="px-4 py-3 bg-gray-100">品名</th>
-                  <th class="px-4 py-3 bg-gray-100">品番</th>
-                  <th class="px-4 py-3 bg-gray-100">数量</th>
-                  <th class="w-10 bg-gray-100"></th>
-                  <th class="w-10 bg-gray-100"></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="order in initial_orders"
-                  :key="order.id"
-                  :class="{ 'bg-red-100': order.not_found_flg }"
-                >
-                  <td class="px-4 py-6">
-                    <input
-                      type="checkbox"
-                      @change="
-                        updateSelectList(order.id, $event.target.checked)
-                      "
-                    />
-                  </td>
-                  <td class="px-4 py-6">{{ order.order_no }}</td>
-                  <td class="w-24 px-4 py-6">
-                    <img
-                      @click="modalImage($event.target)"
-                      :src="
-                        order.img_path && order.img_path.includes('https://')
-                          ? order.img_path
-                          : 'https://akioka.cloud/' + order.img_path
-                      "
-                      alt=""
-                    />
-                  </td>
-                  <td class="px-4 py-6">{{ order.order_user }}</td>
-                  <td class="px-4 py-6">
-                    {{ new Date(order.order_date).toLocaleDateString("ja-JP") }}
-                  </td>
-                  <td class="px-4 py-6">
-                    {{
-                      order.desire_delivery_date
-                        ? new Date(
-                            order.desire_delivery_date
-                          ).toLocaleDateString("ja-JP")
-                        : "未指定"
-                    }}
-                  </td>
-                  <td class="px-4 py-6">{{ order.com_name }}</td>
-                  <td class="px-4 py-6">
-                    <span
-                      v-html="highlightMatch(order.name, order.nameMatch)"
-                    ></span>
-                  </td>
-                  <td class="px-4 py-6">
-                    <span
-                      v-html="
-                        highlightMatch(order.s_name ?? '', order.sNameMatch)
-                      "
-                    ></span>
-                  </td>
-                  <td class="px-4 py-6">
-                    {{ order.quantity + order.order_unit }}
-                  </td>
-                  <td class="w-10 text-center whitespace-nowrap">
-                    <button
-                      @click="uploadFile(order.id)"
-                      class="bg-transparent hover:bg-gray-500 text-gray-700 font-semibold hover:text-white py-2 px-4 border border-gray-500 rounded text-sm"
-                    >
-                      納品書
-                    </button>
-                  </td>
-                  <td class="w-10 text-center px-2 whitespace-nowrap">
-                    <button
-                      @click="deleteInitialOrder(order.id)"
-                      class="bg-red-500 text-white font-semibold py-2 px-4 border border-red-500 rounded text-sm"
-                    >
-                      削除
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="table-modern">
+                <thead>
+                  <tr>
+                    <th>選択</th>
+                    <th>注文No</th>
+                    <th>画像</th>
+                    <th>注文者</th>
+                    <th>注文日</th>
+                    <th>希望納期</th>
+                    <th>注文先</th>
+                    <th>品名</th>
+                    <th>品番</th>
+                    <th>数量</th>
+                    <th></th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="order in initial_orders"
+                    :key="order.id"
+                    :class="{ 'bg-red-50': order.not_found_flg }"
+                  >
+                    <td>
+                      <input
+                        type="checkbox"
+                        class="rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                        @change="
+                          updateSelectList(order.id, $event.target.checked)
+                        "
+                      />
+                    </td>
+                    <td class="font-medium text-slate-800">{{ order.order_no }}</td>
+                    <td class="w-24">
+                      <img
+                        @click="modalImage($event.target)"
+                        :src="
+                          order.img_path && order.img_path.includes('https://')
+                            ? order.img_path
+                            : 'https://akioka.cloud/' + order.img_path
+                        "
+                        alt=""
+                        class="rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                      />
+                    </td>
+                    <td>{{ order.order_user }}</td>
+                    <td>
+                      {{ new Date(order.order_date).toLocaleDateString("ja-JP") }}
+                    </td>
+                    <td>
+                      {{
+                        order.desire_delivery_date
+                          ? new Date(
+                              order.desire_delivery_date
+                            ).toLocaleDateString("ja-JP")
+                          : "未指定"
+                      }}
+                    </td>
+                    <td>{{ order.com_name }}</td>
+                    <td>
+                      <span
+                        v-html="highlightMatch(order.name, order.nameMatch)"
+                      ></span>
+                    </td>
+                    <td>
+                      <span
+                        v-html="
+                          highlightMatch(order.s_name ?? '', order.sNameMatch)
+                        "
+                      ></span>
+                    </td>
+                    <td>
+                      {{ order.quantity + order.order_unit }}
+                    </td>
+                    <td class="text-center whitespace-nowrap">
+                      <button
+                        @click="uploadFile(order.id)"
+                        class="btn-secondary text-sm"
+                      >
+                        納品書
+                      </button>
+                    </td>
+                    <td class="text-center whitespace-nowrap">
+                      <button
+                        @click="deleteInitialOrder(order.id)"
+                        class="btn-danger text-sm"
+                      >
+                        削除
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
@@ -381,44 +385,44 @@ onMounted(() => {
       <!-- カメラモーダル -->
       <div
         v-if="modalStatus"
-        class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+        class="modal-overlay"
       >
-        <div class="bg-white p-4 rounded-xl shadow-xl w-2/3 max-w-2xl">
+        <div class="modal-content w-2/3 max-w-2xl">
           <!-- カメラ映像：プレビューがない時のみ表示 -->
           <video
             v-if="!previewImage"
             ref="videoRef"
             autoplay
             playsinline
-            class="w-full rounded-lg mb-2"
+            class="w-full rounded-xl mb-4"
           ></video>
 
           <canvas ref="captureCanvas" class="hidden"></canvas>
 
           <!-- プレビュー -->
-          <div v-if="previewImage" class="mb-2">
-            <p class="text-sm text-gray-700 mb-1 font-bold">プレビュー:</p>
-            <img :src="previewImage" class="w-full rounded border" />
+          <div v-if="previewImage" class="mb-4">
+            <p class="text-sm text-slate-700 mb-2 font-semibold">プレビュー:</p>
+            <img :src="previewImage" class="w-full rounded-xl border border-slate-200" />
           </div>
 
-          <div class="flex justify-between space-x-2 mt-2">
+          <div class="flex justify-between gap-3 mt-4">
             <!-- プレビュー前 -->
             <template v-if="!previewImage">
               <button
                 @click="handleCapture"
-                class="bg-green-500 text-white px-4 py-2 rounded"
+                class="btn-success"
               >
                 撮影
               </button>
               <button
                 @click="toggleCameraFacing"
-                class="bg-yellow-500 text-white px-4 py-2 rounded"
+                class="btn-secondary"
               >
                 カメラ切替
               </button>
               <button
                 @click="fileInputRef.click()"
-                class="bg-blue-500 text-white px-4 py-2 rounded"
+                class="btn-primary"
               >
                 ファイルから選択
               </button>
@@ -431,7 +435,7 @@ onMounted(() => {
               />
               <button
                 @click="handleCloseModal"
-                class="bg-red-500 text-white px-4 py-2 rounded"
+                class="btn-danger"
               >
                 キャンセル
               </button>
@@ -441,20 +445,20 @@ onMounted(() => {
             <template v-else>
               <button
                 @click="confirmUpload"
-                class="bg-purple-500 text-white px-4 py-2 rounded"
+                class="btn-primary"
                 :disabled="!previewFile"
               >
                 確定
               </button>
               <button
                 @click="retakePhoto"
-                class="bg-yellow-500 text-white px-4 py-2 rounded"
+                class="btn-secondary"
               >
                 再撮影
               </button>
               <button
                 @click="handleCloseModal"
-                class="bg-red-500 text-white px-4 py-2 rounded"
+                class="btn-danger"
               >
                 キャンセル
               </button>

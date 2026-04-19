@@ -13,12 +13,8 @@ const props = defineProps({
 onMounted(() => {});
 </script>
 <template>
-  <MainLayout :url="'stock.home'" :title="'棚卸し登録'" :login_user="login_user">
+  <MainLayout :url="'stock.home'" :title="'New Inventory'" :login_user="login_user">
     <template #content>
-
-
-      <!-- <h1>新規棚卸登録</h1> -->
-
       <SearchInput
         :formStatus="true"
         :suppliers="props.suppliers"
@@ -26,8 +22,3 @@ onMounted(() => {});
     </template>
   </MainLayout>
 </template>
-
-
-
-<style>
-</style>

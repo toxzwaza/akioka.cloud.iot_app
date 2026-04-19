@@ -17,7 +17,6 @@ const getLatestdata = () => {
     .get("/getLatestData")
     .then((res) => {
       latestData.value = res.data;
-      console.log(latestData.value);
     })
     .catch((err) => {});
 };
@@ -25,11 +24,10 @@ const getTempHumiCo2 = () => {
   axios
     .get(route('getTempHumiCo2'))
     .then((res) => {
-      console.log(res.data);
       tempHumiCo2.value = res.data;
     })
     .catch((err) => {
-      console.error('データの取得に失敗しました:', err);
+      console.error('Data fetch failed:', err);
     });
 };
 
@@ -42,30 +40,31 @@ onMounted(() => {
 <template>
     <MainLayout :title="'Dashboard'">
         <template #content>
-            <div class="flex justify-between items-center mb-2">
-                <h1 class="text-lg font-bold text-gray-400 mb-2">
-                    ダッシュボード
-                </h1>
-                <button
-                    @click="updatedata"
-                    class="bg-green-500 hover:bg-white text-white hover:text-green-500 px-4 py-2 rounded font-bold text-sm border border-green-500 transition duration-200"
-                >
-                    データ更新
+            <div class="page-header">
+                <div>
+                    <h1 class="section-title">Dashboard</h1>
+                    <p class="section-subtitle">Environmental monitoring</p>
+                </div>
+                <button @click="updatedata" class="btn-success text-sm">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
                 </button>
             </div>
 
-            <div id="top_container">
-                <div>
+            <!-- Sensor cards -->
+            <div class="card p-5 mb-6">
+                <div class="flex items-center gap-4 overflow-x-auto pb-2 custom-scroll">
                     <DataCard v-for="data in latestData" :key="data.id" :data="data"/>
                 </div>
             </div>
-            <div id="bottom_container">
-                <div class="base_chart_container">
-                    <div>
-                        <BaseChart :title="'温度'" :data="tempHumiCo2.temperature"  />
-                        <BaseChart :title="'湿度'" :data="tempHumiCo2.humidity" />
-                        <BaseChart :title="'Co2濃度'" :data="tempHumiCo2.co2" />
-                    </div>
+
+            <!-- Charts -->
+            <div class="card p-5">
+                <h2 class="text-sm font-semibold text-slate-500 mb-4">Trends (24h)</h2>
+                <div class="flex gap-4">
+                    <BaseChart :title="'Temperature'" :data="tempHumiCo2.temperature" />
+                    <BaseChart :title="'Humidity'" :data="tempHumiCo2.humidity" />
+                    <BaseChart :title="'CO2'" :data="tempHumiCo2.co2" />
                 </div>
             </div>
         </template>
@@ -73,54 +72,16 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
-#top_container {
-    background-color: #fff;
-    padding: 1% 2%;
-    border-radius: 4px;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
-        rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-    & > div {
-        padding: 1% 0;
-
-        &::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        &::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        &::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-
-        &::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        overflow-x: scroll;
+.custom-scroll {
+    &::-webkit-scrollbar {
+        height: 6px;
     }
-}
-#bottom_container {
-    background-color: #fff;
-    margin-top: 20px;
-    padding: 1% 2%;
-    border-radius: 4px;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
-        rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-
-    & .base_chart_container {
-        & > div {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 100%;
-        }
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
     }
 }
 </style>

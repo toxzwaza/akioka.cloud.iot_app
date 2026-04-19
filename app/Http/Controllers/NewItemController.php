@@ -24,9 +24,9 @@ class NewItemController extends Controller
     public function home(Request $request)
     {
 
-        $processes = Process::all();
-        $users = User::where('del_flg', 0)->orderBy('process_id', 'desc')->orderBy('position_id', 'asc')->get();
-        $suppliers = Supplier::all();
+        $processes = Process::select('id', 'name')->get();
+        $users = User::select('id', 'name', 'process_id', 'position_id')->where('del_flg', 0)->orderBy('process_id', 'desc')->orderBy('position_id', 'asc')->get();
+        $suppliers = Supplier::select('id', 'name', 'supplier_no')->get();
 
         $order_request_id = $request->order_request_id;
         $order_request = OrderRequest::select([

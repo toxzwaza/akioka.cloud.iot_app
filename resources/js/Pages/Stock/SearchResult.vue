@@ -18,98 +18,90 @@ onMounted( ()=> {
   <StockLayout :title="'検索'">
     <template #content>
 
-      <Link
-        :class="{'ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded' : true}"
-        :href="route('stock.search', { search: props.search })"
-      >
-        検索画面を表示
-      </Link>
+      <div class="page-header mb-6">
+        <div>
+          <h1 class="section-title">
+            <i class="fas fa-search text-primary-500 mr-2"></i>
+            検索結果
+          </h1>
+          <p class="section-subtitle">{{ stocks.length }} 件の在庫が見つかりました</p>
+        </div>
+        <div>
+          <Link
+            class="btn-primary"
+            :href="route('stock.search', { search: props.search })"
+          >
+            <i class="fas fa-search mr-2"></i>
+            検索画面を表示
+          </Link>
+        </div>
+      </div>
 
       <!-- 検索結果表示用コンポーネント -->
-      <div>
-        <div v-if="stocks.length > 0" class="">
+      <div v-if="stocks.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          v-for="stock in stocks"
+          :key="stock.id"
+          class="card card-hover overflow-hidden"
+        >
+          <div class="bg-slate-50 flex items-center justify-center p-4" style="height: 220px;">
+            <img
+              class="rounded-xl max-h-full object-contain"
+              :src="getImgPath(stock.img_path)"
+              alt=""
+            />
+          </div>
+          <div class="p-6">
+            <h5 class="text-xl font-bold text-slate-800 truncate mb-2">
+              {{ stock.name }}
+            </h5>
+            <p class="text-base text-slate-500 mb-4">
+              <i class="fas fa-barcode mr-1.5"></i>品番: {{ stock.s_name }}
+            </p>
 
-          <hr class="my-8" />
-          <div class="mt-4 flex flex-wrap justify-between">
-            <div
-              v-for="stock in stocks"
-              :key="stock.id"
-              class="stock_card bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 m-4"
-            >
-              <div class="stock_img">
-                <img class="rounded-t-lg" :src="getImgPath(stock.img_path)" alt="" />
-              </div>
-              <div class="p-5">
-                <a href="#">
-                  <h5
-                    class="whitespace-nowrap text-ellipsis overflow-hidden mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-                  >
-                    {{ stock.name }}
-                  </h5>
-                  <h6>品番:{{ stock.s_name }}</h6>
-                </a>
-                <p class="font-normal text-gray-700 dark:text-gray-400">
-                  格納先:{{ stock.location_name }}
-                  <span class="font-bold">{{ stock.address }}</span>
-                </p>
-                <p class="font-normal text-gray-700 dark:text-gray-400">
-                  格納数:{{ stock.quantity }}
-                </p>
-                <p class="font-normal text-gray-700 dark:text-gray-400">
-                  手配先:{{ stock.supplier_name }}
-                </p>
-
-                <Link
-                  :href="route('stock.inventory.show', {stock_id: stock.id,  stock_storage_id: stock.stock_storage_id ?? 0 })"
-                  :class="{ 'mt-4 inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white  rounded-lg  focus:ring-4 focus:outline-none dark:focus:ring-blue-800 focus:ring-blue-300' : true , 'bg-blue-500 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500' : stock.stock_storage_id, 'bg-gray-500 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500' : !stock.stock_storage_id}"
-                >
-                  {{ stock.stock_storage_id ? '詳細画面へ進む' : '詳細画面へ進む' }}
-                  <svg
-                    class="rtl:rotate-180 w-3.5 h-3.5 ms-2"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 14 10"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M1 5h12m0 0L9 1m4 4L9 9"
-                    />
-                  </svg>
-                </Link>
-              </div>
+            <div class="space-y-2 text-base text-slate-600 mb-5">
+              <p>
+                <i class="fas fa-map-marker-alt text-slate-400 mr-2 w-4 text-center"></i>
+                格納先: {{ stock.location_name }}
+                <span class="font-semibold text-slate-800">{{ stock.address }}</span>
+              </p>
+              <p>
+                <i class="fas fa-boxes text-slate-400 mr-2 w-4 text-center"></i>
+                格納数: <span class="font-semibold text-slate-800">{{ stock.quantity }}</span>
+              </p>
+              <p>
+                <i class="fas fa-truck text-slate-400 mr-2 w-4 text-center"></i>
+                手配先: {{ stock.supplier_name }}
+              </p>
             </div>
+
+            <Link
+              :href="route('stock.inventory.show', {stock_id: stock.id,  stock_storage_id: stock.stock_storage_id ?? 0 })"
+              :class="[stock.stock_storage_id ? 'btn-primary' : 'btn-secondary', 'w-full justify-center py-4 text-base font-bold rounded-xl']"
+            >
+              詳細画面へ進む
+              <i class="fas fa-arrow-right ml-2"></i>
+            </Link>
           </div>
         </div>
       </div>
+
+      <!-- Empty state -->
+      <div v-else class="card p-8 text-center">
+        <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-search text-slate-400 text-2xl"></i>
+        </div>
+        <h2 class="text-lg font-semibold text-slate-600 mb-2">検索結果なし</h2>
+        <p class="text-sm text-slate-400 mb-4">条件に一致する在庫が見つかりませんでした。</p>
+        <Link
+          class="btn-primary inline-flex"
+          :href="route('stock.search', { search: props.search })"
+        >
+          <i class="fas fa-search mr-2"></i>
+          検索画面に戻る
+        </Link>
+      </div>
+
     </template>
   </StockLayout>
 </template>
-<style scoped lang="scss">
-.hide{
-  height: 0;
-  overflow: hidden;
-  opacity: 0;
-}
-
-.stock_card {
-  width: 28%;
-  height: 30%;
-  & .stock_img {
-    width: 100%;
-    height: 23vh;
-    display: flex;
-    justify-content: center;
-    padding: 0 1rem;
-    background-color: #ffffff;
-
-    & img {
-      width: 100%;
-      object-fit: contain;
-    }
-  }
-}
-</style>

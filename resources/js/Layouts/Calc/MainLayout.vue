@@ -12,7 +12,7 @@ const props = defineProps({
 });
 
 const logout = () => {
-  if (confirm('ログアウトしますか？')) {
+  if (confirm('Logout?')) {
     router.get(route('calc.logout'));
   }
 };
@@ -23,79 +23,67 @@ onMounted(() => {
 </script>
 <template>
   <Head :title="title" />
-  <header class="bg-white border-b border-gray-200 shadow-sm">
-    <div class="px-6 py-4">
+  <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
+    <div class="px-6 py-3">
       <div class="flex items-center justify-between">
-        <!-- ロゴ・ホームエリア -->
-        <div class="flex items-center gap-4">
-          <Link 
+        <!-- Logo + Home -->
+        <div class="flex items-center gap-3">
+          <Link
             :href="route(url)"
-            class="flex items-center gap-3 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group"
+            class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-100 transition-colors group"
           >
-            <div class="bg-blue-100 rounded-full p-2 group-hover:bg-blue-200 transition-colors">
-              <i class="fas fa-home text-blue-600 text-lg"></i>
+            <div class="w-9 h-9 bg-primary-100 rounded-xl flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+              <i class="fas fa-home text-primary-600"></i>
             </div>
-            <span class="text-gray-700 font-semibold group-hover:text-blue-700 transition-colors">ホーム</span>
+            <span class="text-slate-700 font-semibold group-hover:text-primary-700 transition-colors">Home</span>
           </Link>
 
-          <!-- <Link 
-            :href="route('stock.home')"
-            class="flex items-center gap-3 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group"
-          >
-            <div class="bg-blue-100 rounded-full p-2 group-hover:bg-blue-200 transition-colors">
-              <i class="fas fa-home text-blue-600 text-lg"></i>
-            </div>
-            <span class="text-gray-700 font-semibold group-hover:text-blue-700 transition-colors">TOP</span>
-          </Link> -->
+          <div v-if="props.login_user" class="h-5 w-px bg-slate-200"></div>
 
-          <!-- ユーザー情報（クリックでログアウト） -->
-          <div 
-            v-if="props.login_user" 
+          <!-- User info -->
+          <div
+            v-if="props.login_user"
             @click="logout"
-            class="flex items-center gap-2 px-4 py-2 hover:bg-red-50 rounded-lg cursor-pointer transition-colors group"
+            class="flex items-center gap-2 px-3 py-2 hover:bg-rose-50 rounded-xl cursor-pointer transition-colors group"
           >
-            <div class="bg-green-100 group-hover:bg-red-100 rounded-full p-1 transition-colors">
-              <i class="fas fa-user text-green-600 group-hover:text-red-600 text-sm transition-colors"></i>
+            <div class="w-8 h-8 bg-emerald-100 group-hover:bg-rose-100 rounded-full flex items-center justify-center transition-colors">
+              <i class="fas fa-user text-emerald-600 group-hover:text-rose-600 text-xs transition-colors"></i>
             </div>
             <div class="text-sm">
-              <span class="font-semibold text-gray-800 group-hover:text-red-700 transition-colors">{{ props.login_user.user_name }}</span>
-              <span class="text-gray-500 mx-1">•</span>
-              <span class="text-gray-600 group-hover:text-red-600 transition-colors">{{ props.login_user.location_name }}</span>
+              <span class="font-semibold text-slate-800 group-hover:text-rose-700 transition-colors">{{ props.login_user.user_name }}</span>
+              <span class="text-slate-400 mx-1">/</span>
+              <span class="text-slate-500 group-hover:text-rose-600 transition-colors">{{ props.login_user.location_name }}</span>
             </div>
-            <div class="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <i class="fas fa-sign-out-alt text-red-500 text-xs"></i>
-            </div>
+            <i class="fas fa-sign-out-alt text-rose-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity ml-1"></i>
           </div>
         </div>
 
-        <!-- ナビゲーションメニュー -->
+        <!-- Navigation -->
         <nav class="flex gap-2">
           <Link
             :href="route('calc.home')"
-            class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2"
+            class="px-4 py-2 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center gap-2"
             :class="{
-              'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm': 
+              'bg-primary-600 text-white shadow-sm':
                 route().current() == 'calc.home' || route().current() == 'calc.search' || route().current() == 'calc.show',
-              'bg-gray-100 text-gray-700 hover:bg-gray-200': 
+              'bg-slate-100 text-slate-600 hover:bg-slate-200':
                 !(route().current() == 'calc.home' || route().current() == 'calc.search' || route().current() == 'calc.show')
             }"
           >
             <i class="fas fa-clipboard-list text-sm"></i>
-            棚卸登録
+            Inventory
           </Link>
           <Link
             v-if="props.login_user"
             :href="route('calc.new')"
-            class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2"
+            class="px-4 py-2 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center gap-2"
             :class="{
-              'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-sm': 
-                route().current() == 'calc.new',
-              'bg-gray-100 text-gray-700 hover:bg-gray-200': 
-                route().current() != 'calc.new'
+              'bg-emerald-600 text-white shadow-sm': route().current() == 'calc.new',
+              'bg-slate-100 text-slate-600 hover:bg-slate-200': route().current() != 'calc.new'
             }"
           >
             <i class="fas fa-plus text-sm"></i>
-            棚卸新規
+            New
           </Link>
         </nav>
       </div>
@@ -104,22 +92,7 @@ onMounted(() => {
 
   <Message />
 
-  <main id="main_container">
+  <main class="min-h-[calc(100vh-64px)] bg-slate-50 p-6">
     <slot name="content" />
   </main>
 </template>
-
-
-<style>
-html {
-  overflow-y: scroll;
-}
-
-#main_container {
-  height: auto;
-  width: 100vw;
-  padding: 5%;
-  background-color: #f8fafc;
-  min-height: calc(100vh - 80px);
-}
-</style>

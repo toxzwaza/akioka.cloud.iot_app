@@ -5,24 +5,18 @@ import { Link } from "@inertiajs/vue3";
 <template>
   <StockLayout :padding="true" :title="'滞留品'">
     <template #content>
-      <div id="iframe_container">
+      <div class="card p-0 overflow-hidden h-full">
         <iframe
           :src="route('stock.retention')"
-          frameborder="0"
+          class="w-full h-full border-0"
         ></iframe>
       </div>
     </template>
   </StockLayout>
 </template>
 <style scoped lang="scss">
-#iframe_container {
+.card {
   height: 100%;
   width: 100%;
-
-  & iframe {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-  }
 }
 </style>

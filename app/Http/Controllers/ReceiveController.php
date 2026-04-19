@@ -25,7 +25,7 @@ class ReceiveController extends Controller
 {
     public function home()
     {
-        return Inertia::render('Stock/Receive');
+        return Inertia::render('Stock/Receive/Index');
     }
 
     //
@@ -47,17 +47,15 @@ class ReceiveController extends Controller
     // 品名が一致かつ、品番が一致又は含まれているモノ
     public function getInitialOrders()
     {
-        $initial_orders = InitialOrder::where(function ($query) {
-            $query->whereNull('receive_flg')
-                ->orWhere('receive_flg', 0);
-        })->whereNull('delifile_path')->where('del_flg', 0)->get();
+        $initial_orders = InitialOrder::select('initial_orders.*', 'stocks.img_path')
+            ->leftJoin('stocks', 'stocks.id', '=', 'initial_orders.stock_id')
+            ->where(function ($query) {
+                $query->whereNull('receive_flg')
+                    ->orWhere('receive_flg', 0);
+            })->whereNull('delifile_path')->where('initial_orders.del_flg', 0)->get();
 
         foreach ($initial_orders as $order) {
-            $stock = Stock::find($order->stock_id);
-            if ($stock) {
-                $order->img_path = $stock->img_path;
-                $order->stock_id = $stock->id;
-            } else {
+            if (!$order->img_path && !Stock::where('id', $order->stock_id)->exists()) {
                 $order->not_found_flg = 1;
             }
         }
@@ -146,20 +144,17 @@ class ReceiveController extends Controller
         // 納品書登録済み
         // 在庫を所持している
 
-        $initial_orders = InitialOrder::where(function ($query) {
-            $query->whereNull('receive_flg')
-                ->orWhere('receive_flg', 0);
-        })->where('del_flg', 0)->whereNotNull('delifile_path')
+        $initial_orders = InitialOrder::select('initial_orders.*', 'stocks.img_path')
+            ->leftJoin('stocks', 'stocks.id', '=', 'initial_orders.stock_id')
+            ->where(function ($query) {
+                $query->whereNull('receive_flg')
+                    ->orWhere('receive_flg', 0);
+            })->where('initial_orders.del_flg', 0)->whereNotNull('delifile_path')
             ->whereNull('none_storage_flg')
-            ->orderby('updated_at', 'desc')->get();
+            ->orderby('initial_orders.updated_at', 'desc')->get();
 
         foreach ($initial_orders as $order) {
-            $stock = Stock::find($order->stock_id);
-
-            if ($stock) {
-                $order->img_path = $stock->img_path;
-                $order->stock_id = $stock->id;
-            } else {
+            if (!$order->img_path && !Stock::where('id', $order->stock_id)->exists()) {
                 $order->not_found_flg = 1;
             }
         }
@@ -250,19 +245,15 @@ class ReceiveController extends Controller
     // 納品確定済みで受領されていないもののリスト
     public function getReceiptOrders()
     {
-        $initial_orders = InitialOrder::where('receive_flg', 1)
+        $initial_orders = InitialOrder::select('initial_orders.*', 'stocks.img_path')
+            ->leftJoin('stocks', 'stocks.id', '=', 'initial_orders.stock_id')
+            ->where('receive_flg', 1)
             ->where('receipt_flg', 0)
-            ->where('del_flg', 0)
-            ->orderby('updated_at', 'desc')->get();
-
+            ->where('initial_orders.del_flg', 0)
+            ->orderby('initial_orders.updated_at', 'desc')->get();
 
         foreach ($initial_orders as $order) {
-
-            $stock = Stock::find($order->stock_id);
-
-            if ($stock) {
-                $order->img_path = $stock->img_path;
-            } else {
+            if (!$order->img_path && !Stock::where('id', $order->stock_id)->exists()) {
                 $order->found_flg = 1;
             }
         }

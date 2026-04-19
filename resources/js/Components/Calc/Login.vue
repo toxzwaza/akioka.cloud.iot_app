@@ -19,7 +19,7 @@ const form = reactive({
 const login = ()=> {
     console.log(form);
     if(!(form.user_id && form.location_id)){
-        alert('実施者もしくは実施場所が未選択の可能性があります。');
+        alert('Please select both user and location.');
         return;
     }
 
@@ -28,67 +28,56 @@ const login = ()=> {
 </script>
 <template>
   <div class="w-full max-w-md mx-auto">
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      <!-- ログインヘッダー -->
-      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+    <div class="card overflow-hidden">
+      <!-- Header -->
+      <div class="bg-primary-50 px-6 py-4 border-b border-primary-100">
         <div class="flex items-center gap-3">
-          <div class="bg-blue-100 rounded-full p-2">
-            <i class="fas fa-sign-in-alt text-blue-600"></i>
+          <div class="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
+            <i class="fas fa-sign-in-alt text-primary-600"></i>
           </div>
           <div>
-            <h2 class="text-xl font-bold text-gray-800">ログイン</h2>
-            <p class="text-sm text-gray-600">棚卸システムにログインします</p>
+            <h2 class="text-lg font-bold text-slate-800">Login</h2>
+            <p class="text-xs text-slate-500">Inventory count system</p>
           </div>
         </div>
       </div>
 
-      <!-- ログインフォーム -->
+      <!-- Form -->
       <div class="p-6">
-        <form class="space-y-6">
-          <!-- 棚卸実施者 -->
-          <div class="space-y-2">
-            <label class="block text-sm font-semibold text-gray-700" for="user">
-              <span class="text-red-500">*</span> 棚卸実施者
+        <form class="space-y-5">
+          <div>
+            <label class="form-label">
+              <span class="text-rose-500">*</span> Operator
             </label>
-            <select
-              v-model="form.user_id"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              id="user"
-            >
-              <option value="0" disabled>実施者を選択してください</option>
+            <select v-model="form.user_id" class="form-select-modern">
+              <option value="0" disabled>Select operator</option>
               <option v-for="user in users" :key="user.id" :value="user.id">
                 {{ user.name }}
               </option>
             </select>
           </div>
 
-          <!-- 棚卸実施場所 -->
-          <div class="space-y-2">
-            <label class="block text-sm font-semibold text-gray-700" for="location">
-              <span class="text-red-500">*</span> 棚卸実施場所
+          <div>
+            <label class="form-label">
+              <span class="text-rose-500">*</span> Location
             </label>
-            <select
-              v-model="form.location_id"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              id="location"
-            >
-              <option value="0" disabled>実施場所を選択してください</option>
+            <select v-model="form.location_id" class="form-select-modern">
+              <option value="0" disabled>Select location</option>
               <option v-for="location in locations" :key="location.id" :value="location.id">
                 {{ location.name }}
               </option>
             </select>
           </div>
 
-          <!-- ログインボタン -->
-          <div class="pt-6 border-t border-gray-200">
+          <div class="pt-4 border-t border-slate-100">
             <button
               @click.prevent="login"
               :disabled="!form.user_id || form.user_id === 0 || !form.location_id || form.location_id === 0"
-              class="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+              class="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
               type="button"
             >
               <i class="fas fa-sign-in-alt"></i>
-              棚卸開始
+              Start Inventory
             </button>
           </div>
         </form>

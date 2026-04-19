@@ -257,7 +257,7 @@ onMounted(() => {
                       <img
                         v-if="props.order.img_path"
                         class="w-5/6 object-cover object-center rounded"
-                        alt="hero"
+                        alt="商品画像"
                         :src="
                           props.order.img_path &&
                           props.order.img_path.includes('https://')

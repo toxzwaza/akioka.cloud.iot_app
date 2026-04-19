@@ -19,9 +19,9 @@ class SearchController extends Controller
     {
         $search = $request->search;
 
-        $processes = Process::all();
-        $users = User::where('del_flg', 0)->get();
-        $classifications = Classification::all();
+        $processes = Process::select('id', 'name')->get();
+        $users = User::select('id', 'name', 'process_id')->where('del_flg', 0)->get();
+        $classifications = Classification::select('id', 'name')->get();
         return Inertia::render('Stock/Search', ['processes' => $processes, 'users' => $users, 'search' => $search, 'classifications' => $classifications ]);
     }
     public function result(Request $request)

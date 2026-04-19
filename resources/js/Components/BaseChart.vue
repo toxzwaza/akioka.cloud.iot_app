@@ -15,16 +15,8 @@ const chartData = reactive({
 });
 
 const colors = [
-    "#FF6384", // 赤
-    "#36A2EB", // 青
-    "#4BC0C0", // ターコイズ
-    "#FFCD56", // 黄色
-    "#9966FF", // 紫
-    "#FF9F40", // オレンジ
-    "#2ECC71", // 緑
-    "#E74C3C", // 濃い赤
-    "#3498DB", // 薄い青
-    "#F1C40F"  // 濃い黄色
+    "#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6",
+    "#06b6d4", "#ec4899", "#14b8a6", "#f97316", "#3b82f6"
 ];
 
 watch(() => props.data, (newData) => {
@@ -32,9 +24,12 @@ watch(() => props.data, (newData) => {
         chartData.datasets = newData.map((item, index) => ({
             label: item.place_name,
             data: item.data,
-            backgroundColor: colors[index % colors.length],
+            backgroundColor: colors[index % colors.length] + "20",
             borderColor: colors[index % colors.length],
-            tension: 0.1
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0.3,
+            fill: true,
         }));
     }
 }, { immediate: true, deep: true });
@@ -42,8 +37,10 @@ watch(() => props.data, (newData) => {
 
 <template>
     <div class="chart-container">
-        <h3 class="title">{{ title }}</h3>
-        <LineChart :chartData="chartData" />
+        <h3 class="text-sm font-semibold text-slate-500 mb-3">{{ title }}</h3>
+        <div class="card p-4">
+            <LineChart :chartData="chartData" />
+        </div>
     </div>
 </template>
 
@@ -51,12 +48,6 @@ watch(() => props.data, (newData) => {
 .chart-container {
     height: 100%;
     width: 32%;
-    padding: 1%;
-
-}
-.title {
-    font-size: 1rem;
-    color: gray;
-    font-weight: bold;
+    padding: 0.5%;
 }
 </style>

@@ -37,17 +37,13 @@ const handleCloseModal = () => {
 };
 
 const handleProcessId = (process_id) => {
-  console.log(process_id);
   form.user_id = null;
-
   users.value = props.users.filter((user) => user.process_id == process_id);
   checkAlreadyStockRequest();
 };
 
 const modalImage = (target, stock_id) => {
-  if (stock_id) {
-    modalStockId.value = stock_id;
-  }
+  if (stock_id) modalStockId.value = stock_id;
   modalStatus.value = true;
   modalImageSrc.value = target.src;
 };
@@ -59,15 +55,9 @@ const form = reactive({
 });
 
 const loginAdmin = () => {
-  console.log(props.users);
-
   if (form.pwd) {
-    is_login.value = admin_users.value.find(
-      (user) => user.password === form.pwd
-    );
-    if (!is_login.value) {
-      alert("パスワードが違います。");
-    }
+    is_login.value = admin_users.value.find((user) => user.password === form.pwd);
+    if (!is_login.value) alert("パスワードが正しくありません。");
   } else {
     alert("パスワードを入力してください。");
   }
@@ -75,204 +65,132 @@ const loginAdmin = () => {
 
 const updateQuantity = (stock_id, quantity) => {
   orderData.value[stock_id] = quantity;
-  console.log(orderData.value);
 };
 
 const orderStockRequest = () => {
   axios
     .post(route("stock.request.store"), {
-      already_flg : already_flg.status,
+      already_flg: already_flg.status,
       process_id: form.process_id,
       user_id: form.user_id,
       data: orderData.value,
     })
     .then((res) => {
-      console.log(res.data)
       if (res.data.status) {
-        if (confirm("物品依頼が完了しました。")) {
-          window.location.reload();
-        }
+        if (confirm("依頼が完了しました。")) window.location.reload();
       }
     })
-    .catch((error) => {
-      console.log(error);
-    });
+    .catch((error) => console.log(error));
 };
 
 const checkAlreadyStockRequest = () => {
-  if (
-    // 現在仕掛かり中の物品依頼が存在するか
-    props.stock_request_orders.some(
-      (order) => order.process_id === form.process_id
-    )
-  ) {
-    if (
-      confirm(
-        "物品依頼が完了しています。確認及び変更を依頼しますか？\n(キャンセルすると新規依頼となります。)"
-      )
-    ) {
+  if (props.stock_request_orders.some((order) => order.process_id === form.process_id)) {
+    if (confirm("既存の依頼が見つかりました。確認・修正しますか？\n（キャンセルで新規依頼）")) {
       stock_requests.value.forEach((stock_request) => {
         const matchingOrder = props.stock_request_orders.find(
-          (stock_request_order) =>
-            stock_request_order.process_id == form.process_id &&
-            stock_request_order.stock_id == stock_request.stock_id
+          (o) => o.process_id == form.process_id && o.stock_id == stock_request.stock_id
         );
-        if (matchingOrder) {
-          stock_request.quantity = matchingOrder.quantity;
-        } else {
-          stock_request.quantity = '';
-        }
+        stock_request.quantity = matchingOrder ? matchingOrder.quantity : '';
       });
-
       already_flg.status = true;
     } else {
-      stock_requests.value = props.stock_requests.map(stock_request => ({ ...stock_request, quantity: '' }));
+      stock_requests.value = props.stock_requests.map((sr) => ({ ...sr, quantity: '' }));
       already_flg.status = false;
     }
   } else {
     stock_requests.value = props.stock_requests;
-    stock_requests.value.forEach((stock_request) => {
-      stock_request.quantity = "";
-    });
+    stock_requests.value.forEach((sr) => { sr.quantity = ""; });
     already_flg.status = false;
   }
-
   sliceStockRequests(stock_requests.value);
 };
 
-// 依頼可能期間かチェック
 const isWeekdayMonToWed = () => {
-  const today = new Date();
-  const day = today.getDay();
+  const day = new Date().getDay();
   return day >= 1 && day <= 3;
 };
 
 const setUpAlreadyFlg = () => {
   if (isWeekdayMonToWed()) {
     const today = new Date();
-    const nextMonday = new Date(
-      today.setDate(today.getDate() + ((1 + 7 - today.getDay()) % 7 || 7))
-    );
+    const nextMonday = new Date(today.setDate(today.getDate() + ((1 + 7 - today.getDay()) % 7 || 7)));
     const days = ["日", "月", "火", "水", "木", "金", "土"];
-    already_flg.delivery_date = `${nextMonday.getFullYear()}/${(
-      nextMonday.getMonth() + 1
-    )
-      .toString()
-      .padStart(2, "0")}/${nextMonday.getDate().toString().padStart(2, "0")}(${
-      days[nextMonday.getDay()]
-    })`;
+    already_flg.delivery_date = `${nextMonday.getFullYear()}/${(nextMonday.getMonth() + 1).toString().padStart(2, "0")}/${nextMonday.getDate().toString().padStart(2, "0")}(${days[nextMonday.getDay()]})`;
   }
 };
 
-const sliceStockRequests = (stock_requests) => {
-  left_stock_requests.value = stock_requests.slice(
-    0,
-    Math.floor(stock_requests.length / 2)
-  );
-  right_stock_requests.value = stock_requests.slice(
-    Math.floor(stock_requests.length / 2)
-  );
-
-  // console.log(left_stock_requests.value, right_stock_requests.value);
+const sliceStockRequests = (requests) => {
+  left_stock_requests.value = requests.slice(0, Math.floor(requests.length / 2));
+  right_stock_requests.value = requests.slice(Math.floor(requests.length / 2));
 };
 
 onMounted(() => {
-  console.log('stock_requests:', props.stock_requests)
-  console.log('stock_request_orders:', props.stock_request_orders)
   stock_requests.value = props.stock_requests;
   sliceStockRequests(stock_requests.value);
-
   users.value = props.users;
-
-  setUpAlreadyFlg(); //現在の日付からお渡し日を算出
-
+  setUpAlreadyFlg();
   admin_users.value = props.users.filter((user) => user.is_admin);
 });
 </script>
 <template>
-  <StockLayout :title="'在庫管理システム'">
+  <StockLayout :title="'定期物品依頼'">
     <template #content>
-      <!-- 管理者ログイン -->
-      <div class="flex items-center justify-between mb-12">
-        <p class="py-2 text-lg font-bold text-gray-700">
-          <span v-if="is_login">{{ is_login.name }}さん、ようこそ！</span>
+      <!-- Admin login -->
+      <div class="flex items-center justify-between mb-8">
+        <p v-if="is_login" class="text-sm font-semibold text-slate-600">
+          <i class="fas fa-user-shield text-primary-500 mr-1"></i>
+          {{ is_login.name }}
         </p>
+        <div v-else></div>
 
-        <form class="w-full max-w-sm">
-          <div class="flex items-center border-b border-blue-500 py-2">
-            <input
-              class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-4 px-2 leading-tight focus:outline-none text-center text-2xl"
-              type="text"
-              placeholder="管理者パスワード"
-              v-model="form.pwd"
-            />
-            <button
-              v-if="!is_login"
-              @click.prevent="loginAdmin"
-              class="flex-shrink-0 bg-blue-500 hover:bg-blue-700 border-blue-500 hover:border-blue-700 text-lg border-4 text-white py-1 px-2 rounded"
-              type="button"
-            >
-              ログイン
-            </button>
-            <button
-              v-if="is_login"
-              @click="
-                is_login = false;
-                form.pwd = '';
-              "
-              class="flex-shrink-0 border-transparent border-4 text-red-500 hover:text-red-800 text-sm py-1 px-2 rounded"
-              type="button"
-            >
-              ログアウト
-            </button>
-          </div>
-        </form>
+        <div class="flex items-center gap-2">
+          <input
+            class="form-input-modern w-48 text-sm py-2"
+            type="password"
+            placeholder="管理者パスワード"
+            v-model="form.pwd"
+          />
+          <button v-if="!is_login" @click.prevent="loginAdmin" class="btn-primary text-xs py-2">
+            <i class="fas fa-sign-in-alt"></i> ログイン
+          </button>
+          <button v-if="is_login" @click="is_login = false; form.pwd = ''" class="btn-danger text-xs py-2">
+            <i class="fas fa-sign-out-alt"></i> ログアウト
+          </button>
+        </div>
       </div>
 
-      <!-- 物品依頼者画面 -->
+      <!-- User view -->
       <div v-if="!is_login">
-        <div class="mb-16">
-          <h2 class="text-4xl text-center font-bold text-gray-700">
-            物品依頼期間は月曜～水曜の定時までとなっております。<br />
-            依頼頂いた物品は翌週月曜日の朝礼後に備品倉庫前からお取りください。
-          </h2>
+        <!-- Info banner -->
+        <div class="card p-6 mb-8 bg-primary-50 border-primary-200">
+          <p class="text-center text-lg font-semibold text-slate-700 leading-relaxed">
+            依頼期間：月〜水曜日（当日終業時刻まで）<br>
+            翌週月曜日の朝、供給倉庫にて受け取り可能です。
+          </p>
         </div>
-        <div>
+
+        <!-- Process selector -->
+        <div class="space-y-5 mb-8">
           <div>
-            <label
-              for="large"
-              class="block mb-4 text-2xl text-red-500 dark:text-white font-bold"
-              >作業場所を選択してください</label
-            >
+            <label class="form-label text-base text-rose-500">作業場所を選択</label>
             <select
-              id="large"
-              class="font-bold block w-full px-4 py-6 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 text-4xl text-center"
+              class="form-select-modern text-xl py-5 text-center font-bold"
               v-model="form.process_id"
               @change="handleProcessId($event.target.value)"
             >
-              <option value="0">未選択</option>
-              <option
-                v-for="process in processes"
-                :value="process.id"
-                :key="process.id"
-              >
+              <option value="0">-- 選択してください --</option>
+              <option v-for="process in processes" :value="process.id" :key="process.id">
                 {{ process.name }}
               </option>
             </select>
           </div>
-
-          <div class="mt-8">
-            <label
-              for="large"
-              class="block mb-4 text-2xl text-red-500 dark:text-white font-bold"
-              >担当者を選択してください</label
-            >
+          <div>
+            <label class="form-label text-base text-rose-500">ユーザーを選択</label>
             <select
-              id="large"
-              class="font-bold block w-full px-4 py-6 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 text-4xl text-center"
+              class="form-select-modern text-xl py-5 text-center font-bold"
               v-model="form.user_id"
             >
-              <option value="0">未選択</option>
+              <option value="0">-- 選択してください --</option>
               <option v-for="user in users" :value="user.id" :key="user.id">
                 {{ user.name }}
               </option>
@@ -280,108 +198,102 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- 注文依頼用紙 -->
-        <div v-if="form.process_id && form.user_id" class="mt-12">
-          <h1 v-if="already_flg.status" class="rounded mx-auto w-1/2 px-4 py-2 text-xl font-bold text-center mb-8 bg-red-500 text-white">--- 依頼確認・修正 ---</h1>
-          <h1 v-else class="rounded mx-auto w-1/2 px-4 py-2 text-xl font-bold text-center mb-8 bg-green-500 text-white">--- 新規依頼 ---</h1>
-          <div class="table-container">
-            <div class="left_table_container">
-              <table>
-                <tbody>
-                  <tr>
-                    <th>画像</th>
-                    <th>品名</th>
-                    <th>数量</th>
-                    <th>単位</th>
-                  </tr>
-                  <tr v-for="stock in left_stock_requests" :key="stock.id">
-                    <td class="img">
-                      <img
-                        @click="modalImage($event.target, stock.stock_id)"
-                        :src="getImgPath(stock.img_path)"
-                        alt=""
-                      />
-                    </td>
-                    <td class="text-2xl">{{ stock.alias ?? stock.name }}</td>
-                    <td class="quantity">
-                      <input
-                        @change="
-                          updateQuantity(stock.stock_id, $event.target.value)
-                        "
-                        class="text-4xl"
-                        type="number"
-                        name=""
-                        id=""
-                        v-model="stock.quantity"
-                      />
-                    </td>
-                    <td class="unit text-2xl">{{ stock.orderUnit ?? stock.solo_unit }}</td>
-                  </tr>
-                </tbody>
-              </table>
+        <!-- Order form -->
+        <div v-if="form.process_id && form.user_id" class="mt-8">
+          <div class="text-center mb-6">
+            <span v-if="already_flg.status" class="badge-warning text-base px-6 py-2">確認・修正</span>
+            <span v-else class="badge-success text-base px-6 py-2">新規依頼</span>
+          </div>
+
+          <div class="flex flex-col lg:flex-row gap-4">
+            <!-- Left table -->
+            <div class="flex-1">
+              <div class="card overflow-hidden">
+                <table class="request-table">
+                  <thead>
+                    <tr>
+                      <th class="w-24">画像</th>
+                      <th>品名</th>
+                      <th class="w-24">数量</th>
+                      <th class="w-16">単位</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="stock in left_stock_requests" :key="stock.id">
+                      <td class="p-1">
+                        <img
+                          @click="modalImage($event.target, stock.stock_id)"
+                          :src="getImgPath(stock.img_path)"
+                          class="w-20 h-16 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                        />
+                      </td>
+                      <td class="text-sm font-semibold text-slate-700">{{ stock.alias ?? stock.name }}</td>
+                      <td class="p-1">
+                        <input
+                          @change="updateQuantity(stock.stock_id, $event.target.value)"
+                          class="w-full h-16 text-center text-xl font-bold border-0 bg-slate-50 rounded-lg focus:ring-2 focus:ring-primary-500"
+                          type="number"
+                          v-model="stock.quantity"
+                        />
+                      </td>
+                      <td class="text-sm text-slate-500 text-center">{{ stock.orderUnit ?? stock.solo_unit }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-            <div class="right_table_container">
-              <table>
-                <tbody>
-                  <tr>
-                    <th>画像</th>
-                    <th>品名</th>
-                    <th>数量</th>
-                    <th>単位</th>
-                  </tr>
-                  <tr v-for="stock in right_stock_requests" :key="stock.id">
-                    <td class="img">
-                      <img
-                        @click="modalImage($event.target, stock.stock_id)"
-                        :src="getImgPath(stock.img_path)"
-                        alt=""
-                      />
-                    </td>
-                    <td class="text-2xl">{{ stock.alias ?? stock.name }}</td>
-                    <td class="quantity">
-                      <input
-                        @change="
-                          updateQuantity(stock.stock_id, $event.target.value)
-                        "
-                        v-model="stock.quantity"
-                        class="text-4xl"
-                        type="number"
-                        name=""
-                        id=""
-                      />
-                    </td>
-                    <td class="unit text-2xl">{{ stock.orderUnit ?? stock.solo_unit }}</td>
-                  </tr>
-                </tbody>
-              </table>
+            <!-- Right table -->
+            <div class="flex-1">
+              <div class="card overflow-hidden">
+                <table class="request-table">
+                  <thead>
+                    <tr>
+                      <th class="w-24">画像</th>
+                      <th>品名</th>
+                      <th class="w-24">数量</th>
+                      <th class="w-16">単位</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="stock in right_stock_requests" :key="stock.id">
+                      <td class="p-1">
+                        <img
+                          @click="modalImage($event.target, stock.stock_id)"
+                          :src="getImgPath(stock.img_path)"
+                          class="w-20 h-16 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                        />
+                      </td>
+                      <td class="text-sm font-semibold text-slate-700">{{ stock.alias ?? stock.name }}</td>
+                      <td class="p-1">
+                        <input
+                          @change="updateQuantity(stock.stock_id, $event.target.value)"
+                          v-model="stock.quantity"
+                          class="w-full h-16 text-center text-xl font-bold border-0 bg-slate-50 rounded-lg focus:ring-2 focus:ring-primary-500"
+                          type="number"
+                        />
+                      </td>
+                      <td class="text-sm text-slate-500 text-center">{{ stock.orderUnit ?? stock.solo_unit }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
-          <div
-            v-if="
-              Object.keys(orderData).length > 0 &&
-              isWeekdayMonToWed
-            "
-            class="mt-12"
-          >
-            <h3
-              v-if="already_flg.delivery_date"
-              class="text-center text-4xl mb-8 text-gray-700 font-bold"
-            >
-              お渡し予定日：{{ already_flg.delivery_date }}
-            </h3>
-            <!-- 物品依頼ボタン -->
-            <button
-              @click="orderStockRequest"
-              class="text-4xl w-full bg-red-500 hover:bg-red-700 text-white font-bold py-8 px-4 rounded"
-            >
-              物品依頼
+          <div v-if="Object.keys(orderData).length > 0 && isWeekdayMonToWed" class="mt-8">
+            <p v-if="already_flg.delivery_date" class="text-center text-2xl mb-6 text-slate-700 font-bold">
+              <i class="fas fa-calendar-check text-primary-500 mr-2"></i>
+              納品日：{{ already_flg.delivery_date }}
+            </p>
+            <button @click="orderStockRequest" class="btn-danger w-full py-6 text-xl rounded-2xl">
+              <i class="fas fa-paper-plane mr-2"></i>
+              依頼を送信
             </button>
           </div>
         </div>
       </div>
 
-      <!-- 管理者画面 -->
+      <!-- Admin view -->
       <div v-else>
         <Admin
           :processes="props.processes"
@@ -400,79 +312,33 @@ onMounted(() => {
   </StockLayout>
 </template>
 <style scoped lang="scss">
-.table-container {
-  display: flex;
-  justify-content: space-between;
-
-  & > div {
-    width: 50%;
-    padding: 4px;
-
-    & table {
-      width: 100%;
-    }
-  }
-
-  & .left_table_container {
-  }
-  & .right_table_container {
-  }
-}
-
-table,
-td,
-th {
-  border: 1px solid #595959;
+.request-table {
+  width: 100%;
   border-collapse: collapse;
-}
-td,
-th {
-  padding: 3px;
-  overflow-wrap: hidden;
-  text-align: center;
-  font-weight: bold;
 
-  &.img {
-    width: 10vw;
-    height: 9vw;
-    max-width: 10vw;
-    max-height: 9vw;
-    & img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+  thead {
+    background-color: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
   }
 
-  &.quantity {
-    width: 6vw;
-    height: 100%;
-
-    & input[type="number"] {
-      display: block;
-      height: 9vw;
-      width: 100%;
-      border: none;
-      text-align: center;
-    }
+  th {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
   }
 
-  &.unit {
-    width: 2vw;
+  td {
+    padding: 0.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
   }
-}
 
-td {
-  // text-align: center;
-  // font-size: 2rem;
-}
-th {
-  background: #f0e6cc;
-}
-.even {
-  background: #fbf8f0;
-}
-.odd {
-  background: #fefcf9;
+  tbody tr:hover {
+    background-color: #f8fafc;
+  }
 }
 </style>

@@ -315,11 +315,11 @@ onMounted(async () => {
 });
 </script>
 <template>
-  <div id="stock_request_container" class="mt-8 mb-8 bg-gray-50 p-2 rounded">
-    <h1 class="text-xl mb-4 text-gray-600 font-bold">物品依頼</h1>
-    
+  <div id="stock_request_container" class="card mt-8 mb-8 p-6">
+    <h1 class="section-title mb-4">物品依頼</h1>
+
     <!-- 再依頼モードの表示 -->
-    <div v-if="props.stock && props.stock.re_order_request" class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 mb-6">
+    <div v-if="props.stock && props.stock.re_order_request" class="bg-amber-50 border-l-4 border-amber-500 text-amber-700 p-4 mb-6 rounded-r-xl">
       <div class="flex">
         <div class="flex-shrink-0">
           <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -343,7 +343,7 @@ onMounted(async () => {
           <div class="flex flex-wrap -mx-3 mb-4">
             <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
               <label
-                class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                class="form-label block mb-2"
                 for="grid-first-name"
               >
                 依頼者所属部署選択
@@ -351,7 +351,7 @@ onMounted(async () => {
               <select
                 name=""
                 id=""
-                class="appearance-none block w-full bg-gray-200 text-gray-700 border-transparent rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
+                class="form-select-modern w-full"
                 v-model="form.process_id"
                 @change="handleProcess"
               >
@@ -368,9 +368,9 @@ onMounted(async () => {
             <div class="w-full md:w-1/2 px-3">
               <label
                 :class="{
-                  'block uppercase tracking-wide text-xs font-bold mb-2': true,
-                  'text-gray-700': form.user_id,
-                  'text-red-500': !form.user_id,
+                  'form-label block mb-2': true,
+                  'text-slate-600': form.user_id,
+                  'text-rose-500': !form.user_id,
                 }"
                 for="grid-last-name"
               >
@@ -379,7 +379,7 @@ onMounted(async () => {
               <select
                 name=""
                 id=""
-                class="appearance-none block w-full bg-gray-200 text-gray-700 border-transparent rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
+                class="form-select-modern w-full"
                 v-model="form.user_id"
               >
                 <option
@@ -396,11 +396,11 @@ onMounted(async () => {
             <div class="w-1/4 px-3 mb-6 md:mb-0">
               <label
                 :class="{
-                  'block uppercase tracking-wide text-xs font-bold mb-2': true,
-                  'text-gray-700':
+                  'form-label block mb-2': true,
+                  'text-slate-600':
                     form.now_quantity !== null &&
                     form.now_quantity !== undefined,
-                  'text-red-500':
+                  'text-rose-500':
                     form.now_quantity === null ||
                     form.now_quantity === undefined,
                 }"
@@ -409,7 +409,7 @@ onMounted(async () => {
                 現在個数
               </label>
               <input
-                class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                class="form-input-modern w-full"
                 id="grid-city"
                 type="number"
                 v-model="form.now_quantity"
@@ -418,9 +418,9 @@ onMounted(async () => {
             <div class="w-1/4 px-3 mb-6 md:mb-0">
               <label
                 :class="{
-                  'block uppercase tracking-wide text-xs font-bold mb-2': true,
-                  'text-gray-700': form.now_quantity_unit,
-                  'text-red-500': !form.now_quantity_unit,
+                  'form-label block mb-2': true,
+                  'text-slate-600': form.now_quantity_unit,
+                  'text-rose-500': !form.now_quantity_unit,
                 }"
                 for="grid-city"
               >
@@ -429,7 +429,7 @@ onMounted(async () => {
               <select
                 name=""
                 id=""
-                class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                class="form-select-modern w-full"
                 v-model="form.now_quantity_unit"
               >
                 <option
@@ -450,16 +450,16 @@ onMounted(async () => {
             <div class="w-1/2 px-3 mb-6 md:mb-0">
               <label
                 :class="{
-                  'block uppercase tracking-wide text-xs font-bold mb-2': true,
-                  'text-gray-700': form.digest_date,
-                  'text-red-500': !form.digest_date,
+                  'form-label block mb-2': true,
+                  'text-slate-600': form.digest_date,
+                  'text-rose-500': !form.digest_date,
                 }"
                 for="grid-state"
               >
                 消化予定日
               </label>
               <input
-                class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                class="form-input-modern w-full"
                 id="grid-city"
                 type="date"
                 v-model="form.digest_date"
@@ -471,16 +471,16 @@ onMounted(async () => {
             <div class="w-1/4 px-3 mb-6 md:mb-0">
               <label
                 :class="{
-                  'block uppercase tracking-wide text-xs font-bold mb-2': true,
-                  'text-gray-700': form.quantity,
-                  'text-red-500': !form.quantity,
+                  'form-label block mb-2': true,
+                  'text-slate-600': form.quantity,
+                  'text-rose-500': !form.quantity,
                 }"
                 for="grid-city"
               >
                 必要数量
               </label>
               <input
-                class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                class="form-input-modern w-full"
                 id="grid-city"
                 type="number"
                 v-model="form.quantity"
@@ -490,9 +490,9 @@ onMounted(async () => {
             <div class="w-1/4 px-3 mb-6 md:mb-0">
               <label
                 :class="{
-                  'block uppercase tracking-wide text-xs font-bold mb-2': true,
-                  'text-gray-700': form.quantity_unit,
-                  'text-red-500': !form.quantity_unit,
+                  'form-label block mb-2': true,
+                  'text-slate-600': form.quantity_unit,
+                  'text-rose-500': !form.quantity_unit,
                 }"
                 for="grid-city"
               >
@@ -501,7 +501,7 @@ onMounted(async () => {
               <select
                 name=""
                 id=""
-                class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                class="form-select-modern w-full"
                 v-model="form.quantity_unit"
               >
                 <option
@@ -522,22 +522,22 @@ onMounted(async () => {
             <div class="w-1/2 px-3 mb-6 md:mb-0">
               <label
                 :class="{
-                  'block uppercase tracking-wide text-xs font-bold mb-2': true,
-                  'text-gray-700': form.desire_delivery_date,
-                  'text-red-500': !form.desire_delivery_date,
+                  'form-label block mb-2': true,
+                  'text-slate-600': form.desire_delivery_date,
+                  'text-rose-500': !form.desire_delivery_date,
                 }"
                 for="desire_delivery_date"
               >
                 希望納期
               </label>
               <input
-                class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                class="form-input-modern w-full"
                 id="desire_delivery_date"
                 type="date"
                 v-model="form.desire_delivery_date"
                 @change="handleDesireDeliveryDateChange"
               />
-              <p class="mt-2 text-red-500 text-xs italic">
+              <p class="mt-2 text-rose-500 text-xs italic">
                 リードタイムの都合上難しい場合がございます。土日祝は選択できません。
               </p>
             </div>
@@ -607,7 +607,7 @@ onMounted(async () => {
             <div class="flex items-end mb-4">
               <div class="w-1/6 mr-4">
                 <label
-                  class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                  class="form-label block mb-2"
                   for="grid-first-name"
                 >
                   文字
@@ -615,7 +615,7 @@ onMounted(async () => {
                 <select
                   name=""
                   id=""
-                  class="appearance-none block w-full bg-gray-200 text-gray-700 border-transparent rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
+                  class="form-select-modern w-full"
                   v-model="special_area.cd_1.text_1"
                 >
                   <option value="0">未選択</option>
@@ -630,7 +630,7 @@ onMounted(async () => {
               </div>
               <div class="w-1/6 mr-4">
                 <label
-                  class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                  class="form-label block mb-2"
                   for="grid-first-name"
                 >
                   数量
@@ -640,7 +640,7 @@ onMounted(async () => {
                   name=""
                   id=""
                   v-model="special_area.cd_1.text_2"
-                  class="ppearance-none block w-full bg-gray-200 text-gray-700 border-transparent rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
+                  class="form-input-modern w-full"
                 />
               </div>
 
@@ -649,7 +649,7 @@ onMounted(async () => {
                   v-if="special_area.cd_1.text_1 && special_area.cd_1.text_2"
                   @click="special_area.cd_1.add_description"
                   type="button"
-                  class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  class="btn-primary"
                 >
                   追加
                 </button>
@@ -661,9 +661,9 @@ onMounted(async () => {
             <label
               for="grid-password"
               :class="{
-                'block uppercase tracking-wide text-xs font-bold mb-2': true,
-                'text-gray-700': form.description,
-                'text-red-500': !form.description,
+                'form-label block mb-2': true,
+                'text-slate-600': form.description,
+                'text-rose-500': !form.description,
               }"
             >
               備考（使用用途を記載）
@@ -674,7 +674,7 @@ onMounted(async () => {
               cols="30"
               rows="8"
               v-model="form.description"
-              class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              class="form-input-modern w-full"
             ></textarea>
           </div>
         </div>
@@ -682,7 +682,7 @@ onMounted(async () => {
 
       <button
         v-if="form.user_id && form.quantity && form.desire_delivery_date"
-        class="mt-4 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-6 px-4 rounded"
+        class="btn-primary mt-4 w-full py-6"
         @click.prevent="handleSubmit"
       >
         物品依頼
@@ -690,11 +690,6 @@ onMounted(async () => {
     </form>
   </div>
 </template>
-<style scoped style="scss">
-#stock_request_container {
-  background-color: rgb(255, 255, 255);
-  padding: 1rem;
-  border-radius: 5px;
-  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-}
+<style scoped lang="scss">
+/* Styles handled by global card class */
 </style>

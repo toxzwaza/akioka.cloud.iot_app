@@ -599,55 +599,54 @@ onMounted(async () => {
 <template>
   <StockLayout :title="'在庫管理システム'">
     <template #content>
-      <p class="text-gray-700 mb-4 text-left ml-4">
+      <p class="text-slate-500 mb-4 text-left ml-4 text-sm">
         device_id :{{ form.device_name }}
       </p>
 
-      <ul class="flex border-b">
-        <li class="-mb-px mr-1">
-          <button
-            @click="form.new_approval = 0"
-            :class="{
-              'inline-block border-l border-t border-r rounded-t py-2 px-4 font-semibold': true,
-              'bg-gray-50  text-blue-700': form.new_approval,
-              ' bg-blue-700 text-white': !form.new_approval,
-            }"
-          >
-            既存品
-          </button>
-        </li>
-        <li class="mr-1">
-          <button
-            @click="form.new_approval = 1"
-            :class="{
-              'inline-block border-l border-t border-r rounded-t py-2 px-4 font-semibold': true,
-              'bg-gray-50  text-blue-700': !form.new_approval,
-              ' bg-blue-700 text-white': form.new_approval,
-            }"
-          >
-            新規品
-          </button>
-        </li>
-      </ul>
+      <!-- Modern pill-style tabs -->
+      <div class="flex gap-2 mb-8">
+        <button
+          @click="form.new_approval = 0"
+          :class="[
+            'px-8 py-4 rounded-full font-semibold text-base transition-all duration-200',
+            !form.new_approval
+              ? 'bg-indigo-600 text-white shadow-md'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
+          ]"
+        >
+          既存品
+        </button>
+        <button
+          @click="form.new_approval = 1"
+          :class="[
+            'px-8 py-4 rounded-full font-semibold text-base transition-all duration-200',
+            form.new_approval
+              ? 'bg-indigo-600 text-white shadow-md'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
+          ]"
+        >
+          新規品
+        </button>
+      </div>
 
-      <form class="w-full mt-8">
-        <h1 class="text-center text-3xl mb-4 text-gray-700 font-bold">
+      <form class="w-full">
+        <h1 class="section-title text-center text-3xl mb-6">
           {{ form.new_approval ? "新規品稟議書" : "既存品依頼" }}
         </h1>
-        
+
         <!-- 再依頼モードの表示 -->
-        <div v-if="form.before_order_request_id" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
+        <div v-if="form.before_order_request_id" class="card p-4 bg-amber-50 border-amber-200 mb-6">
           <div class="flex">
-            <div class="flex-shrink-0">
+            <div class="flex-shrink-0 text-amber-500">
               <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
               </svg>
             </div>
             <div class="ml-3">
-              <p class="text-sm font-medium">
-                <strong>再依頼モード</strong>
+              <p class="text-sm font-semibold text-amber-800">
+                再依頼モード
               </p>
-              <p class="mt-1 text-sm">
+              <p class="mt-1 text-sm text-amber-700">
                 発注依頼ID: {{ form.before_order_request_id }} から引き継いだ内容で再依頼を行います。
               </p>
             </div>
@@ -660,20 +659,521 @@ onMounted(async () => {
           <p class="text-center mt-4">
             実装完了まで、もうしばらくお待ちください。
           </p> -->
-          <div class="flex justify-between items-start">
-            <div class="w-2/3">
-              <div class="flex flex-wrap -mx-3 mb-8">
-                <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+          <div class="flex flex-col xl:flex-row justify-between items-start gap-6">
+            <div class="w-full xl:w-2/3">
+              <div class="card p-6 mb-6">
+                <div class="flex flex-wrap -mx-3 mb-6">
+                  <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                    <label
+                      class="form-label"
+                      for="grid-first-name"
+                    >
+                      起案部門
+                    </label>
+                    <select
+                      name=""
+                      id=""
+                      class="form-select-modern"
+                      @change="handleProcessId($event.target.value)"
+                    >
+                      <option value="0">未選択</option>
+                      <option
+                        v-for="process in props.processes"
+                        :key="process.id"
+                        :value="process.id"
+                      >
+                        {{ process.name }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="w-full md:w-1/2 px-3">
+                    <label
+                      class="form-label"
+                      for="grid-last-name"
+                    >
+                      起案者
+                    </label>
+                    <select
+                      name=""
+                      id=""
+                      class="form-select-modern"
+                      v-model="form.user_id"
+                    >
+                      <option value="0">未選択</option>
+                      <option
+                        v-for="user in select_users"
+                        :key="user.id"
+                        :value="user.id"
+                      >
+                        {{ user.name }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap -mx-3">
+                  <!-- <div class="w-1/3 px-3 mb-6 md:mb-0">
+                    <label
+                      class="form-label"
+                      for="grid-city"
+                    >
+                      評価予定日
+                      <i class="fas fa-question-circle"></i>
+                    </label>
+                    <input
+                      class="form-input-modern"
+                      id="grid-city"
+                      type="date"
+                      v-model="form.evaluation_date"
+                    />
+                  </div> -->
+                  <div class="w-1/2 px-3 mb-6 md:mb-0">
+                    <label
+                      class="form-label"
+                      for="desire_delivery_date_new"
+                    >
+                      希望納入日
+                    </label>
+                    <input
+                      class="form-input-modern"
+                      id="desire_delivery_date_new"
+                      type="date"
+                      v-model="form.desire_delivery_date"
+                      @change="handleDesireDeliveryDateChange"
+                    />
+                    <p class="mt-2 text-rose-500 text-xs italic">
+                      土日祝は選択できません。
+                    </p>
+                  </div>
+                  <div class="w-1/2 px-3 mb-6 md:mb-0">
+                    <label
+                      class="form-label"
+                      for="grid-state"
+                    >
+                      稟議合計金額
+                    </label>
+                    <div class="relative">
+                      <input
+                        class="form-input-modern"
+                        id="grid-zip"
+                        type="number"
+                        v-model="form.calc_price"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card p-6 mb-6">
+                <h2 class="section-title text-lg mb-4">購入物品</h2>
+
+                <div class="flex flex-wrap -mx-3 mb-6">
+                  <div class="w-1/2 px-3 mb-6 md:mb-0">
+                    <label
+                      class="form-label"
+                      for="grid-city"
+                    >
+                      品名
+                    </label>
+                    <input
+                      class="form-input-modern"
+                      id="grid-city"
+                      type="text"
+                      v-model="form.name"
+                    />
+                  </div>
+                  <div class="w-1/2 px-3 mb-6 md:mb-0">
+                    <label
+                      class="form-label"
+                      for="grid-state"
+                    >
+                      品番
+                    </label>
+                    <div class="relative">
+                      <input
+                        class="form-input-modern"
+                        id="grid-zip"
+                        type="text"
+                        v-model="form.s_name"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="flex flex-wrap -mx-3 mb-6">
+                  <div class="w-1/3 px-3 mb-6 md:mb-0">
+                    <label
+                      class="form-label"
+                      for="grid-state"
+                    >
+                      発注先
+                    </label>
+                    <div class="relative">
+                      <input
+                        class="form-input-modern"
+                        id="grid-zip"
+                        type="text"
+                        list="supplier-list"
+                        v-model="form.supplier_name"
+                      />
+                      <datalist id="supplier-list">
+                        <option
+                          v-for="supplier in suppliers"
+                          :key="supplier.id"
+                          :value="supplier.name"
+                        >
+                          {{ supplier.name }}
+                        </option>
+                      </datalist>
+                    </div>
+                  </div>
+                  <div class="w-1/3 px-3 mb-6 md:mb-0">
+                    <label
+                      class="form-label"
+                      for="grid-city"
+                    >
+                      単価
+                    </label>
+                    <input
+                      class="form-input-modern"
+                      id="grid-city"
+                      type="number"
+                      v-model="form.price"
+                    />
+                  </div>
+                  <div class="w-1/3 px-3 mb-6 md:mb-0">
+                    <label
+                      class="form-label"
+                      for="grid-state"
+                    >
+                      数量
+                    </label>
+                    <div class="relative">
+                      <input
+                        class="form-input-modern"
+                        id="grid-zip"
+                        type="number"
+                        v-model="form.quantity"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <button
+                  v-if="stockEdit === null"
+                  class="btn-primary mb-6"
+                  @click.prevent="createApprovalStocks"
+                >
+                  追加
+                </button>
+                <button
+                  v-else
+                  class="btn-success mb-6"
+                  @click.prevent="saveApprovalStocks"
+                >
+                  更新
+                </button>
+
+                <div v-if="form.approval_stocks.length > 0">
+                  <div class="overflow-x-auto rounded-xl">
+                    <table class="table-modern">
+                      <thead>
+                        <tr>
+                          <th>品名</th>
+                          <th>品番</th>
+                          <th>発注先</th>
+                          <th>単価</th>
+                          <th>数量</th>
+                          <th>金額</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr
+                          v-for="approval_stock in form.approval_stocks"
+                          :key="approval_stock.id"
+                        >
+                          <td>
+                            {{ approval_stock.name }}
+                          </td>
+                          <td>
+                            {{ approval_stock.s_name }}
+                          </td>
+                          <td>
+                            {{ approval_stock.supplier_name }}
+                          </td>
+                          <td>
+                            @ {{ approval_stock.price }}
+                          </td>
+                          <td>
+                            {{ approval_stock.quantity }}
+                          </td>
+                          <td>
+                            {{ approval_stock.price * approval_stock.quantity }}
+                            円
+                          </td>
+                          <td class="flex gap-2">
+                            <button
+                              @click.prevent="
+                                editStock(
+                                  form.approval_stocks.indexOf(approval_stock)
+                                )
+                              "
+                              class="btn-success"
+                            >
+                              編集
+                            </button>
+                            <button
+                              @click.prevent="
+                                deleteStock(
+                                  form.approval_stocks.indexOf(approval_stock)
+                                )
+                              "
+                              class="btn-danger"
+                            >
+                              削除
+                            </button>
+                          </td>
+                        </tr>
+                        <!-- 他の行を追加する場合はここに -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card p-6 mb-6">
+                <div class="mb-6">
                   <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                    class="form-label"
                     for="grid-first-name"
                   >
-                    起案部門
+                    件名
+                  </label>
+                  <input
+                    type="text"
+                    class="form-input-modern"
+                    v-model="form.title"
+                    placeholder="○○における○○の○○（例：備品管理における発注業務の効率化）"
+                  />
+                </div>
+                <div class="mb-6">
+                  <label
+                    class="form-label"
+                    for="grid-first-name"
+                  >
+                    発注内容
+                  </label>
+                  <textarea
+                    name=""
+                    id=""
+                    cols="30"
+                    rows="10"
+                    class="form-input-modern"
+                    v-model="form.content"
+                  ></textarea>
+                </div>
+
+                <div class="mb-6">
+                  <label
+                    class="form-label"
+                    for="grid-first-name"
+                  >
+                    申請理由
+                  </label>
+                  <textarea
+                    name=""
+                    id=""
+                    cols="30"
+                    rows="10"
+                    class="form-input-modern"
+                    v-model="form.main_reason"
+                  ></textarea>
+                </div>
+
+                <div class="mb-6">
+                  <label
+                    class="form-label"
+                    for="grid-first-name"
+                  >
+                    選定理由
+                  </label>
+                  <textarea
+                    name=""
+                    id=""
+                    cols="30"
+                    rows="10"
+                    class="form-input-modern"
+                    v-model="form.sub_reason"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="card p-6 mb-6">
+                <p
+                  class="form-label"
+                >
+                  添付ファイルがある場合は以下より添付してください。（最大5つまで）
+                </p>
+                <ul class="mt-4 list-disc list-inside text-sm text-slate-500">
+                  <li class="mb-1">
+                    承認済み稟議書<span class="text-rose-500 font-bold">
+                      (PDFは一枚にまとめてください！)</span
+                    >
+                  </li>
+                  <li class="mb-1">購入物品の画像</li>
+                </ul>
+                <div class="flex items-center justify-center w-full mt-4">
+                  <label
+                    for="dropzone-file"
+                    class="flex flex-col items-center justify-center w-full h-64 border-2 border-slate-200 border-dashed rounded-2xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors duration-200"
+                  >
+                    <div class="flex flex-col items-center justify-center p-8">
+                      <svg
+                        class="w-8 h-8 mb-4 text-slate-400"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 20 16"
+                      >
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                        />
+                      </svg>
+                      <p class="mb-2 text-sm text-slate-500">
+                        添付資料
+                      </p>
+                      <p class="text-xs text-slate-400">
+                        PNG, JPG, PDF
+                      </p>
+                    </div>
+                    <input
+                      id="dropzone-file"
+                      type="file"
+                      class="hidden"
+                      multiple
+                      accept="image/*,.pdf"
+                      @change="handleFileSelect"
+                    />
+                  </label>
+                </div>
+
+                <!-- プレビュー表示エリア -->
+                <div
+                  v-if="previewUrls.length > 0"
+                  class="mt-4 flex justify-around items-center flex-wrap gap-4"
+                >
+                  <div
+                    v-for="(url, index) in previewUrls"
+                    :key="index"
+                    class="relative w-48"
+                  >
+                    <div class="border border-slate-200 rounded-xl p-2 h-48">
+                      <img
+                        v-if="selectedFiles[index].type.startsWith('image/')"
+                        :src="url"
+                        class="w-full h-32 object-cover rounded-lg"
+                        alt="プレビュー画像"
+                      />
+                      <div
+                        v-else
+                        class="flex items-center justify-center h-32 bg-slate-50 rounded-lg"
+                      >
+                        <span class="text-slate-500">PDFファイル</span>
+                      </div>
+
+                      <button
+                        @click.prevent="removeFile(index)"
+                        class="absolute top-2 right-4 bg-rose-500 hover:bg-rose-600 text-white rounded-full w-6 h-6 flex items-center justify-center transition-colors"
+                      >
+                        ×
+                      </button>
+                      <p class="text-normal mt-1 pl-8 truncate font-bold text-slate-700">
+                        {{ selectedFiles[index].name }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex justify-between">
+                <!-- <button
+                  class="mr-4 w-1/2 btn-success mt-12 py-4"
+                >
+                  AI添削
+                </button> -->
+                <button
+                  class="ml-4 w-1/2 btn-primary mt-8 py-4 text-lg"
+                  @click.prevent="submitForm('new_approval')"
+                >
+                  確定
+                </button>
+              </div>
+            </div>
+
+            <div class="w-full xl:w-1/3 xl:ml-4" id="right_container">
+              <div class="card p-6">
+                <h2 class="section-title text-center text-xl mb-6">
+                  AI 稟議書作成アドバイス
+                </h2>
+
+                <div>
+                  <div
+                    v-for="msg in gpt_msg"
+                    :key="msg.id"
+                    class="flex items-start gap-2.5 my-6"
+                  >
+                    <img
+                      class="w-8 h-8 rounded-full"
+                      src="/images/stocks/ai_asistant.png"
+                      alt="Jese image"
+                    />
+
+                    <div class="flex flex-col gap-1 w-full max-w-[320px] pl-2">
+                      <div
+                        class="flex items-center space-x-2 rtl:space-x-reverse"
+                      >
+                        <span
+                          class="text-sm font-semibold text-slate-800"
+                          >稟議書作成アシスタント</span
+                        >
+                        <span
+                          class="text-sm font-normal text-slate-400 ml-2"
+                          >{{ msg.time }}</span
+                        >
+                      </div>
+                      <div
+                        class="flex flex-col leading-1.5 py-4 px-3 bg-slate-50 rounded-e-xl rounded-es-xl border border-slate-100"
+                      >
+                        <p
+                          class="text-sm font-normal text-slate-700"
+                          v-html="msg.text"
+                        ></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else class="flex justify-between items-start">
+          <div class="w-full">
+            <div class="card p-6 mb-6">
+              <div class="flex flex-wrap -mx-3 mb-6">
+                <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                  <label
+                    class="form-label"
+                    for="grid-first-name"
+                  >
+                    部門
                   </label>
                   <select
                     name=""
                     id=""
-                    class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                    class="form-select-modern"
                     @change="handleProcessId($event.target.value)"
                   >
                     <option value="0">未選択</option>
@@ -688,15 +1188,15 @@ onMounted(async () => {
                 </div>
                 <div class="w-full md:w-1/2 px-3">
                   <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                    class="form-label"
                     for="grid-last-name"
                   >
-                    起案者
+                    依頼者
                   </label>
                   <select
                     name=""
                     id=""
-                    class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                    class="form-select-modern"
                     v-model="form.user_id"
                   >
                     <option value="0">未選択</option>
@@ -711,71 +1211,16 @@ onMounted(async () => {
                 </div>
               </div>
 
-              <div class="flex flex-wrap -mx-3 mb-8">
-                <!-- <div class="w-1/3 px-3 mb-6 md:mb-0">
-                  <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                    for="grid-city"
-                  >
-                    評価予定日
-                    <i class="fas fa-question-circle"></i>
-                  </label>
-                  <input
-                    class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    id="grid-city"
-                    type="date"
-                    v-model="form.evaluation_date"
-                  />
-                </div> -->
+              <div class="flex flex-wrap -mx-3 mb-6">
                 <div class="w-1/2 px-3 mb-6 md:mb-0">
                   <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                    for="desire_delivery_date_new"
-                  >
-                    希望納入日
-                  </label>
-                  <input
-                    class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    id="desire_delivery_date_new"
-                    type="date"
-                    v-model="form.desire_delivery_date"
-                    @change="handleDesireDeliveryDateChange"
-                  />
-                  <p class="mt-2 text-red-500 text-xs italic">
-                    土日祝は選択できません。
-                  </p>
-                </div>
-                <div class="w-1/2 px-3 mb-6 md:mb-0">
-                  <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                    for="grid-state"
-                  >
-                    稟議合計金額
-                  </label>
-                  <div class="relative">
-                    <input
-                      class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                      id="grid-zip"
-                      type="number"
-                      v-model="form.calc_price"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <hr class="my-8" />
-              <h2 class="font-bold text-gray-700 mb-4">購入物品</h2>
-
-              <div class="flex flex-wrap -mx-3 mb-8">
-                <div class="w-1/2 px-3 mb-6 md:mb-0">
-                  <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                    class="form-label"
                     for="grid-city"
                   >
                     品名
                   </label>
                   <input
-                    class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    class="form-input-modern"
                     id="grid-city"
                     type="text"
                     v-model="form.name"
@@ -783,14 +1228,14 @@ onMounted(async () => {
                 </div>
                 <div class="w-1/2 px-3 mb-6 md:mb-0">
                   <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                    class="form-label"
                     for="grid-state"
                   >
                     品番
                   </label>
                   <div class="relative">
                     <input
-                      class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                      class="form-input-modern"
                       id="grid-zip"
                       type="text"
                       v-model="form.s_name"
@@ -798,607 +1243,124 @@ onMounted(async () => {
                   </div>
                 </div>
               </div>
-              <div class="flex flex-wrap -mx-3 mb-8">
-                <div class="w-1/3 px-3 mb-6 md:mb-0">
+
+              <div class="flex flex-wrap -mx-3 mb-6">
+                <div class="w-1/4 px-3 mb-6 md:mb-0">
                   <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                    for="grid-state"
-                  >
-                    発注先
-                  </label>
-                  <div class="relative">
-                    <input
-                      class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                      id="grid-zip"
-                      type="text"
-                      list="supplier-list"
-                      v-model="form.supplier_name"
-                    />
-                    <datalist id="supplier-list">
-                      <option
-                        v-for="supplier in suppliers"
-                        :key="supplier.id"
-                        :value="supplier.name"
-                      >
-                        {{ supplier.name }}
-                      </option>
-                    </datalist>
-                  </div>
-                </div>
-                <div class="w-1/3 px-3 mb-6 md:mb-0">
-                  <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                    class="form-label"
                     for="grid-city"
                   >
-                    単価
+                    現在個数
                   </label>
                   <input
-                    class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    class="form-input-modern"
                     id="grid-city"
                     type="number"
-                    v-model="form.price"
+                    v-model="form.now_quantity"
                   />
                 </div>
-                <div class="w-1/3 px-3 mb-6 md:mb-0">
+                <div class="w-1/4 px-3 mb-6 md:mb-0">
                   <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                    class="form-label"
+                    for="grid-city"
+                  >
+                    単位
+                  </label>
+                  <input
+                    v-model="form.now_quantity_unit"
+                    type="text"
+                    name=""
+                    id=""
+                    class="form-input-modern"
+                  />
+                </div>
+
+                <div class="w-1/2 px-3 mb-6 md:mb-0">
+                  <label
+                    class="form-label"
                     for="grid-state"
                   >
-                    数量
-                  </label>
-                  <div class="relative">
-                    <input
-                      class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                      id="grid-zip"
-                      type="number"
-                      v-model="form.quantity"
-                    />
-                  </div>
-                </div>
-              </div>
-              <button
-                v-if="stockEdit === null"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-8"
-                @click.prevent="createApprovalStocks"
-              >
-                追加
-              </button>
-              <button
-                v-else
-                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-8"
-                @click.prevent="saveApprovalStocks"
-              >
-                更新
-              </button>
-
-              <div v-if="form.approval_stocks.length > 0">
-                <div class="overflow-x-auto">
-                  <table class="min-w-full bg-white border border-gray-200">
-                    <thead>
-                      <tr>
-                        <th
-                          class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
-                        >
-                          品名
-                        </th>
-                        <th
-                          class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
-                        >
-                          品番
-                        </th>
-                        <th
-                          class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
-                        >
-                          発注先
-                        </th>
-                        <th
-                          class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
-                        >
-                          単価
-                        </th>
-                        <th
-                          class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
-                        >
-                          数量
-                        </th>
-                        <th
-                          class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
-                        >
-                          金額
-                        </th>
-                        <th
-                          class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
-                        ></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr
-                        v-for="approval_stock in form.approval_stocks"
-                        :key="approval_stock.id"
-                      >
-                        <td
-                          class="py-2 px-4 border-b border-gray-200 text-sm text-gray-700"
-                        >
-                          {{ approval_stock.name }}
-                        </td>
-                        <td
-                          class="py-2 px-4 border-b border-gray-200 text-sm text-gray-700"
-                        >
-                          {{ approval_stock.s_name }}
-                        </td>
-                        <td
-                          class="py-2 px-4 border-b border-gray-200 text-sm text-gray-700"
-                        >
-                          {{ approval_stock.supplier_name }}
-                        </td>
-                        <td
-                          class="py-2 px-4 border-b border-gray-200 text-sm text-gray-700"
-                        >
-                          @ {{ approval_stock.price }}
-                        </td>
-                        <td
-                          class="py-2 px-4 border-b border-gray-200 text-sm text-gray-700"
-                        >
-                          {{ approval_stock.quantity }}
-                        </td>
-                        <td
-                          class="py-2 px-4 border-b border-gray-200 text-sm text-gray-700"
-                        >
-                          {{ approval_stock.price * approval_stock.quantity }}
-                          円
-                        </td>
-                        <td
-                          class="py-2 px-4 border-b border-gray-200 text-sm text-gray-700 flex"
-                        >
-                          <button
-                            @click.prevent="
-                              editStock(
-                                form.approval_stocks.indexOf(approval_stock)
-                              )
-                            "
-                            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-4"
-                          >
-                            編集
-                          </button>
-                          <button
-                            @click.prevent="
-                              deleteStock(
-                                form.approval_stocks.indexOf(approval_stock)
-                              )
-                            "
-                            class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                          >
-                            削除
-                          </button>
-                        </td>
-                      </tr>
-                      <!-- 他の行を追加する場合はここに -->
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <hr class="my-8" />
-              <div class="flex flex-wrap -mx-3 mb-8">
-                <div class="w-full px-3 mb-6 md:mb-0">
-                  <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                    for="grid-first-name"
-                  >
-                    件名
+                    消化予定日
                   </label>
                   <input
+                    class="form-input-modern"
+                    id="grid-city"
+                    type="date"
+                    v-model="form.digest_date"
+                  />
+                </div>
+              </div>
+              <div class="flex flex-wrap -mx-3 mb-6">
+                <div class="w-1/4 px-3 mb-6 md:mb-0">
+                  <label
+                    class="form-label"
+                    for="grid-city"
+                  >
+                    必要数量
+                  </label>
+                  <input
+                    class="form-input-modern"
+                    id="grid-city"
+                    type="number"
+                    v-model="form.quantity"
+                  />
+                </div>
+                <div class="w-1/4 px-3 mb-6 md:mb-0">
+                  <label
+                    class="form-label"
+                    for="grid-city"
+                  >
+                    単位
+                  </label>
+                  <input
+                    v-model="form.quantity_unit"
                     type="text"
-                    class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                    v-model="form.title"
-                    placeholder="○○における○○の○○（例：備品管理における発注業務の効率化）"
+                    name=""
+                    id=""
+                    class="form-input-modern"
                   />
                 </div>
-              </div>
-              <div class="flex flex-wrap -mx-3 mb-8">
-                <div class="w-full px-3 mb-6 md:mb-0">
-                  <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                    for="grid-first-name"
-                  >
-                    発注内容
-                  </label>
-                  <textarea
-                    name=""
-                    id=""
-                    cols="30"
-                    rows="10"
-                    class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                    v-model="form.content"
-                  ></textarea>
-                </div>
-              </div>
 
-              <div class="flex flex-wrap -mx-3 mb-8">
-                <div class="w-full px-3 mb-6 md:mb-0">
+                <div class="w-1/2 px-3 mb-6 md:mb-0">
                   <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                    for="grid-first-name"
+                    class="form-label"
+                    for="desire_delivery_date_existing"
                   >
-                    申請理由
+                    希望納期
                   </label>
-                  <textarea
-                    name=""
-                    id=""
-                    cols="30"
-                    rows="10"
-                    class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                    v-model="form.main_reason"
-                  ></textarea>
-                </div>
-              </div>
-
-              <div class="flex flex-wrap -mx-3 mb-8">
-                <div class="w-full px-3 mb-6 md:mb-0">
-                  <label
-                    class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                    for="grid-first-name"
-                  >
-                    選定理由
-                  </label>
-                  <textarea
-                    name=""
-                    id=""
-                    cols="30"
-                    rows="10"
-                    class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                    v-model="form.sub_reason"
-                  ></textarea>
-                </div>
-              </div>
-
-              <p
-                class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-              >
-                添付ファイルがある場合は以下より添付してください。（最大5つまで）
-              </p>
-              <ul class="mt-4 list-disc list-inside text-sm text-gray-600">
-                <li class="mb-1">
-                  承認済み稟議書<span class="text-red-500 font-bold">
-                    (PDFは一枚にまとめてください！)</span
-                  >
-                </li>
-                <li class="mb-1">購入物品の画像</li>
-              </ul>
-              <div class="flex items-center justify-center w-full">
-                <label
-                  for="dropzone-file"
-                  class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                >
-                  <div class="flex flex-col items-center justify-center p-8">
-                    <svg
-                      class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 20 16"
-                    >
-                      <path
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                      />
-                    </svg>
-                    <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                      添付資料
-                    </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                      PNG, JPG, PDF
-                    </p>
-                  </div>
                   <input
-                    id="dropzone-file"
-                    type="file"
-                    class="hidden"
-                    multiple
-                    accept="image/*,.pdf"
-                    @change="handleFileSelect"
+                    class="form-input-modern"
+                    id="desire_delivery_date_existing"
+                    type="date"
+                    v-model="form.desire_delivery_date"
+                    @change="handleDesireDeliveryDateChange"
                   />
-                </label>
-              </div>
-
-              <!-- プレビュー表示エリア -->
-              <div
-                v-if="previewUrls.length > 0"
-                class="mt-4 flex justify-around items-center flex-wrap gap-4"
-              >
-                <div
-                  v-for="(url, index) in previewUrls"
-                  :key="index"
-                  class="relative w-48"
-                >
-                  <div class="border rounded-lg p-2 h-48">
-                    <img
-                      v-if="selectedFiles[index].type.startsWith('image/')"
-                      :src="url"
-                      class="w-full h-32 object-cover"
-                      alt="プレビュー画像"
-                    />
-                    <div
-                      v-else
-                      class="flex items-center justify-center h-32 bg-gray-100"
-                    >
-                      <span class="text-gray-500">PDFファイル</span>
-                    </div>
-
-                    <button
-                      @click.prevent="removeFile(index)"
-                      class="absolute top-2 right-4 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
-                    >
-                      ×
-                    </button>
-                    <p class="text-normal mt-1 pl-8 truncate font-bold">
-                      {{ selectedFiles[index].name }}
-                    </p>
-                  </div>
+                  <p class="mt-2 text-rose-500 text-xs italic">
+                    リードタイムの都合上難しい場合がございます。土日祝は選択できません。
+                  </p>
                 </div>
               </div>
 
-              <div class="flex justify-between">
-                <!-- <button
-                  class="mr-4 w-1/2 bg-green-500 hover:bg-green-700 text-white font-bold mt-12 px-4 rounded py-4"
-                >
-                  AI添削
-                </button> -->
-                <button
-                  class="ml-4 w-1/2 bg-blue-500 hover:bg-blue-700 text-white font-bold mt-12 px-4 rounded py-4"
-                  @click.prevent="submitForm('new_approval')"
-                >
-                  確定
-                </button>
-              </div>
-            </div>
-
-            <div class="w-1/3 p-4 ml-4" id="right_container">
-              <h2 class="text-center mb-8 font-bold text-xl text-gray-700">
-                AI 稟議書作成アドバイス
-              </h2>
-
-              <div>
-                <div
-                  v-for="msg in gpt_msg"
-                  :key="msg.id"
-                  class="flex items-start gap-2.5 my-8"
-                >
-                  <img
-                    class="w-8 h-8 rounded-full"
-                    src="/images/stocks/ai_asistant.png"
-                    alt="Jese image"
-                  />
-
-                  <div class="flex flex-col gap-1 w-full max-w-[320px] pl-2">
-                    <div
-                      class="flex items-center space-x-2 rtl:space-x-reverse"
-                    >
-                      <span
-                        class="text-sm font-semibold text-gray-900 dark:text-white"
-                        >稟議書作成アシスタント</span
-                      >
-                      <span
-                        class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2"
-                        >{{ msg.time }}</span
-                      >
-                    </div>
-                    <div
-                      class="flex flex-col leading-1.5 py-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700"
-                    >
-                      <p
-                        class="text-sm font-normal text-gray-900 dark:text-white"
-                        v-html="msg.text"
-                      ></p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div v-else class="flex justify-between items-start">
-          <div class="w-full">
-            <div class="flex flex-wrap -mx-3 mb-8">
-              <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+              <div class="w-full">
                 <label
-                  class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                  for="grid-first-name"
+                  class="form-label"
+                  for="grid-password"
                 >
-                  部門
+                  備考（使用用途を記載）
                 </label>
-                <select
+                <textarea
                   name=""
                   id=""
-                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                  @change="handleProcessId($event.target.value)"
-                >
-                  <option value="0">未選択</option>
-                  <option
-                    v-for="process in props.processes"
-                    :key="process.id"
-                    :value="process.id"
-                  >
-                    {{ process.name }}
-                  </option>
-                </select>
+                  cols="30"
+                  rows="9"
+                  v-model="form.description"
+                  class="form-input-modern"
+                ></textarea>
               </div>
-              <div class="w-full md:w-1/2 px-3">
-                <label
-                  class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                  for="grid-last-name"
-                >
-                  依頼者
-                </label>
-                <select
-                  name=""
-                  id=""
-                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-transparent rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                  v-model="form.user_id"
-                >
-                  <option value="0">未選択</option>
-                  <option
-                    v-for="user in select_users"
-                    :key="user.id"
-                    :value="user.id"
-                  >
-                    {{ user.name }}
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap -mx-3 mb-8">
-              <div class="w-1/2 px-3 mb-6 md:mb-0">
-                <label
-                  class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                  for="grid-city"
-                >
-                  品名
-                </label>
-                <input
-                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  id="grid-city"
-                  type="text"
-                  v-model="form.name"
-                />
-              </div>
-              <div class="w-1/2 px-3 mb-6 md:mb-0">
-                <label
-                  class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                  for="grid-state"
-                >
-                  品番
-                </label>
-                <div class="relative">
-                  <input
-                    class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    id="grid-zip"
-                    type="text"
-                    v-model="form.s_name"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap -mx-3 mb-8">
-              <div class="w-1/4 px-3 mb-6 md:mb-0">
-                <label
-                  class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                  for="grid-city"
-                >
-                  現在個数
-                </label>
-                <input
-                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  id="grid-city"
-                  type="number"
-                  v-model="form.now_quantity"
-                />
-              </div>
-              <div class="w-1/4 px-3 mb-6 md:mb-0">
-                <label
-                  class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                  for="grid-city"
-                >
-                  単位
-                </label>
-                <input
-                  v-model="form.now_quantity_unit"
-                  type="text"
-                  name=""
-                  id=""
-                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                />
-              </div>
-
-              <div class="w-1/2 px-3 mb-6 md:mb-0">
-                <label
-                  class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                  for="grid-state"
-                >
-                  消化予定日
-                </label>
-                <input
-                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  id="grid-city"
-                  type="date"
-                  v-model="form.digest_date"
-                />
-              </div>
-            </div>
-            <div class="flex flex-wrap -mx-3 mb-8">
-              <div class="w-1/4 px-3 mb-6 md:mb-0">
-                <label
-                  class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                  for="grid-city"
-                >
-                  必要数量
-                </label>
-                <input
-                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  id="grid-city"
-                  type="number"
-                  v-model="form.quantity"
-                />
-              </div>
-              <div class="w-1/4 px-3 mb-6 md:mb-0">
-                <label
-                  class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                  for="grid-city"
-                >
-                  単位
-                </label>
-                <input
-                  v-model="form.quantity_unit"
-                  type="text"
-                  name=""
-                  id=""
-                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                />
-              </div>
-
-              <div class="w-1/2 px-3 mb-6 md:mb-0">
-                <label
-                  class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                  for="desire_delivery_date_existing"
-                >
-                  希望納期
-                </label>
-                <input
-                  class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  id="desire_delivery_date_existing"
-                  type="date"
-                  v-model="form.desire_delivery_date"
-                  @change="handleDesireDeliveryDateChange"
-                />
-                <p class="mt-2 text-red-500 text-xs italic">
-                  リードタイムの都合上難しい場合がございます。土日祝は選択できません。
-                </p>
-              </div>
-            </div>
-
-            <div class="w-full">
-              <label
-                class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                for="grid-password"
-              >
-                備考（使用用途を記載）
-              </label>
-              <textarea
-                name=""
-                id=""
-                cols="30"
-                rows="9"
-                v-model="form.description"
-                class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-              ></textarea>
             </div>
 
             <button
-              class="bg-blue-500 hover:bg-blue-700 text-white font-bold mt-12 px-4 rounded w-full py-4"
+              class="btn-primary w-full mt-8 py-4 text-lg"
               @click.prevent="submitForm"
             >
               確定
@@ -1407,34 +1369,36 @@ onMounted(async () => {
         </div>
       </form>
 
-      <hr class="mt-8 mb-4" />
-      <h1 class="font-bold text-gray-700 text-xl text-center">物品依頼状況</h1>
+      <hr class="mt-10 mb-6 border-slate-200" />
+      <h1 class="section-title text-xl text-center">物品依頼状況</h1>
     </template>
   </StockLayout>
 </template>
 <style lang="scss" scoped>
 #right_container {
-  position: sticky;
-  top: 3%;
-  height: 100vh;
-  overflow-y: scroll;
+  @media (min-width: 1280px) {
+    position: sticky;
+    top: 3%;
+    height: 100vh;
+    overflow-y: scroll;
+  }
 
   &::-webkit-scrollbar {
     width: 8px;
   }
 
   &::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: #f1f5f9;
     border-radius: 4px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #888;
+    background: #94a3b8;
     border-radius: 4px;
     transition: background 0.3s ease;
 
     &:hover {
-      background: #555;
+      background: #64748b;
     }
   }
 }

@@ -17,16 +17,16 @@ const chartData = reactive({
 });
 
 const colors = [
-  "#4BC0C0", // ターコイズ
-  "#FFCD56", // 黄色
-  "#FF6384", // 赤
-  "#9966FF", // 紫
-  "#FF9F40", // オレンジ
-  "#2ECC71", // 緑
-  "#E74C3C", // 濃い赤
-  "#3498DB", // 薄い青
-  "#36A2EB", // 青,
-  "#F1C40F", // 濃い黄色
+  "#6366f1", // indigo
+  "#10b981", // emerald
+  "#f59e0b", // amber
+  "#ef4444", // red
+  "#8b5cf6", // violet
+  "#06b6d4", // cyan
+  "#ec4899", // pink
+  "#14b8a6", // teal
+  "#f97316", // orange
+  "#3b82f6", // blue
 ];
 
 const currentMonth = new Date();
@@ -67,8 +67,10 @@ watch(
 </script>
 
 <template>
-  <div class="chart-container">
-    <BarChart :chartData="chartData" />
+  <div class="card p-4">
+    <div class="chart-container">
+      <BarChart :chartData="chartData" />
+    </div>
   </div>
 </template>
 

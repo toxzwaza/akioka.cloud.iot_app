@@ -103,19 +103,19 @@ onMounted(() => {
   <button
     v-if="stock_storage_id"
     @click="updateLocation(true)"
-    class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-2 mb-4"
+    class="btn-danger text-sm mb-4"
   >
     アドレス削除
   </button>
   <div class="flex items-center justify-start py-2 mb-2">
     <label class="w-1/3 mr-1" for="">
-      <span class="text-gray-600 text-sm mb-1">格納先</span>
+      <span class="form-label">格納先</span>
       <select
         @change="getStorageAddresses($event.target.value)"
         name=""
         id="select_location_id"
         v-model="location.location_id"
-        class="w-full appearance-none block bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+        class="form-select-modern w-full"
       >
         <option value="" disabled selected>格納先を選択してください。</option>
         <option
@@ -129,12 +129,12 @@ onMounted(() => {
     </label>
 
     <label v-if="location.location_id" for="" class="w-1/3 mr-1">
-      <span class="text-gray-600 text-sm mb-1">アドレス</span>
+      <span class="form-label">アドレス</span>
       <select
         v-model="location.storage_address_id"
         name=""
         id="select_storage_address"
-        class="w-full appearance-none block bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+        class="form-select-modern w-full"
       >
         <option value="0">アドレスを選択してください。</option>
         <option
@@ -148,11 +148,11 @@ onMounted(() => {
     </label>
 
     <label v-if="location.storage_address_id" for="" class="w-1/3">
-      <span class="text-gray-600 text-sm mb-1">個数</span>
+      <span class="form-label">個数</span>
       <input
         @change="checkQuantity($event.target.value)"
         type="number"
-        class="w-full appearance-none block bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 text-center"
+        class="form-input-modern w-full text-center"
         v-model="location.quantity"
       />
     </label>
@@ -163,7 +163,7 @@ onMounted(() => {
       location.location_id && location.storage_address_id && location.quantity
     "
     @click="updateLocation(false)"
-    class="text-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    class="btn-primary text-sm"
   >
     確定
   </button>
